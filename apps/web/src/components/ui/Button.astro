@@ -1,0 +1,149 @@
+---
+import type { Link } from '@repo/shared'
+import ArrowRight from './icons/ArrowRight.astro'
+
+/**
+ * The project's only button. White surface, Lime-Dark label, square corners —
+ * there is exactly one shape in the design and this is it.
+ *
+ * Hover reveals Green from left to right, turns the content white and swaps the
+ * arrow for a copy entering from the left. The choreography uses `transform`
+ * only and collapses to its end state under `prefers-reduced-motion`.
+ */
+
+interface Props {
+  link: Link
+  /** The trailing arrow. The header CTA is drawn without one. */
+  withArrow?: boolean
+  /**
+   * `'span'` draws the button without making it one.
+   *
+   * For the case where the button is the *affordance* of a larger link — a card
+   * whose whole surface navigates. Nesting an `<a>` inside an `<a>` is invalid
+   * HTML and browsers recover from it by splitting the outer link, so the card
+   * would stop being one target. A span keeps the shape and leaves the outer
+   * element as the only thing in the tab order.
+   *
+   * Hover still works untouched — `:hover` matches a span like anything else, and
+   * driving it from the host link instead would leave the button permanently
+   * tinted the whole time a card is open, which is not what the design shows. The
+   * host link only has to reach in for `:focus-visible`, because the keyboard
+   * lands on the card and never on the button itself.
+   */
+  as?: 'a' | 'span'
+  class?: string
+}
+
+const { link, withArrow = false, as: Tag = 'a', class: className } = Astro.props
+
+const interactive = Tag === 'a' && !link.disabled
+---
+
+<Tag
+  class:list={['button', className]}
+  href={interactive ? link.href : undefined}
+  aria-label={Tag === 'a' ? link.ariaLabel : undefined}
+  aria-disabled={Tag === 'a' && link.disabled ? 'true' : undefined}
+  role={Tag === 'a' && link.disabled ? 'link' : undefined}
+  rel={interactive && link.external ? 'noopener noreferrer' : undefined}
+  target={interactive && link.external ? '_blank' : undefined}
+>
+  <span class="button__label">{link.label}</span>
+
+  {
+    withArrow && (
+      <span class="button__icon">
+        <ArrowRight class="button__arrow button__arrow--resting" />
+        <ArrowRight class="button__arrow button__arrow--incoming" />
+      </span>
+    )
+  }
+</Tag>
+
+<style>
+  .button {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-inline-icon);
+    overflow: clip;
+    padding: var(--button-padding-block) var(--button-padding-inline);
+    border-radius: var(--radius-none);
+    background-color: var(--button-surface);
+    color: var(--button-fg);
+    font-size: var(--text-ui);
+    font-weight: var(--font-weight-medium);
+    line-height: calc(16 / 14);
+    text-decoration: none;
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .button::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: var(--button-surface-hover);
+    content: '';
+    pointer-events: none;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .button:hover,
+  .button:focus-visible,
+  :global(a:focus-visible) .button {
+    color: var(--button-fg-hover);
+  }
+
+  .button:hover::before,
+  .button:focus-visible::before,
+  :global(a:focus-visible) .button::before {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .button__label {
+    position: relative;
+    z-index: 1;
+    /* Keeps the label on one line so the button never becomes two rows tall. */
+    white-space: nowrap;
+  }
+
+  .button__icon {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    display: block;
+    inline-size: var(--icon-size-inline);
+    block-size: var(--icon-size-inline);
+    overflow: hidden;
+  }
+
+  .button__arrow {
+    position: absolute;
+    inset: 0;
+    transition: transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  /* The replacement waits a beat before entering, so the two arrows read as one
+     leaving and one arriving rather than as a single object stretching. */
+  .button__arrow--incoming {
+    transform: translate3d(-140%, 0, 0);
+    transition-delay: 40ms;
+  }
+
+  .button:hover .button__arrow--resting,
+  .button:focus-visible .button__arrow--resting,
+  :global(a:focus-visible) .button .button__arrow--resting {
+    transform: translate3d(140%, 0, 0);
+  }
+
+  .button:hover .button__arrow--incoming,
+  .button:focus-visible .button__arrow--incoming,
+  :global(a:focus-visible) .button .button__arrow--incoming {
+    transform: none;
+  }
+
+</style>

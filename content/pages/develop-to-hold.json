@@ -1,0 +1,144 @@
+{
+  "slug": "develop-to-hold",
+  "seo": {
+    "title": "IPP Portfolio: Dev-to-Hold — Stora Energy",
+    "description": "We develop own BESS projects in Poland with IPPs, funds and utilities, delivering ready-to-build assets for acquisition or partnership.",
+    "canonicalPath": "/develop-to-hold/"
+  },
+  "blocks": [
+    {
+      "blockType": "pageHero",
+      "heading": "IPP Portfolio: Dev-to-Hold",
+      "subheading": "We develop own BESS projects in Poland with IPPs, funds and utilities,\ndelivering ready-to-build assets for acquisition or partnership.",
+      "image": {
+        "src": "content/media/pages/develop-to-hold-hero.jpg",
+        "alt": "An operating battery storage site in open grassland, containers in long parallel rows",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "blockType": "metricStatement",
+      "heading": "Leader, not broker",
+      "value": "+500",
+      "unit": "MW",
+      "description": "We develop, build and operate our own large-scale BESS assets as a long-term owner, with M&A and JV providing the pipeline for future growth."
+    },
+    {
+      "blockType": "featurePair",
+      "heading": "Our own pipeline",
+      "items": [
+        {
+          "title": "Own Pipeline",
+          "description": "Long-term ownership of a 500+ MW BESS pipeline across Poland.",
+          "image": {
+            "src": "content/media/pages/boxes/own-pipeline.jpg",
+            "alt": "",
+            "width": 1074,
+            "height": 698
+          }
+        },
+        {
+          "title": "Grid Progress",
+          "description": "We monitor and secure grid connection progress at every stage.",
+          "image": {
+            "src": "content/media/pages/boxes/grid-progress.jpg",
+            "alt": "",
+            "width": 1086,
+            "height": 698
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "technicalDepthTabs",
+      "heading": "Three ways BESS\ncreates value",
+      "items": [
+        {
+          "label": "Ancillary services",
+          "title": "Ancillary services",
+          "description": "BESS provides system support to keep the grid stable and secure.",
+          "image": {
+            "src": "content/media/pages/three-ways-bess/wholesale-arbitrage.svg",
+            "alt": "",
+            "width": 590,
+            "height": 590
+          }
+        },
+        {
+          "label": "Balancing services",
+          "title": "Balancing services",
+          "description": "BESS earns revenue by responding instantly to grid imbalances — currently the largest income source, driven by high Polish balancing prices.",
+          "image": {
+            "src": "content/media/pages/three-ways-bess/balancing-ancillary-service.svg",
+            "alt": "",
+            "width": 590,
+            "height": 590
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "marketFlexibility",
+      "heading": "A market built\nfor flexibility",
+      "description": "Poland's energy mix has rapidly shifted to renewables — driving an urgent need for flexible capacity, with BESS the only feasible option.",
+      "items": [
+        {
+          "heading": "Poland's installed capacity, 2025–2040 (GW)",
+          "graphic": {
+            "src": "content/media/pages/a-market-built-for-flexibility/installed-capacity.svg",
+            "alt": "Stacked bar chart showing Poland's installed electricity capacity rising from 71 GW in 2025 to 127 GW in 2040, with renewable capacity growing from 50% to 69%.",
+            "width": 497,
+            "height": 541
+          }
+        },
+        {
+          "heading": "Poland's energy mix — why BESS is the only path to 2040",
+          "graphic": {
+            "src": "content/media/pages/a-market-built-for-flexibility/energy-mix.svg",
+            "alt": "Diagram explaining that gas carries political risk, nuclear arrives too late and coal is forced to exit, leaving renewables as the scalable path supported by battery energy storage.",
+            "width": 618,
+            "height": 554
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "proofPoints",
+      "heading": "Built to Own",
+      "metrics": [
+        {
+          "value": "500",
+          "unit": "MW",
+          "label": "Own BESS pipeline"
+        },
+        {
+          "value": "~130",
+          "unit": "MW",
+          "label": "Grid connection"
+        },
+        {
+          "value": "2026",
+          "label": "First RtB assets"
+        }
+      ],
+      "image": {
+        "src": "content/media/pages/proof-points/built-to-own.png",
+        "alt": "",
+        "width": 573,
+        "height": 548
+      },
+      "contact": {
+        "name": "Michał Ogiński",
+        "role": "Chief Development Officer (CDO)",
+        "email": "michal.o@storaenergy.pl",
+        "portrait": {
+          "src": "content/media/team/michal-oginski.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      }
+    }
+  ]
+}

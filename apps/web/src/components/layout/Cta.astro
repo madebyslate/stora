@@ -1,0 +1,143 @@
+---
+import type { SiteCta } from '@repo/shared'
+import Mark from '@/components/ui/Mark.astro'
+import Button from '@/components/ui/Button.astro'
+
+/**
+ * The closing call.
+ *
+ * The last thing on every page, above the footer, and it is site-global rather
+ * than a block — the reasoning is on `SiteCta` in `packages/shared/src/site.ts`.
+ * It renders inside `<main>`, because it is content: a visitor who skips to the
+ * content and reads to the end has to arrive at the call, not step over it.
+ *
+ * There is no box here. The section is white ground, one centred column and four
+ * things stacked on the page's centre line, so every value it owns is a gap —
+ * see the `--cta-*` group in `tokens.css`.
+ *
+ * Visual spec: apps/web/src/components/layout/Cta.spec.md
+ */
+
+interface Props {
+  cta: SiteCta
+}
+
+const { cta } = Astro.props
+
+const headingId = 'site-cta-heading'
+
+/**
+ * Reveal order. The mark settles first and the headline follows it, because the
+ * mark is what the eye lands on: it arrives from the smallest gesture in the
+ * system (`reveal-pop`) rather than travelling, so it reads as the section
+ * announcing itself rather than as a fifth thing sliding up the page.
+ *
+ * The two halves of the headline are separate steps for the same reason they are
+ * in `LogoWall`: the split of the colour is the split of the claim, and the
+ * question landing a beat after the statement is the whole point of it.
+ */
+const order = {
+  mark: 0,
+  heading: 1,
+  headingAccent: 2,
+  lead: 3,
+  action: 4,
+}
+---
+
+<section class="cta" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page cta__inner">
+    <span class="cta__mark reveal-pop" style={`--reveal-index: ${order.mark}`}>
+      <Mark />
+    </span>
+
+    {
+      /*
+        One <h2>, two masked lines. Block-level masks rather than the inline ones
+        LogoWall uses: the design breaks this headline between its halves at every
+        width, so the two lines are two lines and not a phrase that happens to wrap.
+      */
+    }
+    <h2 class="cta__heading text-display" id={headingId}>
+      <span class="reveal-mask" style={`--reveal-index: ${order.heading}`}>
+        <span>{cta.heading}</span>
+      </span>
+      {
+        cta.headingAccent && (
+          <span class="reveal-mask cta__accent" style={`--reveal-index: ${order.headingAccent}`}>
+            <span>{cta.headingAccent}</span>
+          </span>
+        )
+      }
+    </h2>
+
+    <p class="cta__lead text-standfirst reveal" style={`--reveal-index: ${order.lead}`}>
+      {cta.description}
+    </p>
+
+    <div class="cta__action reveal" style={`--reveal-index: ${order.action}`}>
+      <Button link={cta.link} withArrow />
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: var(--cta-padding-block);
+    background-color: var(--color-bg);
+  }
+
+  .cta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .cta__mark {
+    /* `inline` would leave the scale of `reveal-pop` with nothing to scale. */
+    display: block;
+    inline-size: var(--cta-mark-size);
+    color: var(--color-fg);
+  }
+
+  .cta__mark :global(svg) {
+    inline-size: 100%;
+    /* The intrinsic ratio does the rest — width/height are on the tag. */
+    block-size: auto;
+  }
+
+  .cta__heading {
+    margin-block-start: var(--cta-mark-gap);
+    max-inline-size: var(--cta-heading-measure);
+    color: var(--color-fg);
+    /*
+     * Only below ~640 does either half wrap at all. When it does, balancing beats
+     * filling: "Interested in BESS" over "or" leaves a two-letter line under a 40 px
+     * headline, which reads as a mistake.
+     */
+    text-wrap: balance;
+  }
+
+  .cta__accent {
+    color: var(--color-fg-accent);
+  }
+
+  .cta__lead {
+    margin-block-start: var(--cta-lead-gap);
+    color: var(--color-fg);
+  }
+
+  .cta__action {
+    /*
+     * The inverted button. Custom properties inherit, so overriding the Button
+     * component's own tokens on its wrapper re-colours it without the component
+     * knowing there is a second variant — and without a `tone` prop that every
+     * other caller would then have to ignore.
+     */
+    --button-surface: var(--cta-button-surface);
+    --button-surface-hover: var(--cta-button-surface-hover);
+    --button-fg: var(--cta-button-fg);
+    margin-block-start: var(--cta-action-gap);
+  }
+</style>

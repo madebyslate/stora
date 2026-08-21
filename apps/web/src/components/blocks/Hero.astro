@@ -1,0 +1,356 @@
+---
+import type { HeroBlock } from '@repo/shared'
+import { HERO_POSTER_SIZES, HERO_POSTER_WIDTHS } from '@/lib/images'
+import Picture from '@/components/ui/Picture.astro'
+import Button from '@/components/ui/Button.astro'
+
+interface Props {
+  block: HeroBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'hero-heading'
+
+/**
+ * A newline in `heading` is a designed line break (see the schema). Each line
+ * becomes its own masked block so the two can be revealed in sequence — the
+ * alternative is a JS line splitter, and that is not worth a kilobyte on the
+ * critical path for a break the editor already knows about.
+ */
+const headingLines = block.heading.split('\n')
+
+/** Reveal order. Kept here so the whole choreography is readable in one place. */
+const order = {
+  heading: 1,
+  lead: headingLines.length + 2,
+  cta: headingLines.length + 3,
+  stats: headingLines.length + 3,
+}
+---
+
+<section class="hero" aria-labelledby={headingId} data-hero>
+  {
+    /*
+      The poster is a real <picture>, not the <video poster> attribute, and that is
+      the single most important decision in this block. `poster` takes one URL, so
+      a phone would download the 1920 px file; as a <picture> the LCP image is
+      responsive and a 390 px screen fetches roughly a tenth of the bytes. The video
+      then sits on top of it, transparent until it actually starts.
+
+      No `autoplay` attribute and `preload="none"` on the video: the file must not
+      compete with the poster for bandwidth before LCP, and `autoplay` in HTML is
+      unconditional, so honouring `prefers-reduced-motion` has to happen from
+      script. Without JS the poster stays, which is a correct end state rather than
+      a degraded one.
+    */
+  }
+  <div class="hero__backdrop">
+    <Picture
+      image={block.video.poster}
+      widths={HERO_POSTER_WIDTHS}
+      sizes={HERO_POSTER_SIZES}
+      priority
+    />
+
+    <video
+      class="hero__video"
+      muted
+      playsinline
+      preload="none"
+      loop={block.video.loop === true}
+      tabindex="-1"
+      aria-hidden={block.video.description ? undefined : 'true'}
+      aria-label={block.video.description}
+      disablepictureinpicture
+      data-hero-video
+    >
+      {
+        block.video.sources.map((source) => (
+          <source src={source.src} type={source.type} media={source.media} />
+        ))
+      }
+    </video>
+  </div>
+
+  {
+    /*
+      Two scrims rather than one gradient across the whole frame: the header needs
+      ~145 px of cover at the top and the copy needs ~350 px at the bottom, and a
+      single gradient that did both would grey out the middle of the shot.
+      Deliberately not animated — they are what makes the white type legible, and
+      a scrim that fades in is a contrast failure for its first 400 ms.
+    */
+  }
+  <div class="hero__scrim hero__scrim--top"></div>
+  <div class="hero__scrim hero__scrim--bottom"></div>
+
+  <div class="hero__inner container-page">
+    <div class="hero__copy">
+      <h1 class="hero__heading text-display" id={headingId}>
+        {
+          headingLines.map((line, index) => (
+            <span class="reveal-mask" style={`--reveal-index: ${order.heading + index}`}>
+              <span>{line}</span>
+            </span>
+          ))
+        }
+      </h1>
+
+      {
+        block.subheading && (
+          <p class="hero__lead text-lead reveal" style={`--reveal-index: ${order.lead}`}>
+            {block.subheading}
+          </p>
+        )
+      }
+
+      {
+        block.cta && (
+          <div class="hero__cta reveal" style={`--reveal-index: ${order.cta}`}>
+            <Button link={block.cta} withArrow />
+          </div>
+        )
+      }
+    </div>
+
+    {
+      block.stats && block.stats.length > 0 && (
+        <ul class="hero__stats" role="list">
+          {block.stats.map((stat, index) => (
+            <li class="stat" style={`--reveal-index: ${order.stats + index}`}>
+              <p class="stat__value text-metric reveal">
+                {stat.value}
+                {stat.unit && <span class="stat__unit text-unit">{stat.unit}</span>}
+              </p>
+              <p class="stat__label text-body reveal">{stat.label}</p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    /*
+     * Two rows: an empty spacer that eats the slack, and the content row. The
+     * bottom scrim is laid into the content row alongside the copy, which is what
+     * makes it track the block's real height instead of guessing at 350 px.
+     */
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-block-size: 100svh;
+    overflow: clip;
+    color: var(--color-on-media);
+    background-color: var(--color-ink);
+    /* Lime-Dark is invisible against the footage; the ring has to be white here. */
+    --color-focus: var(--color-on-media);
+  }
+
+  .hero__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-media);
+  }
+
+  /*
+   * `:global(img)` reaches the element rendered by <Picture>. Scoped to
+   * `.hero__backdrop`, so it is a descendant rule inside this component and not a
+   * loose global selector.
+   */
+  .hero__backdrop :global(img),
+  .hero__video {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    /* The subject sits centre-right; on a portrait crop that is what has to survive. */
+    object-position: 60% 50%;
+  }
+
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    /* Frame 0 of the encode is the poster, so the handover is invisible — no
+       transition, because a cross-fade between two identical frames is 400 ms of
+       Speed Index spent on nothing. */
+    opacity: 0;
+  }
+
+  .hero__video[data-playing] {
+    opacity: 1;
+  }
+
+  .hero__scrim {
+    z-index: var(--z-scrim);
+    pointer-events: none;
+  }
+
+  .hero__scrim--top {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--hero-scrim-top-height);
+    background: var(--hero-scrim-top);
+  }
+
+  .hero__scrim--bottom {
+    grid-area: 2 / 1;
+    background: var(--hero-scrim-bottom);
+  }
+
+  .hero__inner {
+    grid-area: 2 / 1;
+    position: relative;
+    z-index: var(--z-content);
+    display: grid;
+    gap: var(--space-10);
+    padding-block: calc(var(--header-height) + var(--space-9)) var(--space-12);
+  }
+
+  .hero__heading {
+    max-inline-size: var(--hero-heading-measure);
+    /* Only relevant once a line has to wrap on its own, below the design width. */
+    text-wrap: balance;
+  }
+
+  .hero__lead {
+    max-inline-size: var(--hero-lead-measure);
+    margin-block-start: var(--space-5);
+  }
+
+  .hero__cta {
+    display: flex;
+    margin-block-start: var(--space-8);
+  }
+
+  /* ── Statistics rail ──────────────────────────────────────────────────────
+   * Four columns of 180 px at the design width, each opened by a hairline rule.
+   *
+   * The rail folds in two steps, and both thresholds are arithmetic rather than
+   * taste. Below 768 it is 2 x 2: four across on a phone leaves ~85 px a column
+   * and the labels wrap to five lines. Below 1360 it sits under the copy instead
+   * of beside it: the rail is a fixed 720 px, the gap is 40, and the standfirst
+   * measures 508, so a side-by-side layout needs 1268 px of content — which a
+   * 1360 px viewport is the first to provide.
+   */
+  .hero__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6) 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .stat {
+    position: relative;
+    padding-inline-start: var(--stat-column-padding);
+  }
+
+  /* The rule is a pseudo-element, not a border: a border cannot be scaled, and
+     scaling it up from the baseline is what makes the rail assemble rather than
+     appear. */
+  .stat::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: 1px;
+    background-color: var(--color-on-media-rule);
+    transform-origin: bottom;
+    animation: reveal-rule var(--duration-reveal) var(--ease-out-expo) both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-step));
+  }
+
+  .stat__value {
+    display: flex;
+    align-items: baseline;
+    gap: var(--stat-unit-gap);
+  }
+
+  .stat__unit {
+    /* The unit rides the value's baseline, so it must not carry its own leading. */
+    flex: none;
+  }
+
+  .stat__label {
+    margin-block-start: var(--space-3);
+    color: var(--color-on-media-muted);
+  }
+
+  @media (min-width: 768px) {
+    .hero__stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1360px) {
+    .hero__inner {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: var(--space-9);
+    }
+
+    .hero__stats {
+      grid-template-columns: repeat(4, var(--stat-column-width));
+    }
+  }
+</style>
+
+
+<script>
+  /*
+   * Hero video start-up. ~0.6 KB inline, no bundle — the budget note lives in
+   * Hero.spec.md. Three requirements collide and none of them can be expressed in
+   * HTML alone:
+   *
+   *   1. `preload="none"` — 1.8 MB must not compete with the poster before LCP;
+   *   2. `prefers-reduced-motion: reduce` has to stop playback (AGENT-RULES §6),
+   *      and the `autoplay` attribute is unconditional;
+   *   3. a metered or 2G connection should keep the poster and never fetch the file.
+   *
+   * Playback is deferred to idle time after `load` so the download starts after
+   * every request that affects a Core Web Vital has finished.
+   */
+  const hero = document.querySelector<HTMLElement>('[data-hero]')
+  const video = hero?.querySelector<HTMLVideoElement>('[data-hero-video]')
+
+  if (hero && video) {
+    type SaveDataConnection = { saveData?: boolean; effectiveType?: string }
+    const connection = (navigator as Navigator & { connection?: SaveDataConnection }).connection
+
+    const unwanted =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      connection?.saveData === true ||
+      /(^|-)2g$/.test(connection?.effectiveType ?? '')
+
+    // A deep link further down the page should not pull the file at all.
+    const onScreen = hero.getBoundingClientRect().top < window.innerHeight
+
+    if (!unwanted && onScreen) {
+      const start = () => {
+        video.preload = 'auto'
+        video.load()
+        video.play().then(
+          () => video.setAttribute('data-playing', ''),
+          // Blocked by a platform autoplay policy: the poster stays, nothing breaks.
+          () => {},
+        )
+      }
+
+      // Safari only shipped requestIdleCallback recently; the timeout keeps the
+      // behaviour identical everywhere else.
+      const whenIdle = () =>
+        typeof window.requestIdleCallback === 'function'
+          ? window.requestIdleCallback(start, { timeout: 1200 })
+          : window.setTimeout(start, 300)
+
+      if (document.readyState === 'complete') whenIdle()
+      else window.addEventListener('load', whenIdle, { once: true })
+    }
+  }
+</script>

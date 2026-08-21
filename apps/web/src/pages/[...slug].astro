@@ -1,0 +1,58 @@
+---
+import type { GetStaticPaths } from 'astro'
+import { pagePath, HOME_SLUG } from '@repo/shared'
+import { getAllPages, getSite } from '@/lib/content'
+import { getLcpPreload } from '@/lib/preload'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
+
+/**
+ * Every page comes out of one router.
+ *
+ * `getStaticPaths` runs at build time, so `getAllPages()` reaches for either the
+ * fixtures or the Payload API and the page never knows which. That is the whole
+ * mechanism by which stage 2 leaves components untouched.
+ */
+export const getStaticPaths = (async () => {
+  const pages = await getAllPages()
+
+  return pages.map((page) => ({
+    // The home page gets `undefined`, not `''` — otherwise Astro builds /home/.
+    params: { slug: page.slug === HOME_SLUG ? undefined : page.slug },
+    props: { page },
+  }))
+}) satisfies GetStaticPaths
+
+const { page } = Astro.props
+const site = await getSite()
+const lcp = await getLcpPreload(page.blocks)
+
+/**
+ * A page that opens on a full-bleed hero gets the header laid over it in white;
+ * anything else keeps it in the flow. Derived from the content rather than set by
+ * hand, so a page cannot be published with white type on a white background.
+ */
+const openingBlock = page.blocks[0]?.blockType
+const headerTone =
+  openingBlock === 'hero' || openingBlock === 'pageHero' ? 'on-media' : 'default'
+---
+
+<BaseLayout seo={page.seo} path={pagePath(page.slug)} site={site} headerTone={headerTone}>
+  <Fragment slot="head">
+    {
+      lcp && (
+        <link
+          rel="preload"
+          as="image"
+          href={lcp.href}
+          type={lcp.type}
+          imagesrcset={lcp.imagesrcset}
+          imagesizes={lcp.imagesizes}
+          fetchpriority="high"
+        />
+      )
+    }
+  </Fragment>
+
+  <BlockRenderer blocks={page.blocks} />
+</BaseLayout>

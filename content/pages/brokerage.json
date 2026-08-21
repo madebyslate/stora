@@ -1,0 +1,257 @@
+{
+  "slug": "brokerage",
+  "seo": {
+    "title": "M&A Brokerage — Stora Energy",
+    "description": "For parties looking to buy or sell BESS projects in Poland. 140 MW of M&A transactions closed, every deal led from opportunity to closing.",
+    "canonicalPath": "/brokerage/"
+  },
+  "blocks": [
+    {
+      "blockType": "pageHero",
+      "heading": "M&A Brokerage",
+      "subheading": "For parties looking to buy or sell BESS projects in Poland.",
+      "image": {
+        "src": "content/media/pages/brokerage-hero.jpg",
+        "alt": "An aerial view of farmland and forest with a watercourse picked out in green",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "blockType": "metricStatement",
+      "heading": "Leader, not broker",
+      "value": "140",
+      "unit": "MW",
+      "description": "With 140 MW of M&A transactions closed, we lead every deal from opportunity to closing, combining technical expertise with hands-on transaction experience."
+    },
+    {
+      "blockType": "featurePair",
+      "heading": "Technical depth. Market access.\nTransaction experience.",
+      "items": [
+        {
+          "title": "For Sellers",
+          "description": "We can buy, or buy with our partner. We assess the opportunity, structure the transaction and connect it with the right buyer.",
+          "image": {
+            "src": "content/media/pages/boxes/for-sellers.jpg",
+            "alt": "",
+            "width": 1074,
+            "height": 698
+          }
+        },
+        {
+          "title": "For Buyers",
+          "description": "We sell our own projects — or find you the right opportunity on the market.",
+          "image": {
+            "src": "content/media/pages/boxes/for-buyers.jpg",
+            "alt": "",
+            "width": 1086,
+            "height": 698
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "technicalDepthTabs",
+      "heading": "Technical depth. Market access.\nTransaction experience.",
+      "items": [
+        {
+          "label": "Off-market opportunities",
+          "title": "Off-market opportunities",
+          "description": "Over 400 projects in our proprietary database.",
+          "image": {
+            "src": "content/media/pages/technical-depth/off-market-opportunities.jpg",
+            "alt": "",
+            "width": 560,
+            "height": 560
+          }
+        },
+        {
+          "label": "Deep technical knowledge",
+          "title": "Deep technical knowledge",
+          "description": "An experienced development team providing hands-on technical support at every stage of the project.",
+          "image": {
+            "src": "content/media/pages/technical-depth/deep-technical-knowledge.jpg",
+            "alt": "",
+            "width": 560,
+            "height": 560
+          }
+        },
+        {
+          "label": "Negotiation leader",
+          "title": "Negotiation leader",
+          "description": "Dedicated M&A manager and legal support guiding every client through the transaction process.",
+          "image": {
+            "src": "content/media/pages/technical-depth/negotiation-leader.jpg",
+            "alt": "",
+            "width": 560,
+            "height": 560
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "processIntroduction",
+      "heading": "More than\nan introduction",
+      "image": {
+        "src": "content/media/pages/introduction-process/more-than-an-introduction.jpg",
+        "alt": "",
+        "width": 870,
+        "height": 515
+      },
+      "items": [
+        {
+          "title": "BESS revenue modelling",
+          "description": "Build a clear view of project revenues with BESS revenue modelling, included within our fee."
+        },
+        {
+          "title": "Technical Vetting & Reports",
+          "description": "Technical vetting and project reports to assess the technical side of each opportunity — included within our fee."
+        },
+        {
+          "title": "Negotiations & Contract Drafts",
+          "description": "Support through negotiations and contract drafting, with this work included within our fee."
+        }
+      ]
+    },
+    {
+      "blockType": "engagementComparison",
+      "heading": "Choose how we work together",
+      "plans": [
+        {
+          "name": "Retained",
+          "icon": "retained"
+        },
+        {
+          "name": "Ad-Hoc",
+          "icon": "adHoc"
+        }
+      ],
+      "rows": [
+        {
+          "heading": "Commitment",
+          "values": [
+            {
+              "text": "Long-term partnership",
+              "status": "included"
+            },
+            {
+              "text": "No long-term commitment",
+              "status": "excluded"
+            }
+          ]
+        },
+        {
+          "heading": "Support across deal lifecycle",
+          "values": [
+            {
+              "text": "Dedicated, continuous",
+              "status": "included"
+            },
+            {
+              "text": "At selected stages only",
+              "status": "excluded"
+            }
+          ]
+        },
+        {
+          "heading": "Access to team & network",
+          "values": [
+            {
+              "text": "Priority access",
+              "status": "included"
+            },
+            {
+              "text": "Access on demand",
+              "status": "included"
+            }
+          ]
+        },
+        {
+          "heading": "Sourcing to closing",
+          "values": [
+            {
+              "text": "Fully covered end-to-end",
+              "status": "included"
+            },
+            {
+              "text": "Covered per selected service",
+              "status": "included"
+            }
+          ]
+        },
+        {
+          "heading": "Pricing structure",
+          "values": [
+            {
+              "text": "Retainer, continuous availability",
+              "status": "plain"
+            },
+            {
+              "text": "Pay only for the services you use",
+              "status": "plain"
+            }
+          ]
+        },
+        {
+          "heading": "Best for",
+          "values": [
+            {
+              "text": "Continuous support for buyers & sellers",
+              "status": "plain"
+            },
+            {
+              "text": "Teams with an internal process",
+              "status": "plain"
+            }
+          ]
+        }
+      ],
+      "cta": {
+        "heading": "Not sure which model is right for you?",
+        "description": "Start with the full scope and decide what works best for your transaction.",
+        "link": {
+          "label": "Chat with our CEO",
+          "href": "/contact/",
+          "disabled": true
+        }
+      }
+    },
+    {
+      "blockType": "proofPoints",
+      "heading": "Built on real market experience",
+      "metrics": [
+        {
+          "value": "140",
+          "label": "M&A transactions closed"
+        },
+        {
+          "value": "400",
+          "unit": "+",
+          "label": "Projects in our database"
+        },
+        {
+          "value": "190",
+          "unit": "+",
+          "label": "Currently in closing"
+        }
+      ],
+      "image": {
+        "src": "content/media/pages/proof-points/built-on-real-market-experience.svg",
+        "alt": "Map of Poland marking Stora Energy project locations",
+        "width": 578,
+        "height": 548
+      },
+      "contact": {
+        "name": "Michał Ogiński",
+        "role": "Chief Development Officer (CDO)",
+        "email": "michal.o@storaenergy.pl",
+        "portrait": {
+          "src": "content/media/team/michal-oginski.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      }
+    }
+  ]
+}

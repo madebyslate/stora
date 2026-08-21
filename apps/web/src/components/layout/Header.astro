@@ -1,0 +1,529 @@
+---
+import type { SiteSettings } from '@repo/shared'
+import Logo from '@/components/ui/Logo.astro'
+import Button from '@/components/ui/Button.astro'
+
+/**
+ * Site header.
+ *
+ * Two opening tones. `on-media` lifts the header out of the flow and lays it over
+ * a full-bleed hero in white; `default` keeps it in the flow for pages that open
+ * on a light surface. After the delayed scroll threshold either one becomes the
+ * same fixed light bar. The page decides its opening tone from its first block,
+ * so a page without a hero can never end up with white type on white.
+ *
+ * The navigation is optically centred on the viewport, not merely placed between
+ * the logo and the CTA: a `1fr auto 1fr` grid inside the centred container puts the
+ * middle column's centre exactly on the page centre whatever the logo measures.
+ * That is what the design does, and `justify-content: space-between` does not.
+ */
+
+interface Props {
+  site: SiteSettings
+  /** Current path, for `aria-current`. Always with a trailing slash. */
+  path: string
+  tone?: 'on-media' | 'default'
+}
+
+const { site, path, tone = 'default' } = Astro.props
+
+const menuId = 'site-menu'
+const ctaIndex = site.navigation.length + 1
+---
+
+<header class:list={['header', `header--${tone}`]} data-site-header>
+  <span class="header__sticky-threshold" data-sticky-threshold aria-hidden="true"></span>
+
+  <div class="header__inner container-page">
+    <a
+      class="header__brand reveal"
+      href="/"
+      aria-label="Stora Energy — home"
+      style="--reveal-index: 0"
+    >
+      <Logo />
+    </a>
+
+    <nav class="header__nav" aria-label="Main">
+      <ul class="header__list">
+        {
+          site.navigation.map((item, index) => (
+            <li class="reveal" style={`--reveal-index: ${index + 1}`}>
+              <a
+                class="nav-link"
+                href={item.href}
+                aria-current={item.href === path ? 'page' : undefined}
+              >
+                <span class="nav-link__roll">
+                  <span class="nav-link__text">{item.label}</span>
+                  <span class="nav-link__text" aria-hidden="true">
+                    {item.label}
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__end">
+      {
+        site.headerCta && (
+          <div class="header__cta reveal" style={`--reveal-index: ${ctaIndex}`}>
+            <Button link={site.headerCta} />
+          </div>
+        )
+      }
+
+      <button
+        class="header__toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls={menuId}
+        data-menu-toggle
+      >
+        <span class="header__toggle-bars" aria-hidden="true"></span>
+        <span class="sr-only" data-menu-label>Open menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="header__panel" id={menuId} data-menu-panel hidden>
+    <nav class="header__panel-nav" aria-label="Main, compact">
+      <ul>
+        {
+          site.navigation.map((item, index) => (
+            <li style={`--menu-index: ${index}`}>
+              <a href={item.href} aria-current={item.href === path ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    {
+      site.headerCta && (
+        <div
+          class="header__panel-cta"
+          style={`--menu-index: ${site.navigation.length}`}
+        >
+          <Button link={site.headerCta} withArrow />
+        </div>
+      )
+    }
+  </div>
+</header>
+
+<div class="header__spacer" aria-hidden="true"></div>
+
+<style>
+  .header {
+    z-index: var(--z-header);
+    /* One step faster than the hero: the chrome should be settled before the
+       headline finishes arriving. */
+    --reveal-step: 60ms;
+  }
+
+  .header--on-media {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    color: var(--color-on-media);
+    /* A white ring reads on the video; the default Lime-Dark one does not. */
+    --color-focus: var(--color-on-media);
+  }
+
+  .header--default {
+    position: relative;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    border-block-end: 1px solid var(--color-border);
+    --button-surface: var(--header-button-surface);
+    --button-surface-hover: var(--header-button-surface-hover);
+    --button-fg: var(--header-button-fg);
+  }
+
+  .header[data-sticky] {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    border-block-end: 1px solid var(--color-border);
+    --color-focus: var(--color-fg);
+    --button-surface: var(--header-button-surface);
+    --button-surface-hover: var(--header-button-surface-hover);
+    --button-fg: var(--header-button-fg);
+  }
+
+  .header[data-sticky] .header__inner {
+    animation: header-enter var(--duration-slow) var(--ease-out-expo) both;
+  }
+
+  .header--default[data-sticky] + .header__spacer {
+    display: block;
+  }
+
+  .header__spacer {
+    display: none;
+    block-size: var(--header-height);
+  }
+
+  .header__sticky-threshold {
+    position: absolute;
+    inset-block-start: var(--header-sticky-threshold);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @keyframes header-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -100%, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .header__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    block-size: var(--header-height);
+  }
+
+  .header__brand {
+    /*
+     * Columns are assigned explicitly. `display: none` takes the navigation out of
+     * the grid entirely rather than leaving an empty track, so with auto-placement
+     * the CTA would slide into the middle column the moment the compact menu takes
+     * over — which is exactly what it did.
+     */
+    grid-column: 1;
+    display: inline-flex;
+    justify-self: start;
+    color: inherit;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .header__brand:hover {
+    opacity: 0.7;
+  }
+
+  /*
+   * Default-visible so a visitor without JS gets links instead of a button that
+   * cannot open anything; `html.js` hands the job to the compact menu below 1024.
+   */
+  .header__nav {
+    grid-column: 2;
+    display: block;
+  }
+
+  :global(html.js) .header__nav {
+    display: none;
+  }
+
+  .header__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4) var(--header-nav-gap);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__end {
+    grid-column: 3;
+    display: flex;
+    align-items: center;
+    justify-self: end;
+  }
+
+  .header__cta {
+    display: none;
+  }
+
+  /* ── Navigation link ──────────────────────────────────────────────────────
+   * Hover rolls the label up and swaps in an identical copy from below. No
+   * underline, no colour change — the movement is the whole signal, which is why
+   * the duplicate is `aria-hidden` and never reaches a screen reader.
+   *
+   * `line-height: 1.4` rather than the token's 16 px: the roll clips at the mask
+   * edge, and at 16 px the descender of "Brokerage" would clip with it.
+   */
+  .nav-link {
+    display: block;
+    /* The mask is exactly one line tall; without the explicit height it grows to
+       fit both copies and the duplicate is simply visible under the label. */
+    block-size: 1.4em;
+    overflow: hidden;
+    color: inherit;
+    font-size: var(--text-ui);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    text-decoration: none;
+  }
+
+  .nav-link__roll {
+    display: block;
+    transition: transform var(--duration-slow) var(--ease-in-out);
+  }
+
+  .nav-link:hover .nav-link__roll,
+  .nav-link:focus-visible .nav-link__roll {
+    transform: translate3d(0, -50%, 0);
+  }
+
+  .nav-link__text {
+    display: block;
+  }
+
+  /* ── Compact menu ─────────────────────────────────────────────────────────
+   * No Figma frame exists for this. It is deliberately the plainest thing that
+   * still works: the same type scale, a full-bleed panel, no decoration.
+   */
+  .header__toggle {
+    position: relative;
+    display: none;
+    place-items: center;
+    inline-size: var(--header-content-height);
+    block-size: var(--header-content-height);
+    margin-inline-end: calc(-1 * var(--space-2));
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  :global(html.js) .header__toggle {
+    display: grid;
+  }
+
+  .header__toggle-bars {
+    position: relative;
+    display: block;
+    inline-size: var(--space-5);
+    block-size: 1px;
+    background-color: currentColor;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .header__toggle-bars::before,
+  .header__toggle-bars::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    block-size: 1px;
+    background-color: currentColor;
+    transition: transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .header__toggle-bars::before {
+    transform: translateY(-0.3125rem);
+  }
+
+  .header__toggle-bars::after {
+    transform: translateY(0.3125rem);
+  }
+
+  .header__toggle[aria-expanded='true'] .header__toggle-bars {
+    background-color: transparent;
+  }
+
+  .header__toggle[aria-expanded='true'] .header__toggle-bars::before {
+    transform: rotate(45deg);
+  }
+
+  .header__toggle[aria-expanded='true'] .header__toggle-bars::after {
+    transform: rotate(-45deg);
+  }
+
+  .header__panel {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--space-9);
+    padding: var(--header-height) var(--container-gutter) var(--space-12);
+    background-color: var(--color-ink);
+    color: var(--color-on-media);
+    --color-focus: var(--color-on-media);
+    --button-surface: var(--color-white);
+    --button-surface-hover: var(--header-panel-button-surface-hover);
+    --button-fg: var(--color-lime-dark);
+  }
+
+  .header[data-menu-open] .header__inner {
+    position: relative;
+    z-index: var(--z-modal);
+  }
+
+  .header__panel[hidden] {
+    display: none;
+  }
+
+  .header__panel:not([hidden]) {
+    animation: menu-panel-in var(--duration-slow) var(--ease-standard) both;
+  }
+
+  .header__panel:not([hidden]) li,
+  .header__panel:not([hidden]) .header__panel-cta {
+    animation: menu-item-in var(--duration-slow) var(--ease-out-expo) both;
+    animation-delay: calc(var(--menu-index, 0) * var(--reveal-step));
+  }
+
+  .header[data-menu-open] {
+    color: var(--color-on-media);
+    --color-focus: var(--color-on-media);
+  }
+
+  @keyframes menu-panel-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes menu-item-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--space-5), 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .header__panel ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__panel a {
+    color: inherit;
+    font-size: var(--text-lead);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .header__panel-cta {
+    display: flex;
+  }
+
+  @media (min-width: 1024px) {
+    .header__nav,
+    :global(html.js) .header__nav {
+      display: block;
+    }
+
+    .header__cta {
+      display: block;
+    }
+
+    .header__toggle,
+    :global(html.js) .header__toggle,
+    .header__panel {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  /*
+   * Compact menu and delayed sticky state. 569 B gzip, no bundle, no island — the
+   * budget note is in Header.spec.md. A disclosure that keeps its promises needs Escape to close,
+   * focus to return to the button, and the page behind it to stop being reachable
+   * by Tab. None of that is expressible in CSS, and a menu that traps a keyboard
+   * user is not a menu we can ship.
+   */
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]')
+  const panel = document.querySelector<HTMLElement>('[data-menu-panel]')
+  const label = document.querySelector<HTMLElement>('[data-menu-label]')
+  const main = document.querySelector<HTMLElement>('#main')
+  const header = document.querySelector<HTMLElement>('[data-site-header]')
+  const stickyThreshold = document.querySelector<HTMLElement>('[data-sticky-threshold]')
+
+  if (toggle && panel) {
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true'
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open))
+      panel.hidden = !open
+      header?.toggleAttribute('data-menu-open', open)
+      document.documentElement.style.overflow = open ? 'hidden' : ''
+      if (label) label.textContent = open ? 'Close menu' : 'Open menu'
+      if (main) main.inert = open
+      if (!open) toggle.focus()
+    }
+
+    toggle.addEventListener('click', () => setOpen(!isOpen()))
+
+    panel.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLAnchorElement) setOpen(false)
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && isOpen()) setOpen(false)
+    })
+
+    // Resizing past the breakpoint hides the panel in CSS; without this the page
+    // behind it would stay `inert` and the scroll lock would never be released.
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    desktop.addEventListener('change', (event) => {
+      if (event.matches && isOpen()) setOpen(false)
+    })
+  }
+
+  if (header && stickyThreshold) {
+    let stickyAfter = Number.POSITIVE_INFINITY
+    let framePending = false
+
+    const updateSticky = () => {
+      header.toggleAttribute('data-sticky', window.scrollY > stickyAfter)
+      framePending = false
+    }
+
+    const measureStickyThreshold = () => {
+      stickyAfter = stickyThreshold.offsetTop
+      updateSticky()
+    }
+
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (framePending) return
+        framePending = true
+        window.requestAnimationFrame(updateSticky)
+      },
+      { passive: true },
+    )
+
+    window.addEventListener('resize', measureStickyThreshold, { passive: true })
+
+    if (document.readyState === 'complete') {
+      measureStickyThreshold()
+    } else {
+      window.addEventListener('load', measureStickyThreshold, { once: true })
+    }
+  }
+</script>

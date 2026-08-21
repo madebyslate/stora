@@ -1,0 +1,30 @@
+---
+/**
+ * The 11 x 11 arrow that sits inside a button label.
+ *
+ * Inlined and filled with `currentColor` so it inherits the button's colour
+ * transition instead of needing its own, and so no request is made for eleven
+ * pixels of artwork.
+ */
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<svg
+  class={className}
+  width="11"
+  height="11"
+  viewBox="0 0 11 11"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M8.1144 4.51881L4.5384 0.942807L5.4812 0L10.6667 5.18548L5.4812 10.3709L4.5384 9.42808L8.1144 5.85215H0V4.51881H8.1144Z"
+    fill="currentColor"></path>
+</svg>

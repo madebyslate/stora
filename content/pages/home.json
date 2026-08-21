@@ -1,0 +1,222 @@
+{
+  "slug": "home",
+  "seo": {
+    "title": "Stora Energy — Accelerating BESS in Poland",
+    "description": "Stora Energy develops, builds and operates large-scale battery energy storage in Poland: 1.4 GW of pipeline under development and 420 MW at ready-to-build stage.",
+    "canonicalPath": "/",
+    "ogImage": {
+      "src": "content/media/og-default.png",
+      "alt": "",
+      "width": 1200,
+      "height": 630
+    }
+  },
+  "blocks": [
+    {
+      "blockType": "hero",
+      "heading": "Accelerating\nBESS in Poland",
+      "subheading": "We develop, build and operate large-scale battery energy storage",
+      "video": {
+        "sources": [
+          {
+            "src": "/video/hero-mobile.av1.mp4",
+            "type": "video/mp4; codecs=av01.0.05M.08",
+            "media": "(max-width: 768px)"
+          },
+          {
+            "src": "/video/hero-mobile.mp4",
+            "type": "video/mp4; codecs=avc1.640028",
+            "media": "(max-width: 768px)"
+          },
+          {
+            "src": "/video/hero.av1.mp4",
+            "type": "video/mp4; codecs=av01.0.08M.08"
+          },
+          {
+            "src": "/video/hero.mp4",
+            "type": "video/mp4; codecs=avc1.64002a"
+          }
+        ],
+        "poster": {
+          "src": "content/media/hero-poster.jpg",
+          "alt": "",
+          "width": 1920,
+          "height": 1080
+        },
+        "duration": 12.04,
+        "loop": false
+      },
+      "cta": {
+        "label": "Partner with us",
+        "href": "/contact/",
+        "disabled": true
+      },
+      "stats": [
+        {
+          "value": "1.4",
+          "unit": "GW",
+          "label": "Pipeline under development"
+        },
+        {
+          "value": "420",
+          "unit": "MW",
+          "label": "Projects at ready-to-build stage"
+        },
+        {
+          "value": "18",
+          "label": "Grid connection agreements"
+        },
+        {
+          "value": "3",
+          "unit": "yr",
+          "label": "Operating in the Polish market"
+        }
+      ]
+    },
+    {
+      "blockRef": "companyCredentials"
+    },
+    {
+      "blockType": "serviceCards",
+      "heading": "Unlocking",
+      "headingAccent": "battery energy storage",
+      "headingTrail": "as your need",
+      "cards": [
+        {
+          "title": "Develop-to-Hold",
+          "description": "We create and maintain high-performance Battery Energy Storage Systems, ensuring reliable, sustainable energy.",
+          "image": {
+            "src": "content/media/services/develop-to-hold.jpg",
+            "alt": "An operating battery energy storage site laid out in rows across open farmland",
+            "width": 612,
+            "height": 600
+          },
+          "cta": {
+            "label": "Partner with us",
+            "href": "/develop-to-hold/"
+          }
+        },
+        {
+          "title": "Develop-to-Sell (JV)",
+          "description": "Partner with us to develop utility-scale BESS projects through strategic joint ventures, from planning to successful project delivery.",
+          "image": {
+            "src": "content/media/services/develop-to-sell.jpg",
+            "alt": "A technical site plan showing battery containers positioned across a project layout",
+            "width": 612,
+            "height": 600
+          },
+          "cta": {
+            "label": "Partner with us",
+            "href": "/develop-to-sell/"
+          }
+        },
+        {
+          "title": "M&A Brokerage",
+          "description": "We advise clients on acquiring, selling, and structuring Battery Energy Storage assets with confidence and market expertise.",
+          "image": {
+            "src": "content/media/services/ma-brokerage.jpg",
+            "alt": "An aerial survey of terrain with candidate storage sites highlighted",
+            "width": 528,
+            "height": 600
+          },
+          "cta": {
+            "label": "Partner with us",
+            "href": "/brokerage/"
+          }
+        }
+      ]
+    },
+    {
+      "blockRef": "foundingTeam"
+    },
+    {
+      "blockType": "ourProcess",
+      "wordmark": "Our process",
+      "steps": [
+        {
+          "leadWord": "Data-Heavy",
+          "trailWord": "Screening",
+          "image": {
+            "src": "content/media/process/data-heavy-screening.jpg",
+            "alt": "",
+            "width": 920,
+            "height": 1080
+          },
+          "description": "We analyze many data points to find locations with the best potential for BESS development."
+        },
+        {
+          "leadWord": "Proprietary",
+          "trailWord": "Knowledge",
+          "image": {
+            "src": "content/media/process/proprietary-knowledge.jpg",
+            "alt": "",
+            "width": 920,
+            "height": 1080
+          },
+          "description": "Our proprietary insights and market expertise enable faster, more informed development decisions."
+        },
+        {
+          "leadWord": "DSO/DNO",
+          "trailWord": "Relationship",
+          "image": {
+            "src": "content/media/process/dso-dno-relationship.jpg",
+            "alt": "",
+            "width": 920,
+            "height": 1080
+          },
+          "description": "Strong ties with grid operators speed coordination and project progress. More text goes here using placeholder."
+        },
+        {
+          "leadWord": "AI",
+          "trailWord": "Pipelines",
+          "image": {
+            "src": "content/media/process/ai-pipelines.jpg",
+            "alt": "",
+            "width": 920,
+            "height": 1080
+          },
+          "description": "Strong ties with grid operators speed coordination and project progress. More text goes here using placeholder."
+        }
+      ]
+    },
+    {
+      "blockType": "marketSlider",
+      "heading": "Poland is our first market",
+      "description": "Stora Energy secures land, grid connection and permits for grid-scale battery energy storage in Poland",
+      "cta": {
+        "label": "Partner with us",
+        "href": "/contact/",
+        "disabled": true
+      },
+      "slides": [
+        {
+          "image": {
+            "src": "content/media/market/poland-1.jpg",
+            "alt": "",
+            "width": 640,
+            "height": 640
+          }
+        },
+        {
+          "image": {
+            "src": "content/media/market/poland-2.jpg",
+            "alt": "",
+            "width": 640,
+            "height": 640
+          }
+        },
+        {
+          "image": {
+            "src": "content/media/market/poland-3.jpg",
+            "alt": "",
+            "width": 640,
+            "height": 640
+          }
+        }
+      ]
+    },
+    {
+      "blockRef": "largeScaleContacts"
+    }
+  ]
+}

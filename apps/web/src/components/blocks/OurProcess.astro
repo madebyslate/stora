@@ -1,0 +1,970 @@
+---
+import type { OurProcessBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: OurProcessBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'our-process-heading'
+
+/**
+ * The timeline, in one place.
+ *
+ * There is exactly one: a `view-timeline` on the section, read over its `contain`
+ * range — which, for an element taller than the viewport, is precisely the window
+ * in which the sticky stage is pinned. Everything that moves is a *range* on that
+ * timeline rather than an animation of its own.
+ *
+ * `INTRO` is the wordmark's share. The rest is split between the steps, and each
+ * step's window reaches back into its predecessor by `TRANSITION x span`, so that
+ * one step's exit and the next one's entrance occupy *exactly* the same stretch of
+ * scroll. That overlap is what lets the two photographs behave as one strip: the
+ * outgoing panel leaves upwards while the incoming one arrives from below, and
+ * because both are driven by the same normalised progress they tile the aperture
+ * edge to edge at every frame — no cross-fade, no gap, and no two-photographs-at-
+ * half-opacity mush.
+ *
+ * Because `TRANSITION` is a *fraction of the span* rather than a fixed number of
+ * percent, every window is the same length and the keyframes below can be written
+ * once, in fractions of a window, for any number of steps.
+ */
+const INTRO = 24
+const TRANSITION = 0.5
+const span = (100 - INTRO) / block.steps.length
+const overlap = span * TRANSITION
+
+/**
+ * 1.6 viewports per step plus 1.6 for the mark. It was one per step, and one per
+ * step is not enough scroll to read as motion rather than as a cut: a photograph
+ * swap had 38 vh to happen in and a half of a step name had 11. At 1.6 they get
+ * 44 and 22, on the same fractions.
+ */
+const sectionVh = (block.steps.length + 1.6) * 100
+
+/**
+ * Where the mark's act begins, expressed on the `cover` range rather than
+ * `contain` — i.e. BEFORE the pin.
+ *
+ * `contain 0%` is the moment the section's top edge reaches the top of the
+ * viewport, and the mark is centred half a viewport below that. Start the mark
+ * there and the visitor scrolls through most of a screen of white first. On
+ * `cover`, offset 0 is the section's top edge entering the *bottom* of the
+ * viewport and the pin begins one viewport later, so 50 vh into `cover` is the earliest it
+ * can be seen at all: the mark is centred half a viewport below the section's top
+ * edge, so before that its centre is still below the fold.
+ */
+const MARK_LEAD_VH = 50
+const markFrom = `cover ${((MARK_LEAD_VH / (sectionVh + 100)) * 100).toFixed(3)}%`
+
+/**
+ * Step 0 reaches back into the wordmark's share exactly as far as every other step
+ * reaches into its predecessor. Not a special case for its own sake — it is what
+ * makes all windows equal, and equal windows are what make one set of keyframes
+ * describe every step.
+ */
+const stepRange = (index: number) => ({
+  from: INTRO + index * span - overlap,
+  to: INTRO + (index + 1) * span,
+})
+
+/**
+ * `sizes` describes the photograph's real drawn width, which is a token rather
+ * than a breakpoint ladder: 44vw capped at 460 above the fold, 72vw capped at 460
+ * below it. The widths stop at 920 because that is the masters' native size — and
+ * it is exactly 2 × 460, so the picture is sharp at 2 dpr and nothing upscales.
+ */
+const PHOTO_SIZES = '(min-width: 768px) min(460px, 44vw), min(460px, 72vw)'
+const PHOTO_WIDTHS = [320, 460, 690, 920]
+---
+
+<section
+  class="process"
+  aria-labelledby={headingId}
+  style={`--process-section-height: ${sectionVh}vh; --process-mark-from: ${markFrom}`}
+>
+  {
+    /*
+      The section's real heading. The mark below says the same words, but at
+      Lime-Dark 0.1 on white it measures 1.16:1 — it is a watermark, and shipping it
+      as the `<h2>` would be claiming legibility the design does not offer. So the
+      words are announced from here and drawn there, and nothing is in the
+      accessibility tree that a sighted visitor cannot also see.
+    */
+  }
+  <h2 class="sr-only" id={headingId}>{block.wordmark}</h2>
+
+  <div class="process__stage">
+    {
+      /*
+        The mark, twice. It arrives small and solid, grows past the frame and
+        dissolves into the watermark the design draws behind the card — that is a
+        colour change, and a colour change is a full-viewport repaint on every
+        frame. Two layers cross-fading are the same picture on the compositor:
+        `opacity` only, and the two colours stay exactly the two colours the design
+        specifies instead of being interpolated through a mid-tone that belongs to
+        neither. Both layers carry the *same* transform animation, so they cannot
+        drift apart.
+      */
+    }
+    <p class="process__mark" aria-hidden="true">
+      <span class="mark__layer mark__layer--solid">{block.wordmark}</span>
+      <span class="mark__layer mark__layer--faint">{block.wordmark}</span>
+    </p>
+
+    <div class="process__deck">
+      {
+        block.steps.map((step, index) => {
+          const range = stepRange(index)
+          const vars =
+            `--step-from: ${range.from.toFixed(3)}%; --step-to: ${range.to.toFixed(3)}%`
+          return (
+            <article class="step" style={vars}>
+              <div class="step__frame">
+                {/*
+                  The plate is one plate. Four of them are stacked here, all
+                  identical, and the ones behind are turned off in pinned mode —
+                  see the stylesheet. Only the digits change, each wiping through
+                  its own aperture.
+                */}
+                <span class="step__badge">
+                  <span class="badge__digit text-body">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                </span>
+
+                {/*
+                  The step's name, twice.
+
+                  Both halves straddle the photograph's edge, and the design sets
+                  the part that lands on the picture in white and the part that
+                  lands on the page in Lime-Dark. That is one run of text in two
+                  colours split along a rectangle, and no blend mode produces that
+                  pair — `difference` and friends give you the inverse of what is
+                  underneath, not Lime-Dark on one side and white on the other.
+
+                  So it is two identical layers: this one under the photograph in
+                  Lime-Dark, and an aria-hidden white one over it, clipped to the
+                  photograph's box. Whichever pixels the picture covers, the white
+                  layer supplies; the rest come from underneath.
+
+                  What makes the seam land exactly on the photograph's edge is a
+                  rule, not a coincidence: **no clipping box in this block is ever
+                  transformed**. Only content inside them moves. Scale the aperture
+                  and the picture stops agreeing with the mask that was cut for it.
+
+                  The real text is the dark layer, so the duplication costs the
+                  accessibility tree nothing.
+                */}
+                <h3 class="step__words step__words--under text-display">
+                  <span class="word word--lead">
+                    <span class="word__line">{step.leadWord}</span>
+                  </span>{' '}
+                  <span class="word word--trail">
+                    <span class="word__line">{step.trailWord}</span>
+                  </span>
+                </h3>
+
+                <div class="step__shot">
+                  <div class="step__panel">
+                    {/*
+                      Out of the browser's own drag-and-drop. The photographs sit
+                      under a scroll-driven sequence, and a native image drag both
+                      leaves a ghost hanging off the cursor and swallows the gesture
+                      that was meant to move the page.
+                    */}
+                    <Picture
+                      image={step.image}
+                      widths={PHOTO_WIDTHS}
+                      sizes={PHOTO_SIZES}
+                      draggable={false}
+                    />
+                  </div>
+                </div>
+
+                <div class="step__words step__words--over text-display" aria-hidden="true">
+                  <span class="word word--lead">
+                    <span class="word__line">{step.leadWord}</span>
+                  </span>
+                  <span class="word word--trail">
+                    <span class="word__line">{step.trailWord}</span>
+                  </span>
+                </div>
+              </div>
+
+              <p class="step__caption text-body">
+                <span class="caption__line">{step.description}</span>
+              </p>
+            </article>
+          )
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ── The static section ───────────────────────────────────────────────────
+   * Everything up to the `@supports` block is the layout a browser gets when it
+   * cannot drive animations from the scroll position — and, by the same rules, the
+   * layout a visitor gets who has asked for reduced motion. Four steps stacked one
+   * under another, every element at rest, no pin and no script. One fallback to
+   * build and one to look at.
+   */
+  .process {
+    padding-block: var(--space-14);
+    /*
+     * Both halves of every step name hang off the photograph, and on a phone they
+     * are wider than it. `clip` rather than `hidden`: `hidden` would make this a
+     * scroll container, and a scroll container between the sticky stage and the
+     * viewport is a stage that never sticks.
+     */
+    overflow-x: clip;
+  }
+
+  /* ── The mark ─────────────────────────────────────────────────────────────── */
+  .process__mark {
+    position: relative;
+    margin: 0;
+    font-size: var(--process-mark-size);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .mark__layer {
+    display: block;
+  }
+
+  /* The two layers occupy the same box: the second is taken out of the flow and
+     laid exactly over the first. */
+  .mark__layer--faint {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    color: var(--process-mark-color-faint);
+  }
+
+  /*
+   * At rest — no pin, or reduced motion — the mark is the watermark the design
+   * draws, not the solid word it passes through on the way there. The pinned
+   * sequence overrides both opacities.
+   */
+  .mark__layer--solid {
+    color: var(--process-mark-color-solid);
+    opacity: 0;
+  }
+
+  .process__deck {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-14);
+    margin-block-start: var(--space-14);
+  }
+
+  .step {
+    /* The photograph is the only fixed thing in a step; the badge, both halves of
+       the name and the description are all placed against its box. */
+    inline-size: var(--process-frame-width);
+  }
+
+  .step__frame {
+    position: relative;
+    inline-size: 100%;
+    aspect-ratio: var(--process-frame-ratio);
+  }
+
+  /* ── Number ───────────────────────────────────────────────────────────────── */
+  .step__badge {
+    position: absolute;
+    inset-block-start: 0;
+    /* 8 px to the left of the photograph, tops aligned. */
+    inset-inline-end: calc(100% + var(--process-badge-gap));
+    z-index: 3;
+    display: grid;
+    inline-size: var(--process-badge-size);
+    block-size: var(--process-badge-size);
+    /* The aperture the digits wipe through. */
+    overflow: clip;
+    background-color: var(--process-badge-surface);
+  }
+
+  /*
+   * The digit's box is the whole plate, not the 16 px line inside it, and that is
+   * load-bearing rather than tidy: everything in this block leaves by travelling
+   * 105% of its own height, which only clears the aperture if the two are the same
+   * height. Centred as a 16 px line in a 36 px plate, 105% is 17 px — the outgoing
+   * number is still half in frame when the incoming one arrives, and the plate
+   * reads `01` over `02`. As a stretched grid item it is 36 px tall and 105%
+   * clears with 2 px to spare.
+   */
+  .badge__digit {
+    display: grid;
+    place-items: center;
+    color: var(--color-fg);
+    font-weight: var(--font-weight-regular);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Step name ────────────────────────────────────────────────────────────── */
+  .step__words {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+  }
+
+  .step__words--under {
+    z-index: 0;
+    color: var(--color-fg);
+  }
+
+  .step__words--over {
+    z-index: 2;
+    color: var(--color-on-media);
+    /* This is the whole trick: the white layer exists only where the picture does.
+       It never moves and it never scales — see the note in the markup. */
+    overflow: clip;
+  }
+
+  /*
+   * One aperture per half, so a half can leave without flying across the card.
+   *
+   * `clip-path`, not `overflow`: at `line-height: 1` the glyphs of this step
+   * overshoot their line box top and bottom, and a box-shaped overflow would slice
+   * the ascender of a `D` and the descender of a `y`. The bleed is generous enough
+   * that no ink is touched at rest, and `--process-word-travel` is longer than the
+   * line box plus both bleeds, so a half at rest outside its step is gone.
+   */
+  .word {
+    position: absolute;
+    display: block;
+    white-space: nowrap;
+    clip-path: inset(
+      calc(-1 * var(--process-word-mask-bleed)) calc(-1 * var(--process-word-glide-bleed))
+        calc(-1 * var(--process-word-mask-bleed))
+    );
+  }
+
+  .word__line {
+    display: block;
+  }
+
+  /*
+   * Each half is CENTRED on the edge of the photograph it straddles: the lead
+   * half on the left edge, the trail half on the right.
+   *
+   * This replaces a pair of fixed insets, and the difference is not cosmetic —
+   * a fixed inset is a rule that only works for words of a similar length. Set
+   * `AI` with its right edge 180 px into the frame and it lands whole on the
+   * photograph, all white, with nothing to split; that is exactly what it looked
+   * like. Re-measured against the reference, the *centre* of every half sits
+   * within ±32 px of its edge across all nine measurements, while the "fixed
+   * inset" reading needs `AI` to be an exception at 57 px against 163–193 for the
+   * other three. Centring is the designer's actual rule, and it is the only one
+   * that guarantees the two-tone treatment for a word of any length.
+   *
+   * `translate`, not `transform`: the travel below owns `transform`, and an
+   * animation beats a declaration on the same property for good. These compose.
+   */
+  .word {
+    translate: -50% 0;
+  }
+
+  .word--lead {
+    inset-inline-start: 0;
+    inset-block-start: var(--process-word-lead-block);
+  }
+
+  .word--trail {
+    inset-inline-start: 100%;
+    inset-block-start: var(--process-word-trail-block);
+  }
+
+  /* ── Photograph ───────────────────────────────────────────────────────────── */
+  .step__shot {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* The aperture. Fixed, always — it is the edge the white text is cut against. */
+    overflow: clip;
+  }
+
+  /*
+   * The panel that travels through the aperture — and the picture's own frame.
+   *
+   * It has to clip. The picture inside is 40% taller than the panel and hangs off
+   * its top, so a panel parked *below* the aperture still reaches its picture's
+   * head up into it: measured at 189 px of photograph showing while its panel
+   * showed none. Clipping here is what makes "this panel is off stage" mean
+   * "nothing of it is on stage".
+   */
+  .step__panel {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    /*
+     * A hair taller than the aperture, and the hair is the point: parked at
+     * `translateY(100%)` the panel's top edge lands exactly on the clip boundary,
+     * and with a frame whose height is fractional — 408.5 px at 483, and every
+     * width below 768 is fractional — the boundary falls mid-pixel and the
+     * rasteriser paints a hairline of photograph across the foot of an empty card.
+     *
+     * The overhang does not disturb the strip: both panels are the same height, so
+     * the outgoing panel's foot is still exactly the incoming panel's head, and the
+     * extra pixels only ever fall outside the aperture.
+     */
+    block-size: calc(100% + var(--process-panel-overhang));
+    overflow: clip;
+  }
+
+  /*
+   * The picture is taller than the panel and sits in it off-centre, so it can lag
+   * behind the panel's travel without ever uncovering an edge. The oversize and the
+   * lag are one pair of numbers: at either extreme the picture still overhangs the
+   * panel by 5% of its height.
+   */
+  .step__panel :global(img) {
+    /* `draggable={false}` covers the drag itself; this covers WebKit's own
+       long-press-to-drag, which the attribute does not reach. */
+    -webkit-user-drag: none;
+    user-select: none;
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: var(--process-photo-inset);
+    inline-size: 100%;
+    block-size: var(--process-photo-oversize);
+    object-fit: cover;
+  }
+
+  /* ── Description ──────────────────────────────────────────────────────────── */
+  .step__caption {
+    position: relative;
+    margin-block-start: var(--process-caption-gap);
+    /*
+     * A fixed two-line window, and it is the aperture the description wipes
+     * through. Fixed rather than content-sized because four stacked steps have to
+     * be exactly superimposed — a step whose description runs a line longer would
+     * otherwise move the card. Copy that needs a third line needs the token raised;
+     * the spec says so.
+     */
+    block-size: var(--process-caption-window);
+    overflow: clip;
+    color: var(--color-fg-note);
+  }
+
+  /*
+   * The line is as tall as the window it wipes through, because it leaves by
+   * travelling 105% of ITSELF — and 105% of a two-line description does not clear
+   * a three-line window.
+   *
+   * A plain block child of a definite-height box, deliberately: this was a grid
+   * with `align-content: start`, and `start` sizes the row to its content, so
+   * `block-size: 100%` resolved to the *text's* height rather than the window's.
+   * Measured at 483–900 px, where the copy sets on two lines inside a three-line
+   * window: 18 px of the next step's description sat in the aperture from the
+   * first frame of the page.
+   */
+  .caption__line {
+    display: block;
+    block-size: 100%;
+  }
+
+  /* ── Fold ─────────────────────────────────────────────────────────────────
+   * Below 768 the photograph is most of the screen and the words are wider than
+   * it, so holding them at their measured insets would start `Relationship` off
+   * the left edge of a 390 px viewport. Centred instead: dark at both ends, white
+   * across the middle — the split survives, which is the point of the treatment.
+   * Recorded as a deviation in the spec.
+   */
+  @media (max-width: 767px) {
+    .word {
+      inset-inline-start: 50%;
+    }
+
+    /*
+     * The number moves above the photograph. Beside it there is 54 px of margin at
+     * 390 for a 44 px plate-and-gap — it fits, but only just, and it fits by
+     * eating the page's gutter. Above, it reads as a label on the card instead of
+     * as something clinging to its edge.
+     */
+    .step__badge {
+      inset-block-start: auto;
+      inset-block-end: calc(100% + var(--process-badge-gap));
+      inset-inline-start: 0;
+      inset-inline-end: auto;
+    }
+  }
+
+  /* ── The pinned sequence ──────────────────────────────────────────────────
+   * Zero bytes of JavaScript: the pin is `position: sticky`, and the sequencing is
+   * one `view-timeline` on the section read over its `contain` range. For an
+   * element taller than the viewport that range is exactly the window in which the
+   * stage is pinned, so "how far through the pin are we" needs no measuring — it
+   * is the timeline's own progress.
+   *
+   * Gated on `@supports` AND on reduced motion, together, because both answers are
+   * the same static stack above.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .process {
+        block-size: var(--process-section-height);
+        padding-block: 0;
+        view-timeline-name: --process;
+        view-timeline-axis: block;
+      }
+
+      .process__stage {
+        position: sticky;
+        inset-block-start: 0;
+        block-size: 100vh;
+        block-size: 100svh;
+        display: grid;
+        place-items: center;
+        /* The mark and the deck occupy the same cell — the mark is behind the card
+           for the whole sequence, exactly as the design draws it. */
+        grid-template-areas: 'stage';
+        /*
+         * `minmax(0, 1fr)`, and it is not belt-and-braces — it is the difference
+         * between centred and not.
+         *
+         * A bare `auto` track is sized to the widest item's max-content, and the
+         * mark is a 300 px line of `white-space: nowrap` that measures 1611 px at
+         * the design width. The track therefore became 1611 px inside a 1440 px
+         * stage, and `place-items: center` faithfully centred everything in the
+         * TRACK: the card sat at 805 px instead of 720, at every width, by exactly
+         * half the mark's overhang. `minmax(0, 1fr)` pins the track to the stage,
+         * so the mark overflows symmetrically — which is what "cropped left and
+         * right" in the design means — and the card is centred on the screen.
+         */
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .process__mark,
+      .process__deck {
+        grid-area: stage;
+      }
+
+      .process__mark {
+        z-index: 0;
+      }
+
+      .process__deck {
+        z-index: 1;
+        gap: 0;
+        margin-block-start: 0;
+      }
+
+      /*
+       * The steps stop being a stack and become one card. Four of everything, all
+       * exactly superimposed — which is why nothing here may create a stacking
+       * context on `.step` itself: the layers have to interleave across steps, so
+       * that the outgoing step's white text still lands on the incoming step's
+       * photograph while the two are trading places.
+       */
+      .step {
+        grid-area: 1 / 1;
+      }
+
+      /*
+       * One plate, not four. They are identical and superimposed, so the three
+       * behind are turned off rather than stacked — otherwise the topmost plate
+       * paints over the digits belonging to the steps below it.
+       */
+      .step:not(:first-child) .step__badge {
+        background-color: transparent;
+      }
+
+      /*
+       * The one plate that is left is furniture: it arrives with the first
+       * photograph and then stays put for the rest of the section. Without this it
+       * is on stage from the first frame of the pin — a lone green square hanging
+       * in the middle of an empty page while the mark is still growing.
+       */
+      .step:first-child .step__badge {
+        animation-timeline: --process;
+        animation-range: contain var(--step-from) contain var(--step-to);
+        animation-timing-function: var(--ease-in-out);
+        animation-fill-mode: both;
+        animation-name: process-plate;
+      }
+
+      /*
+       * The last step does not leave: there is nothing to make room for, and
+       * letting it go would spend the tail of the pin on an empty stage.
+       *
+       * Its end pose is its HOLD pose, stated in full. The previous version
+       * multiplied the exit distance by zero, which quietly sent the two halves
+       * of the name back from their drift to dead centre over the exit segment —
+       * a few pixels of backward travel at the very end of the section, which is
+       * exactly what it looked like.
+       */
+      .step:last-child {
+        --process-panel-end: 0%;
+        --process-photo-lag-end: 0%;
+        --process-line-end: 0%;
+        --process-word-end-x: 0em;
+        --process-word-end-y-lead: calc(-1 * var(--process-word-drift));
+        --process-word-end-y-trail: var(--process-word-drift);
+      }
+
+      /* ── The mark's act ──────────────────────────────────────────────────
+       * Both layers take the same transform over the whole timeline and differ
+       * only in when they are visible. The mark keeps growing, very slowly, for
+       * the rest of the section — a still background reads as a still page.
+       */
+      .mark__layer {
+        animation-timeline: --process, --process;
+        /*
+         * Starts on `cover`, i.e. before the pin — see `--process-mark-from` in
+         * the markup. Ends at `contain 24%`, which is the frame the first
+         * photograph lands on.
+         */
+        animation-range:
+          var(--process-mark-from) contain 24%,
+          var(--process-mark-from) contain 24%;
+        animation-timing-function: var(--ease-in-out);
+        animation-fill-mode: both;
+      }
+
+      .mark__layer--solid {
+        animation-name: process-mark-grow, process-mark-solid;
+      }
+
+      .mark__layer--faint {
+        animation-name: process-mark-grow, process-mark-faint;
+      }
+
+      /*
+       * The final disappearance is on the PARENT, and that is a mechanism rather
+       * than a preference: two animations on one element both writing `opacity`
+       * means the later one wins wherever it is filled, and `fill-mode: both`
+       * fills everywhere. Put the fade on the parent and the two multiply instead
+       * of fighting.
+       */
+      .process__mark {
+        animation-timeline: --process;
+        animation-range: contain 90% contain 100%;
+        animation-timing-function: var(--ease-in-out);
+        animation-fill-mode: both;
+        animation-name: process-mark-out;
+      }
+
+      /* ── The steps ───────────────────────────────────────────────────────
+       * Every animated part of a step shares one range, handed down as
+       * `--step-from` / `--step-to` from the markup. Custom properties inherit;
+       * `animation-range` does not, which is why each rule restates it and none of
+       * them restates the numbers.
+       *
+       * The keyframes are written in fractions of a window, and every window is
+       * the same length, so these percentages are the whole choreography:
+       *   0 – 33.3   the photograph arrives (and the one before it leaves)
+       *   33.3 – 44  the name, the number and the description wipe in
+       *   44 – 66.7  the hold; the two halves of the name drift past each other
+       *   66.7 – 76  the name, the number and the description wipe out
+       *   66.7 – 100 the photograph leaves (and the next one arrives)
+       * The text is gone before the pictures start trading places and arrives
+       * after they have finished, so no word is ever set on a half-empty frame.
+       */
+      .step__panel,
+      .step__panel :global(img),
+      .word__line,
+      .badge__digit,
+      .caption__line {
+        animation-timeline: --process;
+        animation-range: contain var(--step-from) contain var(--step-to);
+        animation-fill-mode: both;
+      }
+
+      /* Symmetric, cinematic — the strip is the one thing here that should read as
+         weight rather than as snap. */
+      .step__panel,
+      .step__panel :global(img) {
+        animation-timing-function: var(--ease-in-out);
+      }
+
+      /*
+       * In-out, not expo-out. On a scrubbed timeline expo-out puts nine tenths of
+       * the distance into the first third of the segment, which reads as a snap
+       * with a long tail rather than as travel — that is what "za szybko,
+       * przeskakuje" was. The strip and the text now share one curve.
+       */
+      .word__line,
+      .badge__digit,
+      .caption__line {
+        animation-timing-function: var(--ease-in-out);
+      }
+
+      .step__panel {
+        animation-name: process-panel;
+      }
+
+      .step__panel :global(img) {
+        animation-name: process-photo-lag;
+      }
+
+      .word--lead .word__line {
+        animation-name: process-word-lead;
+      }
+
+      .word--trail .word__line {
+        animation-name: process-word-trail;
+      }
+
+      .caption__line {
+        animation-name: process-line;
+      }
+
+      /*
+       * The number is the one thing that waits for the photograph. Its plate sits
+       * against the frame's edge, so a number arriving while the frame is still
+       * half empty reads as a label for nothing — which is exactly what it looked
+       * like. Plate and digit both start at 33.3%, the frame the photograph lands
+       * on.
+       */
+      .badge__digit {
+        animation-name: process-digit;
+      }
+    }
+  }
+
+  /* ── Keyframes ────────────────────────────────────────────────────────────
+   * `transform` and `opacity` only (AGENT-RULES §6).
+   *
+   * The step keyframes are fractions of one window, and every window is the same
+   * length, so these percentages are the whole choreography:
+   *   0    – 33.3   the photograph arrives — and the one before it leaves
+   *   3.5  – 33.3   the two halves of the name fly in with it
+   *   33.3 – 66.7   the slow middle of the same flight; they pass each other here
+   *   66.7 – 96     they fly out with the photograph
+   *   66.7 – 100    the photograph leaves — and the next one arrives
+   *
+   * The name's flight now brackets the photograph's exactly, and that is what
+   * closes the dead time. Measured on the previous timing: 41% of the on-stage
+   * scroll had no name on screen at all, in three runs of 10% of the pin — 46 vh
+   * of empty card, three times. The cause was arithmetic rather than taste: two
+   * neighbouring windows overlap by exactly half a span, and the whole handover
+   * was happening OUTSIDE that band — the outgoing name had left before the band
+   * opened and the incoming one arrived after it closed. Inside the band the two
+   * cross at the aperture's edges, one leaving through the top while the other
+   * enters through the bottom, so they are never both in it.
+   *
+   * The name's four frames are one MONOTONIC path, not an entrance, a pause and an
+   * exit: the lead half travels upwards through the whole window and the trail half
+   * downwards, fast at the ends and slow through the middle. That is why the two
+   * appear to pass one another rather than to take turns.
+   * The text is gone before the pictures start trading places and arrives after
+   * they have finished, so no word is ever set on a half-empty frame.
+   */
+
+  /*
+   * The mark grows about its own centre and then stops. It used to rise 8vh while
+   * it grew, and the two cancelled at the bottom edge: the foot of the word stayed
+   * put while the top climbed, which is a word growing upward out of its baseline,
+   * not a word scaling from its centre. And it used to keep creeping to 1.12 for
+   * the rest of the section, which is movement with nothing to say.
+   */
+  @keyframes process-mark-grow {
+    0% {
+      transform: scale(var(--process-mark-scale-from));
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes process-mark-solid {
+    0% {
+      opacity: 0;
+    }
+    /*
+     * Up fast, and early: 12% of this range is ~19 vh of scroll, which lands the
+     * mark at full strength at about the moment the section has taken over the
+     * lower two thirds of the viewport. This is the pair of frames that stops the
+     * section from arriving as a screen of white.
+     */
+    12% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes process-mark-faint {
+    0% {
+      opacity: 0;
+    }
+    70% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes process-mark-out {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* The plate is furniture, and furniture arrives with the room: it waits for the
+     photograph to fill the frame and comes up with the number. */
+  @keyframes process-plate {
+    0%,
+    33.333% {
+      opacity: 0;
+    }
+    45% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* The number: in after the photograph has landed, out before the next one starts
+     to arrive, so the plate never holds two digits. */
+  @keyframes process-digit {
+    0%,
+    36% {
+      transform: translate3d(0, 105%, 0);
+    }
+    52% {
+      transform: none;
+    }
+    70% {
+      transform: none;
+    }
+    78.5%,
+    100% {
+      transform: translate3d(0, var(--process-line-end, -105%), 0);
+    }
+  }
+
+  /*
+   * The strip. Outgoing and incoming are the same curve over the same stretch of
+   * scroll, so their edges meet exactly however the curve is shaped: if the
+   * outgoing sits at −100·e, the incoming sits at 100·(1−e), and the two differ by
+   * exactly one panel height whatever `e` is.
+   */
+  @keyframes process-panel {
+    0% {
+      transform: translate3d(0, 100%, 0);
+    }
+    33.333% {
+      transform: none;
+    }
+    66.667% {
+      transform: none;
+    }
+    100% {
+      transform: translate3d(0, var(--process-panel-end, -100%), 0);
+    }
+  }
+
+  /* The picture lags its panel, so the strip has depth instead of reading as a
+     sheet of paper being pulled. */
+  @keyframes process-photo-lag {
+    0% {
+      transform: translate3d(0, calc(-1 * var(--process-photo-lag)), 0);
+    }
+    33.333% {
+      transform: none;
+    }
+    66.667% {
+      transform: none;
+    }
+    100% {
+      transform: translate3d(0, var(--process-photo-lag-end, var(--process-photo-lag)), 0);
+    }
+  }
+
+  /*
+   * The two halves of the name. They come in on a shallow diagonal — the lead half
+   * from below and slightly behind, the trail half from above and slightly ahead —
+   * drift past one another through the hold, and leave the way they came. The
+   * horizontal component is small on purpose: at 0.14em it is a glide, at more it
+   * would be a slide.
+   */
+  @keyframes process-word-lead {
+    0%,
+    3.5% {
+      transform: translate3d(
+        calc(-1 * var(--process-word-glide)),
+        var(--process-word-travel),
+        0
+      );
+    }
+    33.333% {
+      transform: translate3d(0, var(--process-word-drift), 0);
+    }
+    66.667% {
+      transform: translate3d(0, calc(-1 * var(--process-word-drift)), 0);
+    }
+    96%,
+    100% {
+      transform: translate3d(
+        var(--process-word-end-x, var(--process-word-glide)),
+        var(--process-word-end-y-lead, calc(-1 * var(--process-word-travel))),
+        0
+      );
+    }
+  }
+
+  @keyframes process-word-trail {
+    0%,
+    3.5% {
+      transform: translate3d(
+        var(--process-word-glide),
+        calc(-1 * var(--process-word-travel)),
+        0
+      );
+    }
+    33.333% {
+      transform: translate3d(0, calc(-1 * var(--process-word-drift)), 0);
+    }
+    66.667% {
+      transform: translate3d(0, var(--process-word-drift), 0);
+    }
+    96%,
+    100% {
+      transform: translate3d(
+        calc(-1 * var(--process-word-end-x, var(--process-word-glide))),
+        var(--process-word-end-y-trail, var(--process-word-travel)),
+        0
+      );
+    }
+  }
+
+  /* The number and the description: same window as the name, same direction of
+     travel, through their own apertures. */
+  @keyframes process-line {
+    0%,
+    12% {
+      transform: translate3d(0, 105%, 0);
+    }
+    33.333% {
+      transform: none;
+    }
+    66.667% {
+      transform: none;
+    }
+    88%,
+    100% {
+      transform: translate3d(0, var(--process-line-end, -105%), 0);
+    }
+  }
+</style>

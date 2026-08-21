@@ -1,0 +1,149 @@
+---
+import type { FeaturedPublicationsBlock } from '@repo/shared'
+import Button from '@/components/ui/Button.astro'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: FeaturedPublicationsBlock
+}
+
+const { block } = Astro.props
+const headingId = 'featured-publications-heading'
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+const formatDate = (value: string) => dateFormatter.format(new Date(`${value}T00:00:00Z`))
+
+const revealOrder = {
+  heading: 0,
+  cards: 1,
+  cardStep: 0.75,
+}
+---
+
+<section class="featured-publications" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="featured-publications__heading text-title" id={headingId}>
+      <span class="reveal-mask" style={`--reveal-index: ${revealOrder.heading}`}>
+        <span>{block.heading}</span>
+      </span>
+    </h2>
+
+    <ul class="featured-publications__grid" role="list">
+      {
+        block.items.map((item, index) => (
+          <li
+            class="reveal"
+            style={`--reveal-index: ${revealOrder.cards + index * revealOrder.cardStep}`}
+          >
+            <article class="publication-card">
+              <div class="publication-card__logo" role="img" aria-label={item.publication}>
+                <Picture image={item.logo} widths={[item.logo.width]} sizes={`${item.logo.width}px`} />
+              </div>
+
+              <p class="publication-card__description text-tab">{item.description}</p>
+
+              <p class="publication-card__meta text-publication-meta">
+                <span class="publication-card__category">{item.category}</span>
+                <span class="publication-card__separator" aria-hidden="true">·</span>
+                <time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+              </p>
+
+              <div class="publication-card__cta">
+                <Button link={item.link} withArrow />
+              </div>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .featured-publications {
+    padding-block-end: var(--featured-publications-padding-bottom);
+    background-color: var(--color-bg);
+  }
+
+  .featured-publications__heading {
+    color: var(--color-fg);
+  }
+
+  .featured-publications__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--featured-publications-card-gap);
+    margin-block-start: var(--featured-publications-heading-gap);
+    padding: 0;
+    list-style: none;
+  }
+
+  .featured-publications__grid > li {
+    min-inline-size: 0;
+  }
+
+  .publication-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--featured-publications-content-gap);
+    block-size: 100%;
+    padding: var(--featured-publications-card-padding);
+    border: var(--featured-publications-border-width) solid var(--featured-publications-border-color);
+    --button-surface: var(--color-lime-dark);
+    --button-surface-hover: var(--featured-publications-button-hover);
+    --button-fg: var(--color-fg-inverse);
+  }
+
+  .publication-card__logo {
+    display: flex;
+    align-items: flex-start;
+    min-block-size: var(--featured-publications-logo-height);
+  }
+
+  .publication-card__logo :global(img) {
+    inline-size: auto;
+    block-size: auto;
+  }
+
+  .publication-card__description {
+    color: var(--color-fg);
+  }
+
+  .publication-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--featured-publications-meta-gap);
+    color: var(--featured-publications-meta-color);
+  }
+
+  .publication-card__category {
+    color: var(--color-fg-accent);
+  }
+
+  .publication-card__separator {
+    color: var(--featured-publications-meta-color);
+  }
+
+  .publication-card__cta {
+    margin-block-start: auto;
+  }
+
+  @media (min-width: 768px) {
+    .featured-publications__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .featured-publications__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,72 @@
+{
+  "navigation": [
+    { "label": "Home", "href": "/" },
+    { "label": "About us", "href": "/about-us/" },
+    { "label": "Develop-to-Hold", "href": "/develop-to-hold/" },
+    { "label": "Develop-to-Sell", "href": "/develop-to-sell/" },
+    { "label": "Brokerage", "href": "/brokerage/" }
+  ],
+  "headerCta": {
+    "label": "Let's talk",
+    "href": "/contact/",
+    "disabled": true
+  },
+  "cta": {
+    "heading": "Interested in BESS or",
+    "headingAccent": "working together?",
+    "description": "Stora Energy secures land, grid connection and permits",
+    "link": {
+      "label": "Partner with us",
+      "href": "/contact/",
+      "disabled": true
+    }
+  },
+  "footer": {
+    "tagline": "Accelerating BESS in Poland",
+    "contact": [
+      {
+        "title": "Warsaw Office",
+        "lines": [
+          { "text": "WeWork Mennica Towers" },
+          { "text": "Prosta 20" },
+          { "text": "00-850 Warsaw" }
+        ]
+      },
+      {
+        "title": "Company details",
+        "lines": [
+          { "text": "Stora Energy sp. z o.o." },
+          { "text": "ul. Zwycięstwa 2" },
+          { "text": "42-575 Gródków k. Będzina" }
+        ]
+      },
+      {
+        "title": "General inquiries",
+        "lines": [
+          { "text": "contact@storaenergy.pl", "href": "mailto:contact@storaenergy.pl" },
+          { "text": "+48 695 805 060", "href": "tel:+48695805060" }
+        ]
+      },
+      {
+        "title": "Contact for investors",
+        "lines": [{ "text": "invest@storaenergy.pl", "href": "mailto:invest@storaenergy.pl" }]
+      },
+      {
+        "title": "Contact for landowners",
+        "lines": [
+          { "text": "grunty@storaenergy.pl", "href": "mailto:grunty@storaenergy.pl" },
+          { "text": "+48 507 140 770", "href": "tel:+48507140770" }
+        ]
+      },
+      {
+        "title": "More info",
+        "lines": [
+          { "text": "NIP: 6252488808" },
+          { "text": "REGON: 52597381600000" },
+          { "text": "KRS: 0001049072" }
+        ]
+      }
+    ],
+    "copyrightNotice": "Stora Energy. All rights reserved."
+  }
+}

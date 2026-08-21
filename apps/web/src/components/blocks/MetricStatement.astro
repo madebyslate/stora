@@ -1,0 +1,123 @@
+---
+import type { MetricStatementBlock } from '@repo/shared'
+
+interface Props {
+  block: MetricStatementBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'metric-statement-heading'
+
+const headingLines = block.heading.split('\n')
+
+/** Reveal order. The figure lands a beat after the heading, the sentence after it. */
+const order = {
+  heading: 0,
+  figure: headingLines.length,
+  copy: headingLines.length + 1,
+}
+---
+
+<section class="metric" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="metric__heading text-title" id={headingId}>
+      {
+        headingLines.map((line, index) => (
+          <span class="reveal-mask" style={`--reveal-index: ${order.heading + index}`}>
+            <span>{line}</span>
+          </span>
+        ))
+      }
+    </h2>
+
+    <div class="metric__row">
+      {
+        /*
+          `aria-hidden`, and it is not an oversight. At a tenth of Lime-Dark the
+          figure measures 1.2:1 — it is the section's ground, not its text, and the
+          paragraph beside it states the number in words. Announcing "140 MW" to a
+          screen reader and then again in the sentence would read the same fact
+          twice; announcing it *only* here would put content at 1.2:1.
+        */
+      }
+      <p class="metric__figure reveal" style={`--reveal-index: ${order.figure}`} aria-hidden="true">
+        {block.value}{block.unit && <span class="metric__unit">{block.unit}</span>}
+      </p>
+
+      <p class="metric__copy text-lead reveal" style={`--reveal-index: ${order.copy}`}>
+        {block.description}
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .metric {
+    padding-block: var(--space-14);
+    background-color: var(--color-bg);
+    /*
+     * The opaque ground is what the page hero's scroll effect rides on: this
+     * section travels up over a pinned photograph, and a transparent background
+     * would show it straight through. Stated here rather than inherited from the
+     * body for that reason — see PageHero.spec.md, "Animations".
+     */
+  }
+
+  .metric__heading {
+    color: var(--color-fg);
+    text-wrap: balance;
+  }
+
+  .metric__row {
+    margin-block-start: var(--metric-figure-gap);
+    display: grid;
+    /* One column under 1024: the figure, then the sentence. */
+    gap: var(--metric-copy-offset);
+  }
+
+  .metric__figure {
+    font-size: var(--metric-figure-size);
+    font-weight: var(--font-weight-medium);
+    /* The figure IS the box — a line box taller than the digits would open a gap
+       under the heading that nothing in the design accounts for. */
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--metric-figure-color);
+    /* Nothing here is text to be selected: dragging across the section should take
+       the sentence, not "140". */
+    user-select: none;
+  }
+
+  .metric__unit {
+    /* 56, the heading's own step. The unit rides the figure's baseline, so it must
+       not carry its own leading. */
+    font-size: var(--text-title);
+    line-height: 1;
+  }
+
+  .metric__copy {
+    color: var(--color-fg);
+    max-inline-size: var(--metric-copy-measure);
+  }
+
+  @media (min-width: 1024px) {
+    /*
+     * Two columns: the figure takes what it needs and the sentence sits in a fixed
+     * 480 px flush to the right edge of the grid. `1fr auto` rather than
+     * `auto 1fr` — the figure is the elastic one, and the column that must not
+     * move is the one carrying the copy.
+     */
+    .metric__row {
+      grid-template-columns: minmax(0, 1fr) var(--metric-copy-measure);
+      align-items: start;
+      gap: var(--space-9);
+    }
+
+    .metric__copy {
+      /* 72 px below the top of the figure's box. Measured, and an offset rather
+         than an alignment — the spec carries the arithmetic. */
+      margin-block-start: var(--metric-copy-offset);
+    }
+  }
+</style>

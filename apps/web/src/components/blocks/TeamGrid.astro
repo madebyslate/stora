@@ -1,0 +1,426 @@
+---
+import type { TeamGridBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+import LinkedIn from '@/components/ui/icons/LinkedIn.astro'
+
+interface Props {
+  block: TeamGridBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'team-grid-heading'
+
+/**
+ * The heading is two lines because it is two runs — the design breaks after the
+ * neutral half and sets the qualifying half underneath it. Rendering each run as
+ * its own block gets that break out of the copy, and gives each line its own mask
+ * to rise under.
+ */
+const headingLines = [
+  { text: block.heading, muted: false },
+  ...(block.headingMuted ? [{ text: block.headingMuted, muted: true }] : []),
+]
+
+/**
+ * Tile choreography. Each tile assembles rather than arriving: its ground wipes
+ * up while the portrait inside stays put, then the name rises, the title follows
+ * and the mark settles onto it.
+ *
+ * The offsets are steps of `--reveal-step`, which this section shortens — four
+ * tiles of four parts at the global 90 ms would still be running a second and a
+ * half in.
+ */
+const TILE_STAGGER = 1.4
+const tileOrder = (index: number) => {
+  const base = 2 + index * TILE_STAGGER
+  return {
+    pane: base,
+    name: base + 0.9,
+    role: base + 1.1,
+    mark: base + 1.3,
+  }
+}
+
+/**
+ * `sizes` describes the FEATURED width, not the resting one. The portrait is laid
+ * out at the tile's full size at all times and only scaled down by a transform, so
+ * that is the size the browser has to fetch for — a `sizes` written against the
+ * 180 px resting box would serve a file that goes soft the moment it is pointed at.
+ *
+ * Four columns from 1024 up put a tile at 23–24vw of the viewport; two columns put
+ * it at ~47vw; one column at ~92vw. The ladder stops at 486 because that is the
+ * masters' native width — see the open question in the spec.
+ */
+const PORTRAIT_SIZES = '(min-width: 1024px) 24vw, (min-width: 560px) 47vw, 92vw'
+const PORTRAIT_WIDTHS = [180, 260, 340, 486]
+---
+
+<section class="team" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="team__heading text-title" id={headingId}>
+      {
+        headingLines.map((line, index) => (
+          <span
+            class:list={['team__line', 'reveal-mask', line.muted && 'team__line--muted']}
+            style={`--reveal-index: ${index}`}
+          >
+            <span>{line.text}</span>
+          </span>
+        ))
+      }
+    </h2>
+
+    <ul class="team__row" role="list">
+      {
+        block.members.map((member, index) => {
+          const order = tileOrder(index)
+          return (
+            /*
+              `--featured` is the tile the design shows open, and it stays open
+              after the pointer leaves the row — that is the block's whole idea,
+              the row is never flat. Everything about handing the feature over is
+              in the stylesheet, under "Featured".
+            */
+            <li class:list={['member', index === 0 && 'member--featured']}>
+              <span
+                class="member__pane reveal-curtain"
+                style={`--reveal-index: ${order.pane}`}
+              >
+                {/*
+                  The hold is what keeps the portrait still while the ground wipes
+                  up past it, and it is deliberately NOT the element carrying the
+                  rest scale. The individual `translate`/`scale` properties apply
+                  before `transform`, so a percentage translate on a scaled element
+                  resolves in scaled space — the wipe would no longer cancel out.
+                */}
+                <span
+                  class="member__hold reveal-curtain-hold"
+                  style={`--reveal-index: ${order.pane}`}
+                >
+                  <span class="member__frame">
+                    <Picture
+                      image={member.portrait}
+                      widths={PORTRAIT_WIDTHS}
+                      sizes={PORTRAIT_SIZES}
+                    />
+                  </span>
+                </span>
+
+                <span class="member__scrim" />
+              </span>
+
+              <div class="member__meta">
+                <div class="member__head">
+                  <h3 class="member__name text-caption reveal-mask" style={`--reveal-index: ${order.name}`}>
+                    <span>{member.name}</span>
+                  </h3>
+
+                  {
+                    /*
+                      A link only when there is somewhere to go. It is also the
+                      tile's only focusable element, so `:focus-within` on the tile
+                      is what gives a keyboard the state a pointer gets — and a
+                      member with no URL is pointer-only, which is a content gap
+                      recorded in the spec, not a silent one.
+                    */
+                    member.linkedin ? (
+                      <a
+                        class="member__mark reveal-pop"
+                        style={`--reveal-index: ${order.mark}`}
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${member.name} on LinkedIn`}
+                      >
+                        <LinkedIn />
+                      </a>
+                    ) : (
+                      <span
+                        class="member__mark reveal-pop"
+                        style={`--reveal-index: ${order.mark}`}
+                        aria-hidden="true"
+                      >
+                        <LinkedIn />
+                      </span>
+                    )
+                  }
+                </div>
+
+                <p class="member__role text-caption reveal" style={`--reveal-index: ${order.role}`}>
+                  {member.role}
+                </p>
+              </div>
+            </li>
+          )
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .team {
+    padding-block: var(--space-14);
+    background-color: var(--color-bg-subtle);
+    /* Four tiles of four parts each. At the global 90 ms the last name would land
+       a second and a half after the first. */
+    --reveal-step: 70ms;
+  }
+
+  /* ── Heading ──────────────────────────────────────────────────────────────── */
+  .team__heading {
+    margin-block-end: var(--team-heading-gap);
+    color: var(--color-fg);
+  }
+
+  /* `.reveal-mask` is a block by default, which is what puts each run on its own
+     line — the break the design draws needs no `\n` in the copy. */
+  .team__line--muted {
+    color: var(--color-fg-subtle);
+  }
+
+  /* ── Row ──────────────────────────────────────────────────────────────────── */
+  .team__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--team-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .member {
+    position: relative;
+    /*
+     * The tile carries the PORTRAIT's ratio, and that is the load-bearing decision
+     * of this block: it makes the resting and featured states one uniform scale on
+     * one element. The reasoning, and the 7 px of height it costs against the
+     * frame, are on `--team-tile-ratio` and in TeamGrid.spec.md.
+     */
+    aspect-ratio: var(--team-tile-ratio);
+    /* The aperture for the entrance wipe. Nothing overflows at rest. */
+    overflow: clip;
+    /* Lime-Dark vanishes into the photography once a tile is featured. */
+    --color-focus: var(--color-on-media);
+  }
+
+  /* ── Portrait ─────────────────────────────────────────────────────────────── */
+  .member__pane {
+    position: absolute;
+    inset: 0;
+    display: block;
+    /* On the pane, not on the tile: the ground has to wipe up with the curtain,
+       and a colour on the tile itself would sit behind it and never move. */
+    background-color: var(--team-tile-surface);
+    /*
+     * The aperture is THIS box. The portrait inside is counter-translated back to
+     * where it belongs, so it sits in the tile's bounds from the first frame —
+     * with the clip one level up on `.member` it would simply be visible the whole
+     * time and only the ground would appear to wipe. Clipping here is what makes
+     * the person show only as far as the ground has reached.
+     */
+    overflow: clip;
+  }
+
+  .member__hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .member__frame {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: var(--team-tile-ratio);
+    /*
+     * `translate` and `scale` as separate properties, not one `transform`: the
+     * entrance animation owns `transform` with `fill-mode: both`, and an animation
+     * beats a declaration on the same property for good. These compose with it —
+     * translate, then scale, then whatever the animation is doing.
+     *
+     * The scale runs DOWN from the portrait's full size rather than up from its
+     * small one, so the picture rasterises at the size it is sharpest at and stays
+     * sharp in both states.
+     */
+    translate: -50% -50%;
+    /* Featured is the base state — see "Featured" below for why that direction. */
+    scale: 1;
+    transition: scale var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .member__frame :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    /* The masters are 0.831, the tile is 0.837 — a sliver off the top and bottom. */
+    object-fit: cover;
+  }
+
+  .member__scrim {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    display: block;
+    block-size: var(--team-scrim-height);
+    background: var(--team-scrim);
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  /* ── Name, title, mark ────────────────────────────────────────────────────── */
+  .member__meta {
+    position: absolute;
+    inset-inline: var(--team-tile-padding);
+    inset-block-end: var(--team-tile-padding);
+  }
+
+  .member__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .member__name {
+    margin: 0;
+    /*
+     * The one property here transitioned outside transform/opacity. It is
+     * paint-only over ~200 x 20 px, and the alternative — two copies of every name
+     * cross-fading — doubles the block in the accessibility tree to save a repaint
+     * that costs nothing.
+     */
+    color: var(--color-on-media);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .member__role {
+    margin-block-start: var(--team-name-gap);
+    color: var(--color-on-media-subtle);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .member__mark {
+    display: flex;
+    flex: none;
+    color: var(--color-on-media);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  /* ── Fold ─────────────────────────────────────────────────────────────────
+   * Four across from 1024 up, two down to 560, one below it. Both thresholds are
+   * arithmetic against the longest job title, which has to set on one line: at 560
+   * a tile is 255 px and its padding takes 32, leaving 223 px — "Chairman of the
+   * Management Board" measures ~205 at 14 px. Below that a two-column row starts
+   * wrapping every title, so the row goes to one.
+   */
+  @media (min-width: 560px) {
+    .team__row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .team__row {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* ── Featured ─────────────────────────────────────────────────────────────
+   * Everything above declares the FEATURED state, and that direction is the
+   * accessibility story of this block: a device with no pointer never enters the
+   * block below, so every tile stays featured — which is the only state in which
+   * the copy is legible without a hover it cannot perform. Same call ServiceCards
+   * makes, and the same reason.
+   *
+   * Everything below is the pointer-and-keyboard behaviour.
+   */
+  @media (hover: hover) {
+    /* Resting is the default once there is a pointer to rest from. */
+    .member__frame {
+      scale: var(--team-portrait-rest-scale);
+    }
+
+    .member__scrim {
+      opacity: 0;
+    }
+
+    .member__name {
+      color: var(--color-fg);
+    }
+
+    .member__role {
+      color: var(--color-fg);
+    }
+
+    .member__mark {
+      color: var(--team-mark-color);
+    }
+
+    /* Featured, three ways: the tile the design shows open, the pointer, the
+       keyboard. */
+    .member--featured .member__frame,
+    .member:is(:hover, :focus-within) .member__frame {
+      scale: 1;
+    }
+
+    .member--featured .member__scrim,
+    .member:is(:hover, :focus-within) .member__scrim {
+      opacity: 1;
+    }
+
+    .member--featured .member__name,
+    .member:is(:hover, :focus-within) .member__name {
+      color: var(--color-on-media);
+    }
+
+    .member--featured .member__role,
+    .member:is(:hover, :focus-within) .member__role {
+      color: var(--color-on-media-subtle);
+    }
+
+    .member--featured .member__mark,
+    .member:is(:hover, :focus-within) .member__mark {
+      color: var(--color-on-media);
+    }
+
+    /*
+     * One featured at a time. The moment the row is pointed at or tabbed into, the
+     * tile that was featured by default hands over — unless it is itself the one
+     * being pointed at, which is what the two `:not()`s buy. They also buy the
+     * specificity: this has to outrank the five rules above, and `:not()` counts
+     * towards it.
+     */
+    .team__row:is(:hover, :focus-within)
+      .member--featured:not(:hover):not(:focus-within)
+      .member__frame {
+      scale: var(--team-portrait-rest-scale);
+    }
+
+    .team__row:is(:hover, :focus-within)
+      .member--featured:not(:hover):not(:focus-within)
+      .member__scrim {
+      opacity: 0;
+    }
+
+    .team__row:is(:hover, :focus-within)
+      .member--featured:not(:hover):not(:focus-within)
+      .member__name {
+      color: var(--color-fg);
+    }
+
+    .team__row:is(:hover, :focus-within)
+      .member--featured:not(:hover):not(:focus-within)
+      .member__role {
+      color: var(--color-fg);
+    }
+
+    .team__row:is(:hover, :focus-within)
+      .member--featured:not(:hover):not(:focus-within)
+      .member__mark {
+      color: var(--team-mark-color);
+    }
+  }
+</style>

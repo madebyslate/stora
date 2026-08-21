@@ -1,0 +1,269 @@
+{
+  "companyCredentials": {
+    "blockType": "logoWall",
+    "heading": "Deep expertise.",
+    "headingAccent": "Proven track record.",
+    "subheading": "Utility-scale energy storage is a relatively new technology, present",
+    "logos": [
+      {
+        "src": "content/media/logos/nextera-energy.png",
+        "alt": "NextEra Energy",
+        "width": 164,
+        "height": 72
+      },
+      {
+        "src": "content/media/logos/terra-one.png",
+        "alt": "TERRA ONE",
+        "width": 213,
+        "height": 21
+      },
+      {
+        "src": "content/media/logos/rpower.png",
+        "alt": "R.Power Renewables",
+        "width": 207,
+        "height": 57
+      },
+      {
+        "src": "content/media/logos/university-of-cambridge.png",
+        "alt": "University of Cambridge",
+        "width": 200,
+        "height": 42
+      },
+      {
+        "src": "content/media/logos/baywa-re.png",
+        "alt": "BayWa r.e.",
+        "width": 194,
+        "height": 47
+      },
+      {
+        "src": "content/media/logos/mit.png",
+        "alt": "Massachusetts Institute of Technology",
+        "width": 195,
+        "height": 48
+      }
+    ]
+  },
+  "foundingTeam": {
+    "blockType": "teamGrid",
+    "heading": "Meet visionaries",
+    "headingMuted": "behind every project",
+    "members": [
+      {
+        "name": "Shannon O'Connell",
+        "role": "Chairman of the Management Board",
+        "portrait": {
+          "src": "content/media/team/shannon-oconnell.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      },
+      {
+        "name": "Charles Gilmour",
+        "role": "Chief Technology Officer & Co-founder",
+        "portrait": {
+          "src": "content/media/team/charles-gilmour.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      },
+      {
+        "name": "Jakub Florkiewicz",
+        "role": "Chief Financial Officer (CFO)",
+        "portrait": {
+          "src": "content/media/team/jakub-florkiewicz.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      },
+      {
+        "name": "Michał Oginski",
+        "role": "Chief Development Officer (CDO)",
+        "portrait": {
+          "src": "content/media/team/michal-oginski.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      }
+    ]
+  },
+  "developmentStages": {
+    "blockType": "howWeDevelop",
+    "heading": "How We Develop",
+    "items": [
+      {
+        "label": "Greenfield to Ready to Build",
+        "bullets": [
+          "Land Selection",
+          "Grid Analysis",
+          "Permitting and Grid Connections"
+        ],
+        "title": "We screen land for the right site conditions",
+        "description": "We combine geospatial and infrastructure data to screen land parcels, assess grid capacity, and map permitting pathways before a site enters development.",
+        "image": {
+          "src": "content/media/pages/how-we-develop/greenfield-to-ready-to-build.jpg",
+          "alt": "",
+          "width": 974,
+          "height": 564
+        }
+      },
+      {
+        "label": "Ready to Build (Notice to Proceed)",
+        "bullets": [
+          "EPC Selection",
+          "Technical Design",
+          "Project Financing",
+          "Route to Market"
+        ],
+        "title": "From Investment Decision to Construction Start",
+        "description": "From Ready to Build, the project advances through EPC selection, technical design, financing, and route to market — leading directly to Notice to Proceed.",
+        "image": {
+          "src": "content/media/pages/how-we-develop/ready-to-build-notice-to-proceed.jpg",
+          "alt": "",
+          "width": 974,
+          "height": 564
+        }
+      },
+      {
+        "label": "Notice to Proceed (Commercial Operation)",
+        "bullets": [
+          "Construction",
+          "Certification with Operators"
+        ],
+        "title": "From Construction Start to Full Operation",
+        "description": "Following Notice to Proceed, the project moves into its build-out phase — construction is completed and the plant undergoes certification with grid operators, marking the final step before reaching Commercial Operation.",
+        "image": {
+          "src": "content/media/pages/how-we-develop/notice-to-proceed-commercial-operation.jpg",
+          "alt": "",
+          "width": 974,
+          "height": 564
+        }
+      }
+    ]
+  },
+  "featuredPublications": {
+    "blockType": "featuredPublications",
+    "heading": "Featured Publications",
+    "items": [
+      {
+        "publication": "Forbes",
+        "logo": {
+          "src": "content/media/publications/forbes.svg",
+          "alt": "",
+          "width": 118,
+          "height": 42
+        },
+        "description": "Stora expands renewable energy development pipeline across Poland",
+        "category": "Forbes",
+        "publishedAt": "2026-06-17",
+        "link": {
+          "label": "Read Article",
+          "href": "/industry-insights/",
+          "disabled": true
+        }
+      },
+      {
+        "publication": "Forbes",
+        "logo": {
+          "src": "content/media/publications/forbes.svg",
+          "alt": "",
+          "width": 118,
+          "height": 42
+        },
+        "description": "Stora expands renewable energy development pipeline across Poland",
+        "category": "Forbes",
+        "publishedAt": "2026-06-17",
+        "link": {
+          "label": "Read Article",
+          "href": "/industry-insights/",
+          "disabled": true
+        }
+      },
+      {
+        "publication": "Forbes",
+        "logo": {
+          "src": "content/media/publications/forbes.svg",
+          "alt": "",
+          "width": 118,
+          "height": 42
+        },
+        "description": "Stora expands renewable energy development pipeline across Poland",
+        "category": "Forbes",
+        "publishedAt": "2026-06-17",
+        "link": {
+          "label": "Read Article",
+          "href": "/industry-insights/",
+          "disabled": true
+        }
+      },
+      {
+        "publication": "Forbes",
+        "logo": {
+          "src": "content/media/publications/forbes.svg",
+          "alt": "",
+          "width": 118,
+          "height": 42
+        },
+        "description": "Stora expands renewable energy development pipeline across Poland",
+        "category": "Forbes",
+        "publishedAt": "2026-06-17",
+        "link": {
+          "label": "Read Article",
+          "href": "/industry-insights/",
+          "disabled": true
+        }
+      }
+    ]
+  },
+  "largeScaleContacts": {
+    "blockType": "audienceTabs",
+    "heading": "Store energy at\nlarge scale",
+    "options": [
+      {
+        "label": "Have Land?",
+        "image": {
+          "src": "content/media/audience/have-land.jpg",
+          "alt": "An empty field at dusk, treeline on the horizon, of the kind a storage project is sited on",
+          "width": 870,
+          "height": 500
+        },
+        "cta": {
+          "label": "Call with Land Lead",
+          "href": "/contact/",
+          "disabled": true
+        }
+      },
+      {
+        "label": "Buy or Selling a Project?",
+        "image": {
+          "src": "content/media/audience/buy-or-sell-a-project.jpg",
+          "alt": "A lit battery storage site at blue hour, rows of containers behind a perimeter fence",
+          "width": 659,
+          "height": 500
+        },
+        "cta": {
+          "label": "Call with M&A Lead",
+          "href": "/contact/",
+          "disabled": true
+        }
+      },
+      {
+        "label": "Interested in investing?",
+        "image": {
+          "src": "content/media/audience/interested-in-investing.jpg",
+          "alt": "An aerial view of an operating battery storage site laid out in rows beside farmland",
+          "width": 400,
+          "height": 500
+        },
+        "cta": {
+          "label": "Call with Investment Lead",
+          "href": "/contact/",
+          "disabled": true
+        }
+      }
+    ]
+  }
+}

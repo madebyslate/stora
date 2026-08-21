@@ -1,0 +1,273 @@
+---
+import type { ProofPointsBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: ProofPointsBlock
+}
+
+const { block } = Astro.props
+const headingId = `proof-points-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+---
+
+<section class="proof-points" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 id={headingId} class="proof-points__heading text-title reveal-mask">
+      <span>{block.heading}</span>
+    </h2>
+
+    <div class="proof-points__layout">
+      <div class="proof-points__left">
+        <ul class="proof-points__metrics">
+          {
+            block.metrics.map((metric, index) => (
+              <li class="proof-points__metric">
+                <p class="proof-points__value">
+                  <span class="proof-points__value-mask reveal-mask" style={`--reveal-index: ${2 + index * 2}`}>
+                    <span class="proof-points__value-content">
+                      <span>{metric.value}</span>
+                      {metric.unit && <span class="proof-points__unit">{metric.unit}</span>}
+                    </span>
+                  </span>
+                </p>
+                <p class="proof-points__label reveal" style={`--reveal-index: ${3 + index * 2}`}>
+                  {metric.label}
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+
+        <address class="proof-points__contact reveal-fade" style="--reveal-index: 8">
+          <span class="proof-points__portrait-frame reveal-pop" style="--reveal-index: 9">
+            <Picture
+              image={block.contact.portrait}
+              widths={[92, 184]}
+              sizes="5.75rem"
+              class="proof-points__portrait"
+            />
+          </span>
+          <div class="proof-points__contact-copy">
+            <h3 class="proof-points__contact-name text-panel-title reveal-mask" style="--reveal-index: 10">
+              <span>{block.contact.name}</span>
+            </h3>
+            <p class="proof-points__contact-role reveal" style="--reveal-index: 11">{block.contact.role}</p>
+            <a
+              class="proof-points__contact-email reveal"
+              style="--reveal-index: 12"
+              href={`mailto:${block.contact.email}`}
+            >
+              {block.contact.email}
+            </a>
+          </div>
+        </address>
+      </div>
+
+      <div class="proof-points__artwork">
+        <span class="proof-points__artwork-pane reveal-curtain" style="--reveal-index: 1">
+          <span class="proof-points__artwork-hold reveal-curtain-hold" style="--reveal-index: 1">
+            <Picture
+              image={block.image}
+              widths={[360, 573, 720]}
+              sizes="(max-width: 47.9375rem) calc(100vw - 2.5rem), (max-width: 63.9375rem) 46vw, 35.8125rem"
+              class="proof-points__artwork-image"
+            />
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .proof-points {
+    padding-block: var(--proof-padding-block);
+    overflow: clip;
+    background-color: var(--color-bg-inverse);
+    color: var(--color-fg-inverse);
+  }
+
+  .proof-points__heading {
+    color: inherit;
+  }
+
+  .proof-points__layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, var(--proof-metrics-width))
+      minmax(0, var(--proof-artwork-width));
+    justify-content: space-between;
+    gap: var(--proof-column-gap);
+    margin-top: var(--proof-heading-layout-gap);
+  }
+
+  .proof-points__left {
+    display: flex;
+    min-height: var(--proof-artwork-height);
+    flex-direction: column;
+  }
+
+  .proof-points__metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-top: var(--proof-metrics-top-inset);
+  }
+
+  .proof-points__metric {
+    padding-bottom: var(--proof-metric-row-padding);
+    border-bottom: solid var(--proof-metric-rule);
+    border-bottom-width: var(--proof-rule-width);
+  }
+
+  .proof-points__metric:nth-child(n + 3) {
+    padding-top: var(--proof-metric-row-padding);
+  }
+
+  .proof-points__value {
+    font-size: var(--text-proof-value);
+    font-weight: var(--text-proof-value--font-weight);
+    line-height: var(--text-proof-value--line-height);
+    letter-spacing: var(--text-proof-value--letter-spacing);
+  }
+
+  .proof-points__value-content {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+
+  .proof-points__unit {
+    color: var(--proof-unit-color);
+    font-size: var(--text-lead);
+    font-weight: var(--text-lead--font-weight);
+    line-height: var(--text-lead--line-height);
+    letter-spacing: var(--text-lead--letter-spacing);
+  }
+
+  .proof-points__label {
+    margin-top: var(--proof-metric-label-gap);
+    font-size: var(--text-body);
+    font-weight: var(--text-body--font-weight);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+  }
+
+  .proof-points__contact {
+    display: flex;
+    width: min(100%, var(--proof-contact-width));
+    margin-top: auto;
+    padding: var(--proof-contact-padding);
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--proof-contact-gap);
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-style: normal;
+    text-align: left;
+  }
+
+  .proof-points__portrait-frame {
+    display: block;
+    width: var(--proof-contact-portrait-size);
+    height: var(--proof-contact-portrait-size);
+    flex: none;
+    overflow: clip;
+  }
+
+  .proof-points__portrait-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .proof-points__contact-copy {
+    min-width: 0;
+  }
+
+  .proof-points__contact-name {
+    font-size: var(--text-panel-title);
+    font-weight: var(--text-panel-title--font-weight);
+    line-height: var(--text-panel-title--line-height);
+    letter-spacing: var(--text-panel-title--letter-spacing);
+  }
+
+  .proof-points__contact-role,
+  .proof-points__contact-email {
+    display: block;
+    font-size: var(--text-caption);
+    font-weight: var(--text-caption--font-weight);
+    line-height: var(--text-caption--line-height);
+    letter-spacing: var(--text-caption--letter-spacing);
+  }
+
+  .proof-points__contact-role {
+    color: var(--proof-contact-role-color);
+  }
+
+  .proof-points__contact-email {
+    width: fit-content;
+    margin-top: var(--proof-contact-line-gap);
+    color: var(--proof-contact-email-color);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
+  .proof-points__artwork {
+    aspect-ratio: var(--proof-artwork-ratio);
+    width: min(100%, var(--proof-artwork-width));
+    justify-self: end;
+    overflow: clip;
+  }
+
+  .proof-points__artwork-pane,
+  .proof-points__artwork-hold {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .proof-points__artwork-pane {
+    --reveal-curtain-x: var(--proof-artwork-reveal-x);
+    --reveal-curtain-y: var(--proof-artwork-reveal-y);
+    --reveal-curtain-scale: var(--proof-artwork-reveal-scale);
+    overflow: clip;
+  }
+
+  .proof-points__artwork :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 63.9375rem) {
+    .proof-points__layout {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--proof-mobile-column-gap);
+    }
+
+    .proof-points__left {
+      min-height: 0;
+    }
+
+    .proof-points__metrics {
+      padding-top: 0;
+    }
+
+    .proof-points__contact {
+      margin-top: var(--proof-mobile-column-gap);
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .proof-points__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .proof-points__artwork {
+      justify-self: stretch;
+    }
+  }
+</style>

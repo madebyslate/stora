@@ -1,0 +1,167 @@
+---
+import type { WiderTeamBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: WiderTeamBlock
+}
+
+const { block } = Astro.props
+const headingId = 'wider-team-heading'
+const PORTRAIT_SIZES = '(min-width: 1024px) 19vw, (min-width: 768px) 31vw, 46vw'
+const PORTRAIT_WIDTHS = [120, 160, 215]
+---
+
+<section class="wider-team" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="wider-team__heading text-title reveal-mask" id={headingId}>
+      <span>{block.heading}</span>
+    </h2>
+
+    <ul class="wider-team__grid" role="list">
+      {
+        block.members.map((member, index) => (
+          <li class="member reveal" style={`--reveal-index: ${index + 1}`}>
+            <span class="member__pane">
+              <span class="member__frame">
+                <Picture
+                  image={member.portrait}
+                  widths={PORTRAIT_WIDTHS}
+                  sizes={PORTRAIT_SIZES}
+                />
+              </span>
+              <span class="member__scrim" />
+            </span>
+
+            <div class="member__meta">
+              <h3 class="member__name text-caption">{member.name}</h3>
+              <p class="member__role text-caption">{member.role}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .wider-team {
+    padding-block: var(--space-14);
+    border-block-start: var(--wider-team-rule-width) solid var(--wider-team-rule-color);
+    background-color: var(--color-bg);
+    --reveal-step: 70ms;
+  }
+
+  .wider-team__heading {
+    margin-block-end: var(--team-heading-gap);
+    color: var(--color-fg);
+  }
+
+  .wider-team__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--team-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .member {
+    position: relative;
+    aspect-ratio: var(--team-tile-ratio);
+    overflow: clip;
+  }
+
+  .member__pane {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: clip;
+    background-color: var(--team-tile-surface);
+  }
+
+  .member__frame {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: var(--team-tile-ratio);
+    translate: -50% var(--wider-team-portrait-rest-y-mobile);
+    scale: var(--team-portrait-rest-scale);
+    transition:
+      translate var(--duration-slow) var(--ease-out-expo),
+      scale var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .member__frame :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .member__scrim {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    display: block;
+    block-size: var(--team-scrim-height);
+    background: var(--team-scrim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .member__meta {
+    position: absolute;
+    inset-inline: var(--team-tile-padding);
+    inset-block-end: var(--team-tile-padding);
+  }
+
+  .member__name {
+    margin: 0;
+    color: var(--color-fg);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .member__role {
+    margin-block-start: var(--team-name-gap);
+    color: var(--color-fg-note);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  @media (min-width: 768px) {
+    .wider-team__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .member__frame {
+      translate: -50% var(--wider-team-portrait-rest-y);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .wider-team__grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  @media (hover: hover) {
+    .member:hover .member__frame {
+      translate: -50% -50%;
+      scale: 1;
+    }
+
+    .member:hover .member__scrim {
+      opacity: 1;
+    }
+
+    .member:hover .member__name {
+      color: var(--color-on-media);
+    }
+
+    .member:hover .member__role {
+      color: var(--color-on-media-subtle);
+    }
+  }
+</style>

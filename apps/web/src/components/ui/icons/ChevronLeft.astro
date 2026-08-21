@@ -1,0 +1,33 @@
+---
+/**
+ * The 7 x 11 chevron on the slider's step buttons.
+ *
+ * Only the left one exists. The right one is this glyph mirrored in CSS —
+ * `scale: -1 1` on the button — because the two are the same artwork and a second
+ * copy of the path is a second thing to keep in sync.
+ *
+ * Filled with `currentColor`, so it follows the button's own colour rather than
+ * carrying a value of its own.
+ */
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<svg
+  class={className}
+  width="7"
+  height="11"
+  viewBox="0 0 7 11"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M2.35565 5.30313L6.48047 9.42794L5.30195 10.6064L-0.00134753 5.30313L5.30195 -0.00012006L6.48047 1.17838L2.35565 5.30313Z"
+    fill="currentColor"></path>
+</svg>

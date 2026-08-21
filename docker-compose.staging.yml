@@ -1,0 +1,35 @@
+name: stora-staging
+
+# Stage 1 staging stack: build Astro from fixtures, publish it atomically to a
+# named volume, then serve it through Nginx. Payload and PostgreSQL are
+# intentionally absent until the content model is introduced in stage 2.
+services:
+  website-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: website-builder
+    init: true
+    restart: "no"
+    environment:
+      CONTENT_SOURCE: fixtures
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:?Set the public staging URL}
+    volumes:
+      - website-dist:/output
+
+  router:
+    image: nginx:1.28-alpine
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-18083}:8080"
+    volumes:
+      - website-dist:/srv/website:ro
+      - ./docker/nginx.staging.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      website-build:
+        condition: service_completed_successfully
+
+volumes:
+  website-dist:
+    name: ${WEBSITE_DIST_VOLUME:-stora-staging-website-dist}

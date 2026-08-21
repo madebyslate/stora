@@ -1,0 +1,456 @@
+---
+import type { HowWeDevelopBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: HowWeDevelopBlock
+}
+
+const { block } = Astro.props
+const key = block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+const group = `how-we-develop-${key}`
+const headingId = `${group}-heading`
+const optionId = (index: number) => `${group}-${index + 1}`
+const hasAnyCopy = block.items.some((item) => item.title || item.description)
+---
+
+<section
+  class:list={['how-develop', `how-develop--${block.theme}`]}
+  aria-labelledby={headingId}
+  data-reveal-group
+>
+  <div class="container-page">
+    <h2 class="how-develop__heading text-title reveal-mask" id={headingId}>
+      <span>{block.heading}</span>
+    </h2>
+
+    <div class:list={['how-develop__body', !hasAnyCopy && 'how-develop__body--no-copy']}>
+      <fieldset class="how-develop__tabs">
+        <legend class="sr-only">{block.heading}</legend>
+        {
+          block.items.map((item, index) => (
+            <div class="how-develop__tab-item">
+              <input
+                class="how-develop__pick sr-only"
+                type="radio"
+                name={group}
+                id={optionId(index)}
+                data-panel={index + 1}
+                checked={index === 0}
+              />
+              <label class="how-develop__tab" for={optionId(index)}>
+                <span class="how-develop__tab-label reveal-mask" style={`--reveal-index: ${1 + index * 0.45}`}>
+                  <span>{item.label}</span>
+                </span>
+              </label>
+              <div class="how-develop__bullets-wrap">
+                <div class="how-develop__bullets-inner">
+                  {item.bullets && item.bullets.length > 0 && (
+                    <ul class="how-develop__bullets text-body">
+                      {item.bullets.map((bullet, bulletIndex) => (
+                        <li style={`--bullet-index: ${bulletIndex}`}><span>{bullet}</span></li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </fieldset>
+
+      {
+        hasAnyCopy && (
+          <div class="how-develop__copy-stack">
+            {block.items.map((item) => (
+              <div class="how-develop__copy-panel">
+                {item.title && <h3 class="how-develop__copy-title text-panel-title">{item.title}</h3>}
+                {item.description && <p class="how-develop__copy-description text-body">{item.description}</p>}
+              </div>
+            ))}
+          </div>
+        )
+      }
+
+      <div class="how-develop__stage">
+        {
+          block.items.map((item) => (
+            <figure class="how-develop__panel">
+              <span class="how-develop__pane">
+                <span class="how-develop__hold">
+                  <Picture
+                    image={item.image}
+                    widths={[390, 560, 680, 974]}
+                    sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1439px) 50vw, 680px"
+                    draggable={false}
+                  />
+                </span>
+              </span>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .how-develop {
+    padding-block: var(--how-develop-padding-block);
+    background-color: var(--how-develop-surface);
+    color: var(--how-develop-heading-color);
+  }
+
+  .how-develop--dark {
+    --how-develop-surface: var(--color-bg-inverse);
+    --how-develop-heading-color: var(--color-on-media);
+    --how-develop-tab-color: var(--color-on-media);
+    --how-develop-active-color: var(--color-green);
+    --how-develop-rule-color: var(--color-on-media-rule);
+    --how-develop-copy-color: var(--color-on-media-subtle);
+  }
+
+  .how-develop__heading {
+    width: fit-content;
+    color: var(--how-develop-heading-color);
+  }
+
+  .how-develop__body {
+    display: grid;
+    grid-template-columns: minmax(0, var(--how-develop-left-width)) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: var(--how-develop-column-gap);
+    row-gap: var(--how-develop-copy-media-gap);
+    margin-top: var(--how-develop-heading-gap);
+  }
+
+  .how-develop__body--no-copy {
+    grid-template-rows: auto;
+  }
+
+  .how-develop__tabs {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .how-develop__tab-item {
+    border-bottom: var(--how-develop-rule-width) solid var(--how-develop-rule-color);
+  }
+
+  .how-develop__tab {
+    display: block;
+    padding-block: var(--how-develop-tab-padding-block);
+    color: var(--how-develop-tab-color);
+    font-size: var(--text-stage);
+    font-weight: var(--text-stage--font-weight);
+    line-height: var(--text-stage--line-height);
+    letter-spacing: var(--text-stage--letter-spacing);
+    cursor: pointer;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .how-develop__tab-label {
+    width: fit-content;
+    transform: none;
+    transition: transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .how-develop__pick:checked + .how-develop__tab {
+    color: var(--how-develop-active-color);
+  }
+
+  .how-develop__pick:checked + .how-develop__tab .how-develop__tab-label {
+    transform: translate3d(var(--how-develop-label-active-shift), 0, 0);
+  }
+
+  .how-develop__pick:focus-visible + .how-develop__tab {
+    outline: var(--how-develop-rule-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .how-develop__pick:not(:checked) + .how-develop__tab:hover {
+      opacity: var(--how-develop-tab-hover-opacity);
+    }
+  }
+
+  .how-develop__bullets-wrap {
+    display: none;
+  }
+
+  .how-develop__bullets-inner {
+    overflow: clip;
+  }
+
+  .how-develop__bullets {
+    display: grid;
+    gap: var(--how-develop-bullet-row-gap);
+    margin: var(--how-develop-bullets-top-gap) 0 var(--how-develop-bullets-bottom-gap);
+    padding: 0;
+    color: var(--how-develop-copy-color);
+    list-style: none;
+  }
+
+  .how-develop__bullets li {
+    display: grid;
+    grid-template-columns: var(--how-develop-bullet-marker) minmax(0, 1fr);
+    gap: var(--how-develop-bullet-gap);
+    align-items: center;
+  }
+
+  .how-develop__bullets li::before {
+    width: var(--how-develop-bullet-marker);
+    height: var(--how-develop-bullet-marker);
+    background-color: var(--how-develop-active-color);
+    opacity: 0;
+    transform: scale(var(--how-develop-bullet-marker-start-scale));
+    animation-name: var(--how-develop-marker-animation, none);
+    animation-duration: var(--duration-base);
+    animation-delay: calc(var(--bullet-index) * var(--how-develop-bullet-step));
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+    content: '';
+  }
+
+  .how-develop__bullets li > span {
+    opacity: 0;
+    transform: translate3d(0, var(--how-develop-bullet-text-shift), 0);
+    animation-name: var(--how-develop-bullet-text-animation, none);
+    animation-duration: var(--duration-slow);
+    animation-delay: calc(
+      var(--how-develop-bullet-text-delay) + var(--bullet-index) * var(--how-develop-bullet-step)
+    );
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+  }
+
+  .how-develop__pick:checked ~ .how-develop__bullets-wrap {
+    display: block;
+  }
+
+  .how-develop__pick:checked ~ .how-develop__bullets-wrap .how-develop__bullets {
+    --how-develop-marker-animation: how-develop-marker-in;
+    --how-develop-bullet-text-animation: how-develop-bullet-text-in;
+  }
+
+  .how-develop__copy-stack {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .how-develop__copy-panel {
+    display: none;
+  }
+
+  .how-develop__copy-title {
+    color: var(--how-develop-heading-color);
+    opacity: 0;
+    transform: translate3d(0, var(--how-develop-copy-title-shift), 0);
+    animation-name: var(--how-develop-copy-title-animation, none);
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+  }
+
+  .how-develop__copy-description {
+    max-width: var(--how-develop-left-width);
+    margin-top: var(--how-develop-copy-gap);
+    color: var(--how-develop-copy-color);
+    opacity: 0;
+    transform: translate3d(0, var(--how-develop-copy-description-shift), 0);
+    animation-name: var(--how-develop-copy-description-animation, none);
+    animation-duration: var(--duration-slow);
+    animation-delay: var(--how-develop-copy-description-delay);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+  }
+
+  .how-develop__stage {
+    position: relative;
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    aspect-ratio: var(--how-develop-media-ratio);
+    overflow: clip;
+  }
+
+  .how-develop__body--no-copy .how-develop__stage {
+    grid-row: 1;
+  }
+
+  .how-develop__panel,
+  .how-develop__pane,
+  .how-develop__hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+    margin: 0;
+  }
+
+  .how-develop__panel {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--duration-base) var(--ease-standard),
+      visibility 0s linear var(--duration-base);
+  }
+
+  .how-develop__pane {
+    overflow: clip;
+    transform: translate3d(0, 100%, 0);
+    animation-name: var(--how-develop-pane-animation, none);
+    animation-duration: var(--duration-reveal);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+  }
+
+  .how-develop__hold {
+    transform: translate3d(0, -100%, 0) scale(var(--how-develop-image-reveal-scale));
+    animation-name: var(--how-develop-hold-animation, none);
+    animation-duration: var(--duration-reveal);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+  }
+
+  .how-develop__hold :global(img) {
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    width: calc(100% + var(--how-develop-image-crop-inline-end));
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  @keyframes how-develop-pane-in {
+    from {
+      transform: translate3d(0, 100%, 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes how-develop-hold-in {
+    from {
+      transform: translate3d(0, -100%, 0) scale(var(--how-develop-image-reveal-scale));
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes how-develop-marker-in {
+    from {
+      opacity: 0;
+      transform: scale(var(--how-develop-bullet-marker-start-scale));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes how-develop-bullet-text-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--how-develop-bullet-text-shift), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes how-develop-copy-title-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--how-develop-copy-title-shift), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes how-develop-copy-description-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--how-develop-copy-description-shift), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .how-develop__body:has(.how-develop__pick[data-panel='1']:checked) .how-develop__copy-panel:nth-child(1),
+  .how-develop__body:has(.how-develop__pick[data-panel='2']:checked) .how-develop__copy-panel:nth-child(2),
+  .how-develop__body:has(.how-develop__pick[data-panel='3']:checked) .how-develop__copy-panel:nth-child(3) {
+    --how-develop-copy-title-animation: how-develop-copy-title-in;
+    --how-develop-copy-description-animation: how-develop-copy-description-in;
+    display: block;
+  }
+
+  .how-develop__body:has(.how-develop__pick[data-panel='1']:checked) .how-develop__panel:nth-child(1),
+  .how-develop__body:has(.how-develop__pick[data-panel='2']:checked) .how-develop__panel:nth-child(2),
+  .how-develop__body:has(.how-develop__pick[data-panel='3']:checked) .how-develop__panel:nth-child(3) {
+    --how-develop-pane-animation: how-develop-pane-in;
+    --how-develop-hold-animation: how-develop-hold-in;
+    z-index: var(--z-content);
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__pane,
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__hold,
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__bullets li::before,
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__bullets li > span,
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__copy-title,
+  :global(html.js) .how-develop:not([data-inview]) .how-develop__copy-description {
+    animation-play-state: paused;
+  }
+
+  @media (max-width: 767px) {
+    .how-develop__body,
+    .how-develop__body--no-copy {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      row-gap: 0;
+    }
+
+    .how-develop__tabs,
+    .how-develop__copy-stack,
+    .how-develop__stage,
+    .how-develop__body--no-copy .how-develop__stage {
+      grid-column: 1;
+    }
+
+    .how-develop__tabs {
+      grid-row: 1;
+    }
+
+    .how-develop__copy-stack {
+      grid-row: 2;
+      margin-top: var(--how-develop-mobile-gap);
+    }
+
+    .how-develop__stage,
+    .how-develop__body--no-copy .how-develop__stage {
+      grid-row: 3;
+      margin-top: var(--how-develop-copy-media-gap);
+    }
+
+    .how-develop__body--no-copy .how-develop__stage {
+      grid-row: 2;
+      margin-top: var(--how-develop-mobile-gap);
+    }
+  }
+</style>

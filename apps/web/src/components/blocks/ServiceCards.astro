@@ -1,0 +1,527 @@
+---
+import type { ServiceCardsBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+import Button from '@/components/ui/Button.astro'
+
+interface Props {
+  block: ServiceCardsBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'service-cards-heading'
+
+/**
+ * The headline, word by word.
+ *
+ * Masked per word rather than per run, because the accent run crosses the line
+ * break ("battery energy / storage") and a run masked whole would have to be one
+ * inline-block — which cannot start mid-line and continue on the next, so it would
+ * push the whole accent down a line. A word never wraps inside itself, so each one
+ * can be its own mask and the line still breaks wherever it wants to.
+ */
+const headingRuns = [
+  { text: block.heading, accent: false },
+  ...(block.headingAccent ? [{ text: block.headingAccent, accent: true }] : []),
+  ...(block.headingTrail ? [{ text: block.headingTrail, accent: false }] : []),
+]
+
+/**
+ * Words arrive at three quarters of a step, roughly 46 ms apart. At a full step
+ * the eight of them take longer than the three panels below and the section reads
+ * bottom-up; this way the headline is done leading into the first panel.
+ */
+const HEADING_STEP = 0.75
+
+const headingWords = headingRuns.flatMap((run) =>
+  run.text
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => ({ word, accent: run.accent })),
+)
+
+/**
+ * Panel choreography. Each panel assembles from its own parts instead of arriving
+ * as one object: the picture wipes in, the marker settles onto it, then the title
+ * rises under its own mask and the copy follows. The offsets are in steps of
+ * `--reveal-step`, set on the row below.
+ */
+const CARD_STAGGER = 2
+const cardOrder = (index: number) => {
+  const base = 3 + index * CARD_STAGGER
+  return {
+    media: base,
+    toggle: base + 1.3,
+    title: base + 1.5,
+    description: base + 1.9,
+    cta: base + 2.2,
+  }
+}
+
+const CARD_SIZES = '(min-width: 1024px) 33.34vw, 100vw'
+const CARD_WIDTHS = [400, 640, 960, 1280]
+---
+
+<section class="services" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="services__heading text-headline" id={headingId}>
+      {
+        headingWords.map(({ word, accent }, index) => (
+          <>
+            <span
+              class:list={['services__word', 'reveal-mask', accent && 'services__accent']}
+              style={`--reveal-index: ${index * HEADING_STEP}`}
+            >
+              <span>{word}</span>
+            </span>
+            {index < headingWords.length - 1 && ' '}
+          </>
+        ))
+      }
+    </h2>
+  </div>
+
+  {
+    /*
+      Full-bleed: the row sits outside `.container-page` on purpose. The panels are
+      exact thirds of the viewport in the design — 480 px each at 1440 — and running
+      them inside the 1360 px grid would put a 40 px white margin down each side
+      that the design does not have.
+    */
+  }
+  <ul class="services__row" role="list">
+    {
+      block.cards.map((card, index) => {
+        const order = cardOrder(index)
+        return (
+          <li class="services__cell">
+            {/*
+              The whole panel is the link, and that is what makes the block work
+              without script. The copy is revealed on `:hover` and on
+              `:focus-visible` of this one element, so a keyboard reaches the same
+              state a pointer does, and there is no hidden interactive element to
+              keep out of the tab order — the button inside is drawn as a span
+              (`Button as="span"`).
+
+              `draggable="false"`: a link is draggable by default, and dragging one
+              tears a ghost of the whole panel off the page. There is nothing here
+              worth dragging.
+            */}
+            <a
+              class:list={['card', index === 0 && 'card--open']}
+              href={card.cta.disabled ? undefined : card.cta.href}
+              aria-disabled={card.cta.disabled ? 'true' : undefined}
+              role={card.cta.disabled ? 'link' : undefined}
+              draggable="false"
+              rel={!card.cta.disabled && card.cta.external ? 'noopener noreferrer' : undefined}
+              target={!card.cta.disabled && card.cta.external ? '_blank' : undefined}
+            >
+              <span class="card__pane reveal-curtain" style={`--reveal-index: ${order.media}`}>
+                <span class="card__media reveal-curtain-hold" style={`--reveal-index: ${order.media}`}>
+                  <Picture image={card.image} widths={CARD_WIDTHS} sizes={CARD_SIZES} />
+                </span>
+
+                <span class="card__scrim card__scrim--title" />
+                <span class="card__scrim card__scrim--panel" />
+              </span>
+
+              {/* Decorative: it states the visual state, and every word it stands
+                  for is already in the link's accessible name. */}
+              <span
+                class="card__toggle reveal-pop"
+                style={`--reveal-index: ${order.toggle}`}
+                aria-hidden="true"
+              >
+                <span class="card__toggle-icon">
+                  <span class="card__bar card__bar--horizontal" />
+                  <span class="card__bar card__bar--vertical" />
+                </span>
+              </span>
+
+              <span class="card__body">
+                <h3 class="card__title text-lead reveal-mask" style={`--reveal-index: ${order.title}`}>
+                  <span>{card.title}</span>
+                </h3>
+
+                <span class="card__panel">
+                  <p class="card__description reveal" style={`--reveal-index: ${order.description}`}>
+                    {card.description}
+                  </p>
+                  <span class="card__cta reveal" style={`--reveal-index: ${order.cta}`}>
+                    <Button link={card.cta} withArrow as="span" />
+                  </span>
+                </span>
+              </span>
+            </a>
+          </li>
+        )
+      })
+    }
+  </ul>
+</section>
+
+<style>
+  .services {
+    /*
+     * No padding of its own, in either direction. The panels run to the section's
+     * edges top and bottom; the air above the headline is LogoWall's bottom
+     * padding, and whatever follows brings its own.
+     */
+    background-color: var(--color-bg);
+    /* Eight words and three panels is a lot of steps to get through; at the global
+       90 ms the section would still be assembling a second and a half in. */
+    --reveal-step: 62ms;
+  }
+
+  .services__heading {
+    color: var(--color-fg);
+    max-inline-size: var(--service-headline-measure);
+    text-wrap: balance;
+    margin-block-end: var(--service-headline-gap);
+  }
+
+  /* `.reveal-mask` is a block by default. Each word is atomic, so it can be an
+     inline-block without ever having to wrap inside itself. */
+  .services__word {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .services__accent {
+    color: var(--color-fg-accent);
+  }
+
+  .services__row {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    /* Butted, not gapped: the design's panels share their edges. */
+    gap: 0;
+  }
+
+  .card {
+    position: relative;
+    display: block;
+    block-size: var(--service-card-height);
+    /*
+     * The aperture for both the entrance wipe and the closed copy stack. Every
+     * moving part inside is translated past this edge and clipped by it.
+     */
+    overflow: clip;
+    color: var(--color-on-media);
+    background-color: var(--color-ink);
+    text-decoration: none;
+    /* Lime-Dark disappears against the photography; the ring has to be white. */
+    --color-focus: var(--color-on-media);
+    /*
+     * How far the copy stack drops when the panel is closed: its own full height
+     * less one line of the title, which leaves exactly the title sitting on the
+     * padding line. A percentage, so a two-line or four-line description needs no
+     * new number — and a transform, so none of it costs layout (AGENT-RULES §6).
+     */
+    --card-closed-shift: calc(100% - var(--text-lead) * var(--text-lead--line-height));
+  }
+
+  .card:focus-visible {
+    /* Inside the clip, so an outset ring would be sliced off by `overflow: clip`. */
+    outline-offset: -4px;
+  }
+
+  /*
+   * The picture wipes in from the leading edge, not up from the bottom: three
+   * panels rising in sequence read as three objects being dealt onto the page,
+   * where three apertures opening left to right read as one sweep across the
+   * section. The axis is all that changes — the pane starts one width to the side
+   * and the picture inside starts one width the other way, so the picture never
+   * moves and only the opening travels.
+   */
+  .card__pane {
+    position: absolute;
+    inset: 0;
+    display: block;
+    /*
+     * The aperture is THIS box, not the panel. The picture inside is
+     * counter-translated back to where it belongs, so it lands inside the panel's
+     * bounds from the first frame — with the clip one level up on `.card` it would
+     * simply be visible the whole time and only the scrim would appear to wipe.
+     * Clipping here is what makes the picture show only where the pane has
+     * reached.
+     */
+    overflow: clip;
+    --reveal-curtain-x: -100%;
+    --reveal-curtain-y: 0%;
+  }
+
+  .card__media {
+    position: absolute;
+    inset: 0;
+    display: block;
+    --reveal-curtain-x: -100%;
+    --reveal-curtain-y: 0%;
+    --reveal-curtain-scale: 1.08;
+  }
+
+  .card__media :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    /*
+     * The picture is scenery, not an object on the page. `pointer-events: none`
+     * is what actually stops it being dragged out of the panel in every engine —
+     * `-webkit-user-drag` only covers the WebKit and Blink half — and it hands
+     * every click straight to the link underneath, which is where it belongs.
+     */
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    /*
+     * The hover push lives on the <img>, not on `.card__media`: the entrance
+     * animation owns that element's `transform` with `fill-mode: both`, and an
+     * animation beats a transition on the same property for good.
+     */
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  /*
+   * Two scrims that cross-fade, not one that dims. A closed panel carries one line
+   * of title and gets a short shadow under it; an open panel carries three lines
+   * and a button and gets the design's full 312 px band. Fading a single band down
+   * would either leave a visible stripe across a panel that has nothing to say or
+   * drop the title below 3:1 — the reasoning and the measurements are on the
+   * tokens and in the spec.
+   *
+   * They cross-fade rather than stack, so an open panel is exactly the gradient
+   * the design specifies with nothing added underneath it.
+   */
+  .card__scrim {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    display: block;
+    pointer-events: none;
+    transition: opacity var(--duration-slow) var(--ease-standard);
+  }
+
+  .card__scrim--title {
+    block-size: var(--service-card-scrim-title-height);
+    background: var(--service-card-scrim-title);
+    opacity: 0;
+  }
+
+  .card__scrim--panel {
+    block-size: var(--service-card-scrim-height);
+    background: var(--service-card-scrim);
+    opacity: 1;
+  }
+
+  /* ── Toggle ───────────────────────────────────────────────────────────────
+   * Two bars rather than the two SVGs from the design, because the two SVGs are
+   * the same object in two states: the plus loses its vertical stroke. Built from
+   * boxes, the change is one `scaleY` on the compositor instead of a swap.
+   */
+  .card__toggle {
+    position: absolute;
+    inset-block-start: var(--service-card-toggle-inset);
+    inset-inline-end: var(--service-card-toggle-inset);
+    display: grid;
+    place-items: center;
+    inline-size: var(--service-card-toggle-size);
+    block-size: var(--service-card-toggle-size);
+    background-color: var(--service-card-toggle-surface);
+  }
+
+  /*
+   * At rest the glyph is a minus, because at rest the panel is open — that is the
+   * state a device with no hover is left in, and the two must agree. The plus is
+   * the closed variant, and it lives with the rest of the closed state below.
+   */
+  .card__toggle-icon {
+    position: relative;
+    display: block;
+    inline-size: var(--service-card-toggle-bar-length);
+    block-size: var(--service-card-toggle-bar-length);
+    transform: rotate(180deg);
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .card__bar {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    display: block;
+    background-color: currentColor;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .card__bar--horizontal {
+    inline-size: var(--service-card-toggle-bar-length);
+    block-size: var(--service-card-toggle-bar-weight);
+    transform: translate(-50%, -50%);
+  }
+
+  .card__bar--vertical {
+    inline-size: var(--service-card-toggle-bar-weight);
+    block-size: var(--service-card-toggle-bar-length);
+    transform: translate(-50%, -50%) scaleY(0);
+  }
+
+  /* ── Copy stack ───────────────────────────────────────────────────────────── */
+  .card__body {
+    position: absolute;
+    inset-inline: var(--service-card-padding);
+    inset-block-end: var(--service-card-padding);
+    display: block;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .card__title {
+    margin: 0;
+    color: var(--color-on-media);
+  }
+
+  .card__panel {
+    display: block;
+    margin-block-start: var(--service-card-title-gap);
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .card__description {
+    margin: 0;
+    max-inline-size: var(--service-card-copy-measure);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--service-card-copy-leading);
+    /* Raised from the design's 0.70; the reasoning is on the token. */
+    color: var(--service-card-copy-color);
+  }
+
+  .card__cta {
+    display: flex;
+    margin-block-start: var(--service-card-cta-gap);
+  }
+
+  /* ── Fold ─────────────────────────────────────────────────────────────────
+   * Three across from 1024 up, one column below it. The threshold is arithmetic:
+   * at 1024 a third is 341 px and the padding takes 64, which leaves 277 px — the
+   * width at which the longest title, "Develop-to-Sell (JV)", still sets on one
+   * line. It has to, because the closed state parks exactly one line of title on
+   * the padding line; a second line would drop below the panel's edge.
+   */
+  @media (min-width: 1024px) {
+    .services__row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* ── Open and closed ──────────────────────────────────────────────────────
+   * Gated on `hover: hover`, and that gate is the whole accessibility story of
+   * this block. A touch device has no hover, so there is no state to get stuck
+   * in: every panel is open, which is also the only way the copy is reachable
+   * there. Everything below is the pointer-and-keyboard behaviour.
+   */
+  @media (hover: hover) {
+    /* Closed is the resting state. */
+    .card__body {
+      transform: translate3d(0, var(--card-closed-shift), 0);
+    }
+
+    .card__panel {
+      opacity: 0;
+    }
+
+    .card__scrim--title {
+      opacity: 1;
+    }
+
+    .card__scrim--panel {
+      opacity: 0;
+    }
+
+    .card__toggle-icon {
+      transform: none;
+    }
+
+    .card__bar--vertical {
+      transform: translate(-50%, -50%) scaleY(1);
+    }
+
+    /* Open, three ways: the panel the design starts open, the pointer, the
+       keyboard. `:focus-visible` and not `:focus`, so a click does not leave a
+       panel latched open behind the pointer. */
+    .card--open .card__body,
+    .card:is(:hover, :focus-visible) .card__body {
+      transform: none;
+    }
+
+    .card--open .card__panel,
+    .card:is(:hover, :focus-visible) .card__panel {
+      opacity: 1;
+    }
+
+    .card--open .card__scrim--title,
+    .card:is(:hover, :focus-visible) .card__scrim--title {
+      opacity: 0;
+    }
+
+    .card--open .card__scrim--panel,
+    .card:is(:hover, :focus-visible) .card__scrim--panel {
+      opacity: 1;
+    }
+
+    /* Plus to minus: half a turn, and the vertical stroke collapses into the
+       horizontal one on the way round. */
+    .card--open .card__toggle-icon,
+    .card:is(:hover, :focus-visible) .card__toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .card--open .card__bar--vertical,
+    .card:is(:hover, :focus-visible) .card__bar--vertical {
+      transform: translate(-50%, -50%) scaleY(0);
+    }
+
+    .card:hover .card__media :global(img) {
+      transform: scale(1.04);
+    }
+
+    /*
+     * One open at a time. As soon as the row is being pointed at or tabbed
+     * through, the panel that was open by default yields — unless it is itself the
+     * one under the pointer, which is what the two `:not()`s buy. They also buy
+     * the specificity: this has to outrank the "open" rules above, and `:not()`
+     * counts towards it.
+     */
+    .services__row:is(:hover, :focus-within) .card--open:not(:hover):not(:focus-visible) .card__body {
+      transform: translate3d(0, var(--card-closed-shift), 0);
+    }
+
+    .services__row:is(:hover, :focus-within)
+      .card--open:not(:hover):not(:focus-visible)
+      .card__panel {
+      opacity: 0;
+    }
+
+    .services__row:is(:hover, :focus-within)
+      .card--open:not(:hover):not(:focus-visible)
+      .card__scrim--title {
+      opacity: 1;
+    }
+
+    .card__scrim--panel {
+      opacity: 0;
+    }
+
+    .services__row:is(:hover, :focus-within)
+      .card--open:not(:hover):not(:focus-visible)
+      .card__toggle-icon {
+      transform: none;
+    }
+
+    .services__row:is(:hover, :focus-within)
+      .card--open:not(:hover):not(:focus-visible)
+      .card__bar--vertical {
+      transform: translate(-50%, -50%);
+    }
+  }
+</style>

@@ -1,0 +1,223 @@
+{
+  "slug": "about-us",
+  "seo": {
+    "title": "About us — Stora Energy",
+    "description": "Stora develops renewable energy infrastructure across Europe, combining local market expertise with the experience to deliver projects at scale.",
+    "canonicalPath": "/about-us/"
+  },
+  "blocks": [
+    {
+      "blockType": "pageHero",
+      "heading": "About Stora",
+      "subheading": "Stora develops renewable energy infrastructure across Europe — combining local market expertise with the experience to deliver projects at scale.",
+      "image": {
+        "src": "content/media/pages/about-us-hero.jpg",
+        "alt": "A wooded valley seen from the air, with a river running through it",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "blockType": "aboutStory",
+      "statement": "Built in Poland. Ready to Scale Across Europe,\nDeveloping Renewable Energy Infrastructure from\nEarly Stage Site Identification Through\nConstruction and Operation.",
+      "heroImage": {
+        "src": "content/media/pages/about-us-hero.jpg",
+        "alt": "",
+        "width": 1440,
+        "height": 900
+      },
+      "photos": [
+        {
+          "src": "content/media/pages/about-photos/1.jpg",
+          "alt": "Technical plan of a grid-scale battery storage facility",
+          "width": 291,
+          "height": 285
+        },
+        {
+          "src": "content/media/pages/about-photos/2.jpg",
+          "alt": "Agricultural fields seen from above",
+          "width": 159,
+          "height": 156
+        },
+        {
+          "src": "content/media/pages/about-photos/4.jpg",
+          "alt": "Electric freight trucks travelling beside an energy facility",
+          "width": 240,
+          "height": 234
+        },
+        {
+          "src": "content/media/pages/about-photos/5.jpg",
+          "alt": "A grid-scale battery storage site surrounded by green fields",
+          "width": 384,
+          "height": 384
+        },
+        {
+          "src": "content/media/pages/about-photos/6.jpg",
+          "alt": "Outdoor battery storage enclosures",
+          "width": 291,
+          "height": 285
+        },
+        {
+          "src": "content/media/pages/about-photos/7.jpg",
+          "alt": "A Polish town surrounded by agricultural land at dusk",
+          "width": 276,
+          "height": 270
+        }
+      ]
+    },
+    {
+      "blockType": "growthTimeline",
+      "heading": "Our growth path",
+      "items": [
+        {
+          "title": "Foundation",
+          "period": "2023",
+          "description": "Stora is founded in Poland.",
+          "icon": "poland"
+        },
+        {
+          "title": "100MW IPP",
+          "period": "2024–2025",
+          "description": "Building our first generation of operating assets.",
+          "icon": "bolt"
+        },
+        {
+          "title": "+1 GW",
+          "period": "2026+",
+          "description": "Scaling our development platform.",
+          "icon": "arrow"
+        },
+        {
+          "title": "PAN-EUROPEAN",
+          "period": "Next",
+          "description": "Expanding our platform across European markets.",
+          "icon": "globe"
+        }
+      ]
+    },
+    {
+      "blockRef": "foundingTeam",
+      "overrides": {
+        "heading": "People who have built",
+        "headingMuted": "renewable energy at scales"
+      }
+    },
+    {
+      "blockRef": "companyCredentials"
+    },
+    {
+      "blockType": "metricStatement",
+      "heading": "Crefiblity",
+      "value": "1 GW",
+      "description": "Renewable energy built by our founding team across North America and Europe."
+    },
+    {
+      "blockType": "widerTeam",
+      "heading": "The wider team",
+      "members": [
+        {
+          "name": "Krzysztof Maj",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/krzysztof-maj.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Miłosz Mikołajczyk",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/milosz-mikolajczyk.jpg",
+            "alt": "",
+            "width": 215,
+            "height": 258
+          }
+        },
+        {
+          "name": "Sonia Krenczyk",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/sonia-krenczyk.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Tobias Martin",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/tobias-martin.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Anna Pawlak",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/anna-pawlak.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Brunon Magolewski",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/brunon-magolewski.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Aleksandra Krajewska",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/aleksandra-krajewska.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Żaneta Kopeć",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/zaneta-kopec.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        },
+        {
+          "name": "Anna Walencka-K.",
+          "role": "Chief Technology Officer & Co-founder",
+          "portrait": {
+            "src": "content/media/team/wider/anna-walencka-k.jpg",
+            "alt": "",
+            "width": 216,
+            "height": 258
+          }
+        }
+      ]
+    },
+    {
+      "blockRef": "featuredPublications"
+    },
+    {
+      "blockRef": "developmentStages",
+      "overrides": {
+        "theme": "dark"
+      }
+    },
+    {
+      "blockRef": "largeScaleContacts"
+    }
+  ]
+}

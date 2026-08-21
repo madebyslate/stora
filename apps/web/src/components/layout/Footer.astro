@@ -1,0 +1,368 @@
+---
+import type { SiteSettings } from '@repo/shared'
+import Logo from '@/components/ui/Logo.astro'
+
+/**
+ * Site footer.
+ *
+ * Three columns divided by rules, and the rules are the whole structure: they run
+ * the full height of the block rather than the height of the content, which is why
+ * the block padding lives on the columns and not on the container around them. The
+ * rule is then a column's own edge and reaches the top border and the foot by
+ * construction — no pair of numbers to keep matched.
+ *
+ * The navigation is `site.navigation`, the same array the header renders. Two
+ * copies of the same five links is one copy that goes stale.
+ *
+ * Visual spec: apps/web/src/components/layout/Footer.spec.md
+ */
+
+interface Props {
+  site: SiteSettings
+  /** Current path, for `aria-current`. Always with a trailing slash. */
+  path: string
+}
+
+const { site, path } = Astro.props
+
+const { footer } = site
+
+/**
+ * The year comes from the build, not from the content. This is a static site: a
+ * year typed into a JSON file is wrong from the first of January until somebody
+ * notices, and nobody notices a footer.
+ */
+const year = new Date().getFullYear()
+
+/** Reveal order. Column by column, left to right, and the copy inside each of
+ *  them at half steps — the footer should assemble, not parade. */
+const order = {
+  brand: 0,
+  tagline: 0.5,
+  copyright: 1,
+  nav: 1,
+  navStep: 0.25,
+  contact: 1.5,
+  contactStep: 0.25,
+}
+---
+
+<footer class="footer" data-reveal-group>
+  <div class="container-page">
+    <div class="footer__grid">
+      <div class="footer__col footer__col--brand">
+        <a
+          class="footer__brand reveal"
+          href="/"
+          aria-label="Stora Energy — home"
+          style={`--reveal-index: ${order.brand}`}
+        >
+          <Logo />
+        </a>
+
+        <p class="footer__tagline text-lead reveal" style={`--reveal-index: ${order.tagline}`}>
+          {footer.tagline}
+        </p>
+
+        <p
+          class="footer__copyright text-detail reveal"
+          style={`--reveal-index: ${order.copyright}`}
+        >
+          &copy; {year} {footer.copyrightNotice}
+        </p>
+      </div>
+
+      <nav class="footer__col footer__col--nav" aria-label="Footer">
+        <ul class="footer__nav" role="list">
+          {
+            site.navigation.map((item, index) => (
+              <li class="reveal" style={`--reveal-index: ${order.nav + index * order.navStep}`}>
+                <a
+                  class="footer__link text-detail"
+                  href={item.href}
+                  aria-current={item.href === path ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__col footer__col--contact">
+        <ul class="footer__groups" role="list">
+          {
+            footer.contact.map((group, index) => {
+              const titleId = `footer-contact-${index}`
+              return (
+                <li
+                  class="footer__group reveal"
+                  style={`--reveal-index: ${order.contact + index * order.contactStep}`}
+                >
+                  {
+                    /*
+                      A <p>, not a heading. These are six labels that would appear
+                      on every page of the site, and putting them in the document
+                      outline would bury each page's own headings under them.
+                      `aria-labelledby` gives the list the same grouping a heading
+                      would, without the outline.
+                    */
+                  }
+                  <p class="footer__group-title text-detail" id={titleId}>
+                    {group.title}
+                  </p>
+                  <ul class="footer__lines" role="list" aria-labelledby={titleId}>
+                    {group.lines.map((line) => (
+                      <li class="text-detail">
+                        {line.href ? (
+                          <a class="footer__link" href={line.href}>
+                            {line.text}
+                          </a>
+                        ) : (
+                          line.text
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /*
+   * The top border is an element rather than a `border-block-start`, so it can be
+   * drawn: it wipes in from the left as the footer arrives, and the column rules
+   * grow up from the foot behind it. A border cannot be animated on the
+   * compositor; a 1 px box scaled on one axis can.
+   */
+  .footer {
+    position: relative;
+    background-color: var(--color-bg);
+  }
+
+  .footer::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 1px;
+    background-color: var(--color-border);
+    transform-origin: left;
+    animation: footer-rule-x var(--duration-reveal) var(--ease-out-expo) both;
+  }
+
+  .footer__grid {
+    display: grid;
+  }
+
+  .footer__col {
+    /* The anchor for the column rule below. */
+    position: relative;
+    padding-block: var(--footer-padding-block);
+  }
+
+  /*
+   * The rule between two columns. On the stacked layout it lies across the top of
+   * the column, on the wide one it stands on its leading edge — one pseudo-element
+   * in two orientations rather than two elements, because it is one rule.
+   */
+  .footer__col + .footer__col::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 1px;
+    background-color: var(--color-border);
+    transform-origin: left;
+    animation: footer-rule-x var(--duration-reveal) var(--ease-out-expo) both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-step));
+  }
+
+  .footer__col--nav {
+    --reveal-index: 0.5;
+  }
+
+  .footer__col--contact {
+    --reveal-index: 1;
+  }
+
+  .footer__col--brand {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .footer__brand {
+    display: inline-flex;
+    align-self: flex-start;
+    color: var(--color-fg);
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .footer__brand:hover {
+    opacity: 0.7;
+  }
+
+  .footer__tagline {
+    margin-block-start: var(--footer-brand-gap);
+    /* The minimum air above the copyright, for a viewport where the contact
+       column is not the taller one and `margin-block-start: auto` has nothing to
+       push against. */
+    margin-block-end: var(--footer-copyright-gap);
+    color: var(--color-fg);
+  }
+
+  .footer__copyright {
+    /* Pinned to the column's foot, which is the block's foot: the three columns
+       are equal-height grid items whatever their content. */
+    margin-block-start: auto;
+    color: var(--color-fg);
+  }
+
+  .footer__nav,
+  .footer__groups,
+  .footer__lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--footer-nav-gap);
+  }
+
+  /*
+   * Links underline on hover instead of changing colour. A colour change is the
+   * obvious move and it is not available here: the palette's only other value at
+   * this size is Green, which measures 3.09:1 on white and needs 4.5:1 at 16 px.
+   * The rule is drawn with a scaled pseudo-element rather than `text-decoration`,
+   * so the transition runs on the compositor and the line sweeps in from the left
+   * rather than appearing whole.
+   */
+  .footer__link {
+    position: relative;
+    display: inline-block;
+    color: var(--color-fg);
+    text-decoration: none;
+  }
+
+  .footer__link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -0.125em;
+    block-size: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .footer__link:hover::after,
+  .footer__link:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  /*
+   * Two columns of a fixed measure rather than two halves of the column they sit
+   * in — the design leaves ~90 px of slack at the right edge, so the pair is sized
+   * by the longest line it has to hold and not by the box around it. See
+   * `--footer-contact-column`.
+   */
+  .footer__groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, var(--footer-contact-column)));
+    gap: var(--footer-group-gap) var(--footer-contact-gap);
+  }
+
+  .footer__group-title {
+    margin-block-end: var(--footer-group-title-gap);
+    color: var(--color-fg);
+    opacity: var(--footer-group-title-opacity);
+  }
+
+  .footer__lines {
+    color: var(--color-fg);
+  }
+
+  @keyframes footer-rule-x {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes footer-rule-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /*
+   * The rules are pseudo-elements, so the global hold in `global.css` — which
+   * matches on `.reveal*` classes — cannot reach them. Same mechanism, spelled out
+   * for the two selectors it misses: with `fill-mode: both` a paused animation
+   * renders its first frame, so pausing is the whole hold.
+   */
+  :global(html.js) .footer:not([data-inview])::before,
+  :global(html.js) .footer:not([data-inview]) .footer__col::before {
+    animation-play-state: paused;
+  }
+
+  /*
+   * Below 1024 the three columns stack. The contact grid keeps its two columns
+   * down to 560, where the longest line ("42-575 Gródków k. Będzina", 190 px at
+   * 16 px) stops fitting a half of the content width.
+   */
+  @media (max-width: 1023px) {
+    /* Stacked, the columns are as tall as their content and nothing pushes the
+       copyright down — the 96 px of air it needs at 1440 is only a hole here. */
+    .footer__tagline {
+      margin-block-end: var(--space-9);
+    }
+  }
+
+  @media (max-width: 559px) {
+    .footer__groups {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .footer__grid {
+      grid-template-columns: var(--footer-columns);
+    }
+
+    .footer__col--brand {
+      padding-inline-end: var(--footer-column-pad);
+    }
+
+    .footer__col--nav,
+    .footer__col--contact {
+      padding-inline-start: var(--footer-column-pad);
+    }
+
+    .footer__col + .footer__col::before {
+      inset-block: 0;
+      inset-inline: 0 auto;
+      inline-size: 1px;
+      block-size: auto;
+      transform-origin: bottom;
+      animation-name: footer-rule-y;
+    }
+  }
+</style>

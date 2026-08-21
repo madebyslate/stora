@@ -1,0 +1,326 @@
+---
+import type { AboutStoryBlock } from '@repo/shared'
+import { ABOUT_STORY_HERO_WIDTHS, ABOUT_STORY_SIZES } from '@/lib/images'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: AboutStoryBlock
+}
+
+const { block } = Astro.props
+const headingId = 'about-story-heading'
+const statementLines = block.statement.split('\n').map((line) => line.trim().split(/\s+/))
+const statementLabel = statementLines.flat().join(' ')
+let wordIndex = 0
+const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 3), photo.width])
+---
+
+<section class="about-story" aria-labelledby={headingId} data-about-story>
+  <h2 class="sr-only" id={headingId}>Built in Poland and ready to scale across Europe</h2>
+
+  <div class="about-story__stage">
+    <div class="about-story__scene">
+      {
+        block.photos.map((photo, index) => (
+          <div class={`about-story__photo about-story__photo--${index + 1}`}>
+            <Picture
+              image={photo}
+              widths={photoWidths[index]}
+              sizes={ABOUT_STORY_SIZES}
+              draggable={false}
+            />
+          </div>
+        ))
+      }
+
+      <div class="about-story__hero-target" data-about-hero-target aria-hidden="true">
+        <Picture
+          image={block.heroImage}
+          widths={ABOUT_STORY_HERO_WIDTHS}
+          sizes={ABOUT_STORY_SIZES}
+          draggable={false}
+        />
+      </div>
+
+      <p class="about-story__statement text-heading" aria-label={statementLabel}>
+        {
+          statementLines.map((line, lineIndex) => (
+            <>
+              {line.map((word, lineWordIndex) => {
+                const index = wordIndex++
+                return (
+                  <span
+                    class="about-story__word"
+                    aria-hidden="true"
+                    style={`--about-word-index: ${index}`}
+                  >
+                    {word}
+                    {lineWordIndex < line.length - 1 ? ' ' : ''}
+                  </span>
+                )
+              })}
+              {lineIndex < statementLines.length - 1 && <br />}
+            </>
+          ))
+        }
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-story {
+    --about-progress: 1;
+    --about-text-progress: 1;
+    --about-hero-target-opacity: 1;
+    position: relative;
+    z-index: var(--z-scrim);
+    block-size: var(--about-story-height);
+    overflow: clip;
+    background-color: transparent;
+  }
+
+  .about-story__stage {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    display: grid;
+    place-items: center;
+  }
+
+  .about-story__scene {
+    position: relative;
+    inline-size: 100%;
+    max-inline-size: var(--container-max);
+    block-size: var(--about-story-stage-height);
+    margin-inline: auto;
+  }
+
+  :global(html.js) .about-story {
+    block-size: calc(var(--about-story-viewport-height) + var(--about-story-pin-distance));
+  }
+
+  :global(html.js) .about-story__stage {
+    position: sticky;
+    inset-block-start: 0;
+    block-size: var(--about-story-viewport-height);
+  }
+
+  .about-story__photo,
+  .about-story__hero-target {
+    position: absolute;
+    overflow: clip;
+  }
+
+  .about-story__photo {
+    --about-photo-progress: clamp(
+      0,
+      calc(
+        (var(--about-progress) - var(--about-photo-start)) * var(--about-photo-reveal-speed)
+      ),
+      1
+    );
+    opacity: var(--about-photo-progress);
+    transform: translate3d(
+        0,
+        calc((1 - var(--about-photo-progress)) * var(--about-photo-travel)),
+        0
+      )
+      scale(
+        calc(
+          var(--about-photo-entry-scale) + var(--about-photo-progress) *
+            (1 - var(--about-photo-entry-scale))
+        )
+      );
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+
+  .about-story__photo :global(img),
+  .about-story__hero-target :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+  }
+
+  .about-story__photo--1 {
+    inset-block-start: var(--about-photo-1-top);
+    inset-inline-start: var(--about-photo-1-left);
+    inline-size: var(--about-photo-1-width);
+    aspect-ratio: 291 / 285;
+    --about-photo-start: var(--about-photo-1-start);
+  }
+
+  .about-story__photo--2 {
+    inset-block-start: var(--about-photo-2-top);
+    inset-inline-start: var(--about-photo-2-left);
+    inline-size: var(--about-photo-2-width);
+    aspect-ratio: 159 / 156;
+    --about-photo-start: var(--about-photo-2-start);
+  }
+
+  .about-story__photo--3 {
+    inset-block-start: var(--about-photo-3-top);
+    inset-inline-end: var(--about-photo-3-right);
+    inline-size: var(--about-photo-3-width);
+    aspect-ratio: 240 / 234;
+    --about-photo-start: var(--about-photo-3-start);
+  }
+
+  .about-story__photo--4 {
+    inset-block-start: var(--about-photo-4-top);
+    inset-inline-end: var(--about-photo-4-right);
+    inline-size: var(--about-photo-4-width);
+    aspect-ratio: 1;
+    --about-photo-start: var(--about-photo-4-start);
+  }
+
+  .about-story__photo--5 {
+    inset-block-start: var(--about-photo-5-top);
+    inset-inline-start: var(--about-photo-5-left);
+    inline-size: var(--about-photo-5-width);
+    aspect-ratio: 291 / 285;
+    --about-photo-start: var(--about-photo-5-start);
+  }
+
+  .about-story__photo--6 {
+    inset-block-start: var(--about-photo-6-top);
+    inset-inline-start: var(--about-photo-6-left);
+    inline-size: var(--about-photo-6-width);
+    aspect-ratio: 276 / 270;
+    --about-photo-start: var(--about-photo-6-start);
+  }
+
+  .about-story__hero-target {
+    inset-block-start: var(--about-hero-target-top);
+    inset-inline-start: 50%;
+    inline-size: var(--about-hero-target-size);
+    block-size: var(--about-hero-target-size);
+    translate: -50% 0;
+    opacity: var(--about-hero-target-opacity);
+  }
+
+  .about-story__statement {
+    position: absolute;
+    inset-block-start: var(--about-statement-top);
+    inset-inline-start: 50%;
+    inline-size: min(var(--about-statement-measure), calc(100% - 2 * var(--container-gutter)));
+    margin: 0;
+    translate: -50% 0;
+    color: var(--color-fg);
+    text-align: center;
+    text-wrap: pretty;
+  }
+
+  .about-story__word {
+    --about-word-start: calc(
+      var(--about-word-reveal-start) + var(--about-word-index) * var(--about-word-reveal-step)
+    );
+    opacity: clamp(
+      var(--about-word-resting-opacity),
+      calc(
+        var(--about-word-resting-opacity) +
+        (var(--about-text-progress) - var(--about-word-start)) *
+          var(--about-word-reveal-speed)
+      ),
+      1
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .about-story {
+      --about-progress: 1 !important;
+      --about-text-progress: 1 !important;
+      --about-hero-target-opacity: 1 !important;
+      block-size: var(--about-story-height);
+    }
+
+    :global(html.js) .about-story__stage {
+      position: relative;
+      block-size: 100%;
+    }
+
+    .about-story__scene {
+      block-size: 100%;
+    }
+
+    .about-story__photo {
+      will-change: auto;
+    }
+  }
+</style>
+
+<script>
+  const section = document.querySelector<HTMLElement>('[data-about-story]')
+  const hero = document.querySelector<HTMLElement>('[data-page-hero]')
+  const stage = section?.querySelector<HTMLElement>('.about-story__stage')
+  const target = section?.querySelector<HTMLElement>('[data-about-hero-target]')
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+  if (section && hero && stage && target) {
+    let frame = 0
+    const clamp = (value: number) => Math.min(1, Math.max(0, value))
+    const rootStyles = getComputedStyle(document.documentElement)
+    const token = (name: string) => Number.parseFloat(rootStyles.getPropertyValue(name))
+    const handoffStart = token('--about-hero-handoff-start')
+    const handoffRange = token('--about-hero-handoff-range')
+    const copyFadeSpeed = token('--about-hero-copy-fade-speed')
+
+    const render = () => {
+      frame = 0
+
+      if (reducedMotion.matches) {
+        section.style.setProperty('--about-progress', '1')
+        section.style.setProperty('--about-text-progress', '1')
+        section.style.setProperty('--about-hero-target-opacity', '1')
+        hero.removeAttribute('data-about-morph')
+        return
+      }
+
+      const sectionTop = section.getBoundingClientRect().top
+      const heroWidth = hero.offsetWidth
+      const heroHeight = hero.offsetHeight
+      const progress = clamp(1 - sectionTop / heroHeight)
+      const pinDistance = section.offsetHeight - stage.offsetHeight
+      const pinProgress = clamp(-sectionTop / pinDistance)
+      const targetRect = target.getBoundingClientRect()
+      const targetScaleX = targetRect.width / heroWidth
+      const targetScaleY = targetRect.height / heroHeight
+      const scaleX = 1 + (targetScaleX - 1) * progress
+      const scaleY = 1 + (targetScaleY - 1) * progress
+      const coverScale = Math.max(scaleX, scaleY)
+      const translateX =
+        (targetRect.left + targetRect.width / 2 - heroWidth / 2) * progress
+      const translateY =
+        (targetRect.top + targetRect.height / 2 - heroHeight / 2) * progress
+      const handoff = clamp((progress - handoffStart) / handoffRange)
+
+      hero.setAttribute('data-about-morph', '')
+      section.style.setProperty('--about-progress', pinProgress.toFixed(4))
+      section.style.setProperty('--about-text-progress', pinProgress.toFixed(4))
+      section.style.setProperty('--about-hero-target-opacity', handoff.toFixed(4))
+      hero.style.setProperty('--about-hero-translate-x', `${translateX.toFixed(2)}px`)
+      hero.style.setProperty('--about-hero-translate-y', `${translateY.toFixed(2)}px`)
+      hero.style.setProperty('--about-hero-scale-x', scaleX.toFixed(6))
+      hero.style.setProperty('--about-hero-scale-y', scaleY.toFixed(6))
+      hero.style.setProperty('--about-hero-image-scale-x', (coverScale / scaleX).toFixed(6))
+      hero.style.setProperty('--about-hero-image-scale-y', (coverScale / scaleY).toFixed(6))
+      hero.style.setProperty(
+        '--about-hero-copy-opacity',
+        clamp(1 - progress * copyFadeSpeed).toFixed(4),
+      )
+      hero.style.setProperty('--about-hero-opacity', (1 - handoff).toFixed(4))
+    }
+
+    const schedule = () => {
+      if (frame) return
+      frame = window.requestAnimationFrame(render)
+    }
+
+    render()
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    reducedMotion.addEventListener('change', schedule)
+  }
+</script>

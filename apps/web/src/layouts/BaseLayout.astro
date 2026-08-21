@@ -1,0 +1,133 @@
+---
+import type { Seo, SiteSettings } from '@repo/shared'
+import Seo_ from '@/components/layout/Seo.astro'
+import Header from '@/components/layout/Header.astro'
+import Footer from '@/components/layout/Footer.astro'
+import Cta from '@/components/layout/Cta.astro'
+import '@/styles/global.css'
+
+interface Props {
+  seo: Seo
+  path: string
+  site: SiteSettings
+  /**
+   * `on-media` when the page opens on a full-bleed hero, so the header can be laid
+   * over it in white. Anything else keeps the header in the flow.
+   */
+  headerTone?: 'on-media' | 'default'
+}
+
+const { seo, path, site, headerTone = 'default' } = Astro.props
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="generator" content={Astro.generator} />
+
+    {
+      /*
+        Marks JS as present before anything renders. It gates progressive
+        enhancement only — the compact menu button is hidden without it, and the
+        navigation stays in the flow instead, so a no-JS visitor gets links rather
+        than a button that does nothing. The entrance animation is pure CSS and
+        deliberately does not depend on this.
+      */
+    }
+    <script is:inline>
+      document.documentElement.classList.remove('no-js')
+      document.documentElement.classList.add('js')
+    </script>
+
+    {
+      /*
+        Both weights are used above the fold — 500 for the headline, navigation and
+        figures, 400 for the figure captions — so both are preloaded. The latin-ext
+        slices are not: they only load if the page actually contains a character in
+        that range, which the English copy does not.
+      */
+    }
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/aeonik-500-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/aeonik-400-latin.woff2"
+      crossorigin
+    />
+
+    <Seo_ seo={seo} path={path} />
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <Header site={site} path={path} tone={headerTone} />
+
+    <main id="main">
+      <slot />
+
+      {
+        /*
+          The closing call is inside <main> because it is content, not chrome: a
+          visitor who takes the skip link and reads to the end has to arrive at the
+          call rather than step over it. It is site-global — the reasoning is on
+          `SiteCta` in packages/shared/src/site.ts — so every page carries it
+          without a block having to be appended to every page's fixture.
+        */
+      }
+      <Cta cta={site.cta} />
+    </main>
+
+    <Footer site={site} path={path} />
+
+    {
+      /*
+        Scroll choreography. ~0.3 KB, one observer for the whole page: every
+        section marked `data-reveal-group` holds its entrance at the first frame
+        (CSS does the holding, see "In view" in global.css) until it is close
+        enough to be worth playing.
+
+        `-15%` on the bottom edge, so a section starts when its top is a sixth of
+        the way up the viewport rather than the instant its first pixel appears —
+        otherwise the animation is over before the visitor has scrolled to it. The
+        observer disconnects each group as it fires; nothing replays on scroll back.
+      */
+    }
+    <script>
+      const groups = document.querySelectorAll<HTMLElement>('[data-reveal-group]')
+
+      if (groups.length) {
+        // Baseline since 2019, but a missing observer must reveal the page, not hide it.
+        if (!('IntersectionObserver' in window)) {
+          groups.forEach((group) => group.setAttribute('data-inview', ''))
+        } else {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue
+                entry.target.setAttribute('data-inview', '')
+                observer.unobserve(entry.target)
+              }
+            },
+            { rootMargin: '0px 0px -15% 0px' },
+          )
+          groups.forEach((group) => observer.observe(group))
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,420 @@
+---
+import type { AudienceTabsBlock } from '@repo/shared'
+import Button from '@/components/ui/Button.astro'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: AudienceTabsBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'audience-tabs-heading'
+
+/**
+ * A newline in `heading` is a designed line break, the same convention Hero uses.
+ * Each line becomes its own masked block so the two rise in sequence.
+ */
+const headingLines = block.heading.split('\n')
+
+/**
+ * The switch, and why it has no JavaScript.
+ *
+ * One radio per option, each inside its own label, visually hidden but focusable.
+ * That single choice does three things a script would have to be written to do:
+ * the state survives with no hydration, arrow keys move between the options
+ * because a radio group already does that, and the block costs 0 B.
+ *
+ * Putting the radio INSIDE the label rather than beside it is what keeps the
+ * label's own two states — active and focused — down to one rule each
+ * (`label:has(:checked)`, `label:has(:focus-visible)`) instead of one rule per
+ * position. The photographs still need positional rules, because they live in the
+ * other half of the band and CSS cannot ask "which label is this radio's"; that
+ * list is at the foot of the stylesheet, and it is what caps `options` at four.
+ */
+const group = 'audience-tabs'
+const optionId = (index: number) => `${group}-${index + 1}`
+
+/**
+ * Reveal order. Both halves of the band arrive together — they are one object
+ * split by 10 px, and staggering them would read as two.
+ */
+const order = {
+  heading: 0,
+  band: headingLines.length,
+  tab: headingLines.length + 1,
+}
+const TAB_STAGGER = 0.4
+
+/**
+ * The photograph fills half of the 1360 grid: (1360 - 10) / 2 = 675 at 1440 and
+ * up, and just under half the viewport between the fold and there. Below the fold
+ * it is the full width of the page.
+ *
+ * The ladder stops at 675 because that is where the layout stops growing — and
+ * because the masters stop there too. They are 500 px tall against a 500 px band,
+ * so there is no 2× file to ask for; see AudienceTabs.spec.md.
+ */
+const PHOTO_WIDTHS = [390, 675]
+const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
+---
+
+<section class="audience" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="audience__heading text-title" id={headingId}>
+      {
+        headingLines.map((line, index) => (
+          <span class="reveal-mask" style={`--reveal-index: ${order.heading + index}`}>
+            <span>{line}</span>
+          </span>
+        ))
+      }
+    </h2>
+
+    <div class="audience__band">
+      <div class="audience__box">
+        {
+          /*
+            The ground is its own element, and it has to be: the entrance wipes the
+            tint up from the foot of the box while the questions stay put, which a
+            background on the box itself could not do — it would sit behind the
+            curtain and never move.
+          */
+        }
+        <span class="audience__ground reveal-curtain" style={`--reveal-index: ${order.band}`}
+        ></span>
+
+        <div class="audience__switches">
+          {
+            block.options.map((option, index) => (
+              <label class="audience__tab">
+                <input
+                  class="audience__pick"
+                  type="radio"
+                  name={group}
+                  id={optionId(index)}
+                  checked={index === 0}
+                />
+                {/*
+                  `.reveal-mask`, not `.reveal`, and the reason is a bug this block
+                  had until it was measured: `.reveal` animates opacity with
+                  `fill-mode: both`, an animation's end frame outranks a
+                  declaration on the same property for good, and the inactive
+                  switch's whole state IS an opacity. Every question would have
+                  ended the entrance at full strength. The mask animates transform
+                  only, so the two never meet.
+                */}
+                <span
+                  class="audience__label reveal-mask"
+                  style={`--reveal-index: ${order.tab + index * TAB_STAGGER}`}
+                >
+                  <span>{option.label}</span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="audience__stage">
+        {/*
+          The same two-element curtain the other picture blocks use: the pane wipes
+          up out of the stage's clip while the photographs inside counter-travel, so
+          the picture stands still and only the opening moves.
+        */}
+        <span class="audience__pane reveal-curtain" style={`--reveal-index: ${order.band}`}>
+          <span class="audience__hold reveal-curtain-hold" style={`--reveal-index: ${order.band}`}>
+            {
+              block.options.map((option) => (
+                /*
+                  The whole photograph is the link, so the button inside it is drawn
+                  as a span (`Button as="span"`) — an <a> inside an <a> is invalid
+                  and browsers recover from it by splitting the outer one, which
+                  would stop the picture being a single target.
+
+                  An inactive panel is `visibility: hidden`, which is what keeps the
+                  two links the visitor cannot see out of the tab order as well as
+                  out of sight.
+
+                  `draggable="false"`: dragging a link tears a ghost of the whole
+                  photograph off the page, and there is nothing here worth dragging.
+                */
+                <a
+                  class="audience__panel"
+                  href={option.cta.disabled ? undefined : option.cta.href}
+                  aria-label={option.cta.ariaLabel}
+                  aria-disabled={option.cta.disabled ? 'true' : undefined}
+                  role={option.cta.disabled ? 'link' : undefined}
+                  draggable="false"
+                  rel={!option.cta.disabled && option.cta.external ? 'noopener noreferrer' : undefined}
+                  target={!option.cta.disabled && option.cta.external ? '_blank' : undefined}
+                >
+                  <Picture image={option.image} widths={PHOTO_WIDTHS} sizes={PHOTO_SIZES} />
+
+                  <span class="audience__cta">
+                    <Button link={option.cta} withArrow as="span" />
+                  </span>
+                </a>
+              ))
+            }
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .audience {
+    /* 120 above, nothing below: the section that follows brings its own space. */
+    padding-block-start: var(--space-14);
+    background-color: var(--color-bg);
+  }
+
+  .audience__heading {
+    margin-block-end: var(--audience-heading-gap);
+    color: var(--color-fg);
+  }
+
+  /* ── The band ─────────────────────────────────────────────────────────────
+   * Two equal halves with 10 px between them, 500 px tall. Equal rather than
+   * measured: the crop puts the box at 658.6 and the photograph at 663.0, i.e.
+   * one number read twice through ±2.2 px of crop resolution.
+   */
+  .audience__band {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--audience-gap);
+    block-size: var(--audience-band-height);
+  }
+
+  /* ── The questions ────────────────────────────────────────────────────────── */
+  .audience__box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: var(--audience-pad);
+    /* The aperture the ground wipes up through. */
+    overflow: clip;
+  }
+
+  .audience__ground {
+    position: absolute;
+    inset: 0;
+    display: block;
+    background-color: var(--color-bg-subtle);
+  }
+
+  .audience__switches {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Centred on both axes, and both are measured: the middle switch's ink is
+       centred on the box to half a crop pixel, and the three cap-tops-to-last-
+       baseline block is centred on it to one. */
+    text-align: center;
+  }
+
+  /*
+   * Padding rather than a gap, so the three hit areas tile with no dead ground
+   * between them — on a phone the difference is a tap that lands and a tap that
+   * does not. 20 above and below a 40 px line box is the measured 80 px pitch.
+   */
+  .audience__tab {
+    display: block;
+    padding-block: var(--audience-tab-pad-block);
+    cursor: pointer;
+  }
+
+  /*
+   * The state, parked out of the layout. 1 px rather than `display: none` because
+   * a hidden input is not focusable, and the arrow keys are this block's keyboard
+   * interface. It stays inside its label, so the visible text is its accessible
+   * name with no `aria-label` to keep in sync.
+   */
+  .audience__pick {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .audience__label {
+    display: block;
+    color: var(--color-fg);
+    font-size: var(--audience-tab-size);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    letter-spacing: var(--audience-tab-tracking);
+    /* Inactive is the resting state — see the token for the contrast note. */
+    opacity: var(--audience-tab-rest-opacity);
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  .audience__tab:has(.audience__pick:checked) .audience__label {
+    opacity: 1;
+  }
+
+  /*
+   * `:not(:has(:checked))` rather than source order: without it the hover value
+   * would dim the ACTIVE switch on the way past it, which is the one state the
+   * design is explicit about.
+   */
+  @media (hover: hover) {
+    .audience__tab:not(:has(.audience__pick:checked)):hover .audience__label {
+      opacity: var(--audience-tab-hover-opacity);
+    }
+  }
+
+  /*
+   * The ring belongs to the label even though the focus belongs to the radio: the
+   * radio is a pixel wide, so without this a keyboard visitor moving through the
+   * options would see nothing but the photograph change.
+   */
+  .audience__tab:has(.audience__pick:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  /* ── The photographs ──────────────────────────────────────────────────────── */
+  .audience__stage {
+    position: relative;
+    /* The aperture the entrance curtain opens through. */
+    overflow: clip;
+  }
+
+  .audience__pane,
+  .audience__hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .audience__panel {
+    position: absolute;
+    inset: 0;
+    display: block;
+    /* Lime-Dark disappears into the photography. */
+    --color-focus: var(--color-on-media);
+    /*
+     * Hidden AND transparent. The opacity is the cross-fade; the visibility is
+     * what takes the link out of the tab order, and it is delayed by exactly the
+     * fade so the picture is gone before it stops being there.
+     */
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--duration-base) var(--ease-standard),
+      visibility 0s linear var(--duration-base);
+  }
+
+  .audience__panel :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    /* Three masters of three proportions, one 500 px band. */
+    object-fit: cover;
+  }
+
+  .audience__cta {
+    position: absolute;
+    inset-block-end: var(--audience-pad);
+    inset-inline-end: var(--audience-pad);
+  }
+
+  /* ── Which photograph is showing ──────────────────────────────────────────
+   * The only place the checked radio becomes a position. One rule per option,
+   * and the schema's `max(4)` is what keeps this list this length — a fifth
+   * option needs a fifth rule here, or it silently shows the fourth.
+   */
+  .audience__band:has(.audience__tab:nth-child(1) .audience__pick:checked)
+    .audience__panel:nth-child(1),
+  .audience__band:has(.audience__tab:nth-child(2) .audience__pick:checked)
+    .audience__panel:nth-child(2),
+  .audience__band:has(.audience__tab:nth-child(3) .audience__pick:checked)
+    .audience__panel:nth-child(3),
+  .audience__band:has(.audience__tab:nth-child(4) .audience__pick:checked)
+    .audience__panel:nth-child(4) {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--duration-base) var(--ease-standard),
+      visibility 0s;
+  }
+
+  /* ── Fold ─────────────────────────────────────────────────────────────────
+   * The two-column arrangement lives or dies on one line of text: the longest
+   * question, "Buy or Selling a Project?", has to set on one line inside the box.
+   * At the clamped label size that holds down to about 940 px — 348.8 px of label
+   * plus 80 of padding against a 420 px half — so the design's arrangement is not
+   * actually what folds first. It folds at 1024 anyway, the project's own
+   * breakpoint, so the last width that keeps it has ~90 px of margin rather than
+   * two.
+   *
+   * Below it the questions become a row above the photograph: a scroller with the
+   * active one in it, which is the shape a phone can flick through. The radios are
+   * untouched, so the keyboard story does not change.
+   */
+  @media (max-width: 1023px) {
+    .audience {
+      /* A 40 px band above and below a row of questions is a desktop measure; in
+         a scroller it is a third of the phone's screen spent on nothing. */
+      --audience-tab-pad-block: var(--space-3); /* 12 */
+    }
+
+    .audience__band {
+      grid-template-columns: minmax(0, 1fr);
+      block-size: auto;
+    }
+
+    .audience__box {
+      /* The row is the whole box now: no tint behind it, and nothing to clip. */
+      padding: 0;
+      place-items: stretch;
+      overflow: visible;
+    }
+
+    .audience__ground {
+      display: none;
+    }
+
+    /*
+     * Out to the page edges and back in by the gutter: a scroller that stops short
+     * of the screen edge reads as a box with a bug, and the last question would sit
+     * against the gutter with nothing after it.
+     */
+    .audience__switches {
+      flex-direction: row;
+      gap: var(--audience-tab-pad-inline);
+      margin-inline: calc(-1 * var(--container-gutter));
+      padding-inline: var(--container-gutter);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      /* Both sides: the browser scrolls a focused question into view itself, and
+         without this it parks the last one hard against the screen edge. */
+      scroll-padding-inline: var(--container-gutter);
+      /* The row is a strip of three words; a scrollbar under it is louder than the
+         thing it describes, and the row is also driven by the arrow keys. */
+      scrollbar-width: none;
+      text-align: start;
+    }
+
+    .audience__switches::-webkit-scrollbar {
+      display: none;
+    }
+
+    .audience__tab {
+      flex: none;
+      scroll-snap-align: start;
+    }
+
+    .audience__label {
+      white-space: nowrap;
+    }
+
+    .audience__stage {
+      block-size: var(--audience-band-height);
+    }
+  }
+</style>

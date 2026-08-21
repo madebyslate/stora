@@ -1,0 +1,234 @@
+---
+import type { PageHeroBlock } from '@repo/shared'
+import { PAGE_HERO_QUALITY, PAGE_HERO_SIZES, PAGE_HERO_WIDTHS } from '@/lib/images'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: PageHeroBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'page-hero-heading'
+
+/**
+ * A newline in `heading` and in `subheading` is a designed line break (see the
+ * schema). Each line becomes its own masked block so they can be revealed in
+ * sequence — the alternative is a JS line splitter, and that is not worth a
+ * kilobyte on the critical path for breaks the editor already knows about.
+ */
+const headingLines = block.heading.split('\n')
+const subheadingLines = block.subheading?.split('\n') ?? []
+
+/** Reveal order. Kept here so the whole choreography is readable in one place. */
+const order = {
+  heading: 1,
+  lead: headingLines.length + 2,
+}
+---
+
+{
+  /*
+    `position: sticky` plus a negative index is the entire scroll effect, and it is
+    declared on the section itself rather than on a wrapper because sticky is
+    resolved against the nearest scrolling ancestor — here `<main>`, which is
+    exactly the run of the page we want to travel over the photograph. A wrapper
+    would shorten that run to its own height.
+  */
+}
+<section class="page-hero" aria-labelledby={headingId} data-page-hero>
+  <div class="page-hero__backdrop">
+    <Picture
+      image={block.image}
+      widths={PAGE_HERO_WIDTHS}
+      sizes={PAGE_HERO_SIZES}
+      quality={PAGE_HERO_QUALITY}
+      priority
+    />
+  </div>
+
+  {
+    /*
+      Two scrims, for the reason the home hero has two: the header needs ~145 px
+      of cover at the top and the copy needs its own band at the foot, and one
+      gradient doing both would grey out the middle of the shot. Both are this
+      block's own and both are deeper than the home hero's — four photographs are
+      a harder problem than one clip, and the numbers that forced each value are
+      on its token.
+      Not animated — they are what makes the white type legible, and a scrim that
+      fades in is a contrast failure for its first 400 ms.
+    */
+  }
+  <div class="page-hero__scrim page-hero__scrim--top"></div>
+  <div class="page-hero__scrim page-hero__scrim--bottom"></div>
+
+  <div class="page-hero__inner container-page">
+    <h1 class="page-hero__heading text-display" id={headingId}>
+      {
+        headingLines.map((line, index) => (
+          <span class="reveal-mask" style={`--reveal-index: ${order.heading + index}`}>
+            <span>{line}</span>
+          </span>
+        ))
+      }
+    </h1>
+
+    {
+      subheadingLines.length > 0 && (
+        <p class="page-hero__lead text-lead reveal" style={`--reveal-index: ${order.lead}`}>
+          {subheadingLines.map((line, index) => (
+            <>
+              {index > 0 && <br />}
+              {line}
+            </>
+          ))}
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    /*
+     * Sticky, so the page scrolls over the photograph instead of taking it with
+     * it; `--z-media`, so it does so *over* rather than under. A negative index
+     * puts this block below the layer that in-flow block backgrounds paint in, and
+     * every section that follows paints an opaque ground of its own — which is
+     * what turns a pinned photograph into a section riding on top of it.
+     *
+     * Deliberately no `isolation: isolate` here, unlike the home hero: that would
+     * open a stacking context and trap the -1 inside this block, and the effect
+     * would quietly degrade to an ordinary scroll with nothing to show for it.
+     */
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-media);
+
+    /* Two rows: a spacer that eats the slack, and the content row the bottom
+       scrim is laid into — so the scrim tracks the copy's real height. */
+    display: grid;
+    grid-template-rows: 1fr auto;
+    block-size: var(--page-hero-height);
+    overflow: clip;
+    color: var(--color-on-media);
+    background-color: var(--color-ink);
+    /* Lime-Dark is invisible against the photography; the ring has to be white. */
+    --color-focus: var(--color-on-media);
+  }
+
+  .page-hero[data-about-morph] {
+    z-index: var(--z-base);
+    pointer-events: none;
+    transform-origin: center;
+    transform: translate3d(
+        var(--about-hero-translate-x, 0),
+        var(--about-hero-translate-y, 0),
+        0
+      )
+      scale(var(--about-hero-scale-x, 1), var(--about-hero-scale-y, 1));
+    opacity: var(--about-hero-opacity, 1);
+    will-change: transform;
+  }
+
+  .page-hero[data-about-morph] .page-hero__backdrop :global(img) {
+    transform: scale(
+      var(--about-hero-image-scale-x, 1),
+      var(--about-hero-image-scale-y, 1)
+    );
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  .page-hero[data-about-morph] .page-hero__scrim,
+  .page-hero[data-about-morph] .page-hero__inner {
+    opacity: var(--about-hero-copy-opacity, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /*
+     * A full-screen photograph held still while the page slides over it is
+     * parallax, and parallax is what this query is for. Dropping `sticky` leaves
+     * an ordinary hero — no other value in the block changes.
+     */
+    .page-hero {
+      position: static;
+    }
+
+    .page-hero[data-about-morph] {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  .page-hero__backdrop {
+    grid-area: 1 / 1 / 3 / 2;
+    /*
+     * No `z-index` here, and that is not an omission — it is the fix for a bug
+     * this block had and `Hero` cannot have. The section itself sits at
+     * `--z-media` (-1), which makes it a stacking context; a second -1 nested
+     * inside it takes the photograph out of the render in Chromium entirely,
+     * leaving the ink background and the copy behind. Left at `auto` the
+     * backdrop is an ordinary grid item, painted under the scrims (z 1) and the
+     * copy (z 2) by their own indices, which is all it ever needed.
+     *
+     * Caught by the snapshot in tests/visual/page-hero.spec.ts. A DOM
+     * measurement cannot see it: the <img> is 1440 x 900, loaded and at the
+     * right coordinates — it is simply not painted.
+     */
+  }
+
+  /* `:global(img)` reaches the element <Picture> renders, scoped to the backdrop —
+     a descendant rule inside this component, not a loose global selector. */
+  .page-hero__backdrop :global(img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .page-hero__scrim {
+    z-index: var(--z-scrim);
+    pointer-events: none;
+  }
+
+  .page-hero__scrim--top {
+    grid-area: 1 / 1;
+    align-self: start;
+    block-size: var(--hero-scrim-top-height);
+    inline-size: 100%;
+    background: var(--page-hero-scrim-top);
+  }
+
+  .page-hero__scrim--bottom {
+    grid-area: 2 / 1;
+    /* Deeper than the home hero's, and measured rather than chosen — the token
+       carries the numbers and the photograph that forced them. */
+    background: var(--page-hero-scrim-bottom);
+  }
+
+  .page-hero__inner {
+    grid-area: 2 / 1;
+    position: relative;
+    z-index: var(--z-content);
+    /*
+     * The copy stands 72 px off the foot rather than sitting in the middle of the
+     * frame: measured 75.7 and 69.9 on the two frames, and the same `--space-12`
+     * the home hero sets. The top padding only matters on a viewport short enough
+     * for the copy to reach the header.
+     */
+    padding-block: calc(var(--header-height) + var(--space-9)) var(--space-12);
+    text-align: center;
+  }
+
+  .page-hero__heading {
+    /* Only relevant once a line has to wrap on its own, below the design width. */
+    text-wrap: balance;
+  }
+
+  .page-hero__lead {
+    max-inline-size: var(--page-hero-copy-measure);
+    margin-block: var(--space-5) 0;
+    margin-inline: auto;
+    text-wrap: pretty;
+  }
+</style>

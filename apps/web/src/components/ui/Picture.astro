@@ -1,0 +1,129 @@
+---
+import { Picture as AstroPicture } from 'astro:assets'
+import type { ImageOutputFormat } from 'astro'
+import type { MediaImage } from '@repo/shared'
+import { resolveImage, isRemote } from '@/lib/media'
+
+/**
+ * Every content image goes through here, so the format ladder is decided once.
+ *
+ * AVIF first, WebP second, JPEG as the `<img>` fallback: AVIF covers roughly 94%
+ * of traffic at a fraction of JPEG's bytes, and the two fallbacks cost nothing to
+ * the browsers that never request them. A bare `<img format="avif">` would be
+ * smaller markup and a broken image for the remaining 6%.
+ */
+
+interface Props {
+  image: MediaImage
+  /** Variant widths. Chosen to fit the layout, not "just in case". */
+  widths?: number[]
+  /** Must describe the real rendered width, or the browser picks the wrong file. */
+  sizes?: string
+  /** `true` for the LCP element only. */
+  priority?: boolean
+  /**
+   * Encoder quality, 0–100. Left unset the shared default applies, which is what
+   * every image should use unless it has a measurement saying otherwise: a number
+   * here is a claim that this particular picture was compared at two settings and
+   * the lower one held up. The place to record that comparison is the block's spec.
+   */
+  quality?: number
+  /**
+   * The `<img>` fallback format. JPEG for photography; `png` for anything with an
+   * alpha channel — a logo flattened into a JPEG arrives as a mark on a black box
+   * in the browsers that take the fallback.
+   */
+  fallbackFormat?: 'jpeg' | 'png'
+  /**
+   * `false` takes the picture out of the browser's own drag-and-drop.
+   *
+   * For a picture that lives inside a gesture — a slider dragged with a finger or
+   * a mouse — where the native "drag this image somewhere else" would otherwise
+   * win the pointer halfway through the swipe and leave a ghost of the photograph
+   * hanging off the cursor.
+   */
+  draggable?: boolean
+  class?: string
+}
+
+const {
+  image,
+  widths,
+  sizes = '100vw',
+  priority = false,
+  quality,
+  fallbackFormat = 'jpeg',
+  draggable,
+  class: className,
+} = Astro.props
+
+const src = resolveImage(image)
+const isSvg = !isRemote(src) && src.format === 'svg'
+
+/*
+ * The LCP image is fetched immediately and at high priority; everything else is
+ * lazy. On a 4G connection that is the difference between a 2.4 s and a 4 s LCP.
+ */
+const loading = priority ? 'eager' : 'lazy'
+const decoding = priority ? 'sync' : 'async'
+const fetchpriority = priority ? 'high' : 'auto'
+const formats: ImageOutputFormat[] = ['avif', 'webp']
+---
+
+{
+  /*
+    Two branches, because `<Picture>` has a different contract per source. A local
+    image carries its dimensions in metadata and can be asked for a `widths` ladder.
+    A remote one (Payload, stage 2) has to be given `width`/`height` explicitly —
+    otherwise the space cannot be reserved and CLS blows the budget — and Astro will
+    not generate variants for it, because it has no file to measure. Remote images
+    therefore ship at one size until the Payload adapter starts emitting a set of
+    its own; there is a note about it in DECISIONS.md.
+  */
+}
+{
+  isSvg ? (
+    <img
+      src={src.src}
+      width={image.width}
+      height={image.height}
+      alt={image.alt}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      draggable={draggable}
+      class={className}
+    />
+  ) : isRemote(src) ? (
+    <AstroPicture
+      src={src}
+      width={image.width}
+      height={image.height}
+      alt={image.alt}
+      sizes={sizes}
+      quality={quality}
+      formats={formats}
+      fallbackFormat={fallbackFormat}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      draggable={draggable}
+      class={className}
+    />
+  ) : (
+    <AstroPicture
+      src={src}
+      widths={widths}
+      sizes={sizes}
+      alt={image.alt}
+      quality={quality}
+      formats={formats}
+      fallbackFormat={fallbackFormat}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      draggable={draggable}
+      class={className}
+    />
+  )
+}

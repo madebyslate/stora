@@ -1,0 +1,37 @@
+---
+/**
+ * The Stora mark on its own, inlined.
+ *
+ * The same reasoning as `Logo.astro`: inline so it costs no request, and filled
+ * with `currentColor` so one file serves the Lime-Dark it is drawn in and any
+ * other ground it later has to sit on. The source is `_inbox/logotypy/green-icon.svg`,
+ * whose `#172E23` is `--color-lime-dark` written out — the colour is therefore not
+ * lost by taking it out of the file, it is moved to where every other colour in
+ * this project lives.
+ *
+ * 117 x 116 is the artwork's own box; the CSS sizes it from `--cta-mark-size`.
+ * The same path is reused in `public/favicon.svg`, where a contrasting ground
+ * keeps the mark legible in both light and dark browser chrome.
+ */
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<svg
+  class={className}
+  width="117"
+  height="116"
+  viewBox="0 0 117 116"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M0.193367 38.5491C0.193367 55.6407 11.3872 70.1272 26.878 75.1768L58.3755 0H38.985C17.5642 0 0.193367 17.2623 0.193367 38.5491ZM58.3755 38.5491H116.568V0H58.3755V38.5491ZM79.0658 38.5706C78.6574 38.5706 78.2386 38.5491 77.8195 38.5491V38.5706H79.0658ZM58.3969 115.658H58.3755V115.712L58.3969 115.658ZM89.8835 40.5348L58.3862 115.712H77.7766C99.1975 115.712 116.568 98.4494 116.568 77.1625C116.568 60.0709 105.374 45.5844 89.8835 40.5348ZM58.3755 77.1091H0V115.658H58.3755V77.1091Z"
+    fill="currentColor"></path>
+</svg>

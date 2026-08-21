@@ -1,0 +1,62 @@
+---
+import type { Seo } from '@repo/shared'
+import { absoluteUrl } from '@/lib/site'
+import { resolveImage, isRemote } from '@/lib/media'
+import { getImage } from 'astro:assets'
+
+interface Props {
+  seo: Seo
+  /** Current page path, e.g. `/about-us/`. Used as the canonical when the content does not supply one. */
+  path: string
+}
+
+const { seo, path } = Astro.props
+
+const canonical = absoluteUrl(seo.canonicalPath ?? path)
+
+// Open Graph needs an absolute URL to a finished file, so a local image has to go
+// through the astro:assets pipeline first to get its path inside dist/.
+let ogImageUrl: string | undefined
+let ogImageSize: { width: number; height: number } | undefined
+
+if (seo.ogImage) {
+  const src = resolveImage(seo.ogImage)
+  ogImageSize = { width: seo.ogImage.width, height: seo.ogImage.height }
+  if (isRemote(src)) {
+    ogImageUrl = src
+  } else {
+    // OG images are read by crawlers with no AVIF support — JPEG it is.
+    const generated = await getImage({ src, format: 'jpeg', width: seo.ogImage.width })
+    ogImageUrl = absoluteUrl(generated.src)
+  }
+}
+---
+
+<title>{seo.title}</title>
+<meta name="description" content={seo.description} />
+<link rel="canonical" href={canonical} />
+
+{seo.noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Stora Energy" />
+<meta property="og:title" content={seo.title} />
+<meta property="og:description" content={seo.description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content="en_GB" />
+
+{
+  ogImageUrl && (
+    <>
+      <meta property="og:image" content={ogImageUrl} />
+      <meta property="og:image:width" content={String(ogImageSize?.width)} />
+      <meta property="og:image:height" content={String(ogImageSize?.height)} />
+      <meta property="og:image:alt" content={seo.ogImage?.alt ?? ''} />
+    </>
+  )
+}
+
+<meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:title" content={seo.title} />
+<meta name="twitter:description" content={seo.description} />
+{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}

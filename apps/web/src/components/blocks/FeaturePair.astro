@@ -1,0 +1,304 @@
+---
+import type { FeaturePairBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: FeaturePairBlock
+}
+
+const { block } = Astro.props
+const headingId = `feature-pair-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+const toWords = (text: string) => text.split(/\s+/).filter(Boolean)
+const headingLines = block.heading.split('\n').map(toWords)
+const headingWordCount = headingLines.reduce((count, words) => count + words.length, 0)
+const CARD_STAGGER = 0.7
+const cardOrder = (index: number) => {
+  const pane = headingLines.length + index * CARD_STAGGER
+  const title = headingWordCount + 4 + index * 4
+  return {
+    pane,
+    title,
+  }
+}
+---
+
+<section class="feature-pair" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page feature-pair__head">
+    <h2 id={headingId} class="feature-pair__heading text-title">
+      {
+        headingLines.map((words, lineIndex) => (
+          <span class="feature-pair__line">
+            {words.map((word, wordIndex) => (
+              <>
+                <span
+                  class="feature-pair__word"
+                  style={`--feature-word: ${headingLines
+                    .slice(0, lineIndex)
+                    .reduce((count, line) => count + line.length, 0) + wordIndex}`}
+                >
+                  <span>{word}</span>
+                </span>{' '}
+              </>
+            ))}
+          </span>
+        ))
+      }
+    </h2>
+  </div>
+
+  <div class="feature-pair__cards">
+    {
+      block.items.map((item, index) => {
+        const titleWords = toWords(item.title)
+        const descriptionWords = toWords(item.description)
+        const order = cardOrder(index)
+        return (
+          <article class:list={['feature-card', index === 0 && 'feature-card--selected']}>
+            <span
+              class="feature-card__pane reveal-curtain"
+              style={`--reveal-index: ${order.pane}`}
+            >
+              <span
+                class="feature-card__hold reveal-curtain-hold"
+                style={`--reveal-index: ${order.pane}`}
+              >
+                <Picture
+                  image={item.image}
+                  widths={[540, 720, 1086]}
+                  sizes="(max-width: 767px) 100vw, 50vw"
+                  draggable={false}
+                />
+              </span>
+
+              <span class="feature-card__scrim" aria-hidden="true" />
+
+              <div class="feature-card__content">
+                <h3
+                  class="feature-card__title"
+                >
+                  {titleWords.map((word, wordIndex) => (
+                    <>
+                      <span
+                        class="feature-pair__word"
+                        style={`--feature-word: ${order.title + wordIndex}`}
+                      >
+                        <span>{word}</span>
+                      </span>{' '}
+                    </>
+                  ))}
+                </h3>
+                <span class="feature-card__description">
+                  {descriptionWords.map((word, wordIndex) => (
+                    <>
+                      <span
+                        class="feature-card__description-word"
+                        style={`--feature-word: ${wordIndex}`}
+                      >
+                        <span>{word}</span>
+                      </span>{' '}
+                    </>
+                  ))}
+                </span>
+              </div>
+            </span>
+          </article>
+        )
+      })
+    }
+  </div>
+</section>
+
+<style>
+  .feature-pair {
+    padding-top: var(--feature-pair-padding-top);
+    background-color: var(--color-bg);
+    overflow: clip;
+  }
+
+  .feature-pair__head {
+    padding-bottom: var(--feature-pair-heading-gap);
+  }
+
+  .feature-pair__heading {
+    max-width: var(--feature-pair-heading-measure);
+    color: var(--color-fg);
+  }
+
+  .feature-pair__line {
+    display: block;
+    width: fit-content;
+  }
+
+  .feature-pair__word,
+  .feature-card__description-word {
+    display: inline-block;
+    clip-path: inset(-0.02em -0.05em -0.16em);
+  }
+
+  .feature-pair__word > span,
+  .feature-card__description-word > span {
+    display: inline-block;
+    transform: translate3d(0, var(--feature-word-travel), 0);
+    animation-duration: var(--duration-reveal);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--feature-word) * var(--feature-word-step));
+  }
+
+  .feature-pair__word > span {
+    animation-name: feature-pair-word-in;
+  }
+
+  .feature-card__description-word > span {
+    animation-name: var(--feature-card-copy-line, none);
+  }
+
+  @keyframes feature-pair-word-in {
+    from {
+      transform: translate3d(0, var(--feature-word-travel), 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  :global(html.js) .feature-pair:not([data-inview]) .feature-pair__word > span,
+  :global(html.js)
+    .feature-pair:not([data-inview])
+    .feature-card__description-word
+    > span {
+    animation-play-state: paused;
+  }
+
+  .feature-pair__cards {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--feature-card-min-width)), 1fr)
+    );
+    gap: var(--feature-card-gap);
+  }
+
+  .feature-card {
+    position: relative;
+    height: var(--feature-card-height);
+    overflow: clip;
+    color: var(--color-on-media);
+  }
+
+  .feature-card__pane,
+  .feature-card__hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .feature-card__pane {
+    --reveal-curtain-y: 100%;
+    --reveal-curtain-scale: var(--feature-card-reveal-scale);
+  }
+
+  .feature-card__hold {
+    z-index: var(--z-base);
+    overflow: clip;
+  }
+
+  .feature-card :global(img) {
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform: scale(1);
+    transition: transform var(--duration-slow) var(--ease-standard);
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .feature-card__scrim {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: var(--z-scrim);
+    height: min(100%, var(--feature-card-scrim-height));
+    background: var(--feature-card-scrim);
+    pointer-events: none;
+  }
+
+  .feature-card__content {
+    position: absolute;
+    inset: auto var(--feature-card-padding) var(--feature-card-padding);
+    z-index: var(--z-content);
+    max-width: var(--feature-card-copy-measure);
+    transform: none;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .feature-card__title {
+    font-size: var(--text-card-title);
+    font-weight: var(--text-card-title--font-weight);
+    line-height: var(--text-card-title--line-height);
+    letter-spacing: var(--text-card-title--letter-spacing);
+  }
+
+  .feature-card__description {
+    --feature-card-copy-line: feature-pair-word-in;
+    display: block;
+    margin-top: var(--feature-card-copy-gap);
+    color: var(--color-on-media);
+    font-size: var(--text-body);
+    font-weight: var(--text-body--font-weight);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-standard);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .feature-card__content {
+      transform: translate3d(
+        0,
+        calc(100% - var(--feature-card-title-line-height)),
+        0
+      );
+    }
+
+    .feature-card__description {
+      --feature-card-copy-line: none;
+      opacity: 0;
+    }
+
+    .feature-card--selected .feature-card__content,
+    .feature-card:hover .feature-card__content {
+      transform: none;
+    }
+
+    .feature-card--selected .feature-card__description,
+    .feature-card:hover .feature-card__description {
+      --feature-card-copy-line: feature-pair-word-in;
+      opacity: 1;
+    }
+
+    .feature-pair__cards:has(.feature-card:nth-child(2):hover)
+      .feature-card--selected
+      .feature-card__content {
+      transform: translate3d(
+        0,
+        calc(100% - var(--feature-card-title-line-height)),
+        0
+      );
+    }
+
+    .feature-pair__cards:has(.feature-card:nth-child(2):hover)
+      .feature-card--selected
+      .feature-card__description {
+      --feature-card-copy-line: none;
+      opacity: 0;
+    }
+
+    .feature-card:hover :global(img) {
+      transform: scale(var(--feature-card-image-scale));
+    }
+  }
+</style>

@@ -1,0 +1,303 @@
+---
+import type { GrowthTimelineBlock } from '@repo/shared'
+
+interface Props {
+  block: GrowthTimelineBlock
+}
+
+const { block } = Astro.props
+const headingId = 'growth-timeline-heading'
+---
+
+<section class="growth-timeline" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="growth-timeline__heading text-title reveal-mask" id={headingId}>
+      <span>{block.heading}</span>
+    </h2>
+
+    <ol class="growth-timeline__list">
+      {
+        block.items.map((item, index) => (
+          <li
+            class:list={['growth-timeline__item', index === block.items.length - 1 && 'is-current']}
+            style={`--timeline-index: ${index}`}
+          >
+            <h3 class="growth-timeline__title text-card-title reveal-mask" style={`--reveal-index: ${1.8 + index}`}>
+              <span>{item.title}</span>
+            </h3>
+
+            <div class="growth-timeline__marker-row" aria-hidden="true">
+              <span class="growth-timeline__rule-clip">
+                <span class="growth-timeline__rule reveal-curtain" style={`--reveal-index: ${1 + index * 0.65}`} />
+              </span>
+              <span
+                class="growth-timeline__marker reveal-pop"
+                data-icon={item.icon}
+                style={`--reveal-index: ${2.4 + index}`}
+              >
+                {item.icon === 'poland' && (
+                  <svg viewBox="0 0 25 23" fill="none">
+                    <path d="M21.4081 2.85603C21.0274 2.51978 20.1062 1.58978 19.6874 2.20228C18.3106 2.36166 16.8081 2.52728 15.3956 2.09478C14.7712 1.99041 14.0943 1.56791 13.5156 1.82416C13.3181 2.11541 13.0768 2.44103 12.7062 2.57103C12.5318 2.76166 11.7043 2.70978 12.1331 2.42541C12.3974 2.37666 12.9674 2.39603 12.9424 2.01041C12.2431 2.07353 11.2668 2.71228 10.6562 2.00228C10.6168 1.71791 9.89057 0.599784 10.5849 0.878534C10.7756 1.00228 11.1156 1.71728 11.1674 1.16978C10.5156 0.0210343 9.10495 0.730409 8.11307 0.587284C7.68745 0.679784 7.40495 1.18916 6.97057 1.22041C6.7287 1.09041 6.4662 1.09728 6.2162 1.27291C5.1337 3.01853 2.94995 2.62478 1.2562 3.44353C0.743698 3.30416 1.0562 3.80853 1.0687 4.09541C1.0062 4.30978 0.839323 4.52666 1.0812 4.64041C0.871198 5.10103 1.30745 5.47791 1.16557 5.97166C1.20745 6.72291 0.178073 6.96416 0.603073 7.67916C1.15682 8.13291 1.83995 8.58478 1.2412 9.32666C1.1287 9.66978 1.44745 9.76041 1.6162 9.92291C1.36432 10.2067 1.5187 10.2698 1.65245 10.5579C1.47807 10.976 1.15932 11.306 1.3162 11.7823C1.69269 12.0443 1.68688 12.0516 1.40427 12.4082L1.40057 12.4129C1.42432 12.741 1.89057 12.6867 2.03307 12.9079C2.31245 13.6304 1.7937 14.4798 1.61432 15.0617C1.9762 15.2954 1.9562 14.7198 2.13995 14.5804C2.79057 14.3567 2.49307 15.3804 2.85307 15.5179C3.1112 15.3323 3.51307 15.2417 3.79495 15.5154C3.9087 15.6148 3.84182 15.8492 3.96682 15.936C4.3362 15.9248 4.30995 15.9342 4.45495 16.2573C4.75182 16.2529 5.27495 15.7342 5.30432 16.3935C5.27307 16.6754 4.6762 16.7073 4.69807 16.9898C4.72745 17.3548 5.37932 17.3298 5.59182 17.6273C5.5412 18.3885 6.46182 18.0054 6.49995 17.4823C6.39682 17.2223 6.1337 16.8104 6.60995 16.7967C7.00307 17.0617 7.2612 17.6079 7.87682 17.5454C8.20807 17.4873 8.70682 17.4129 8.40495 17.8954C7.72745 18.2354 7.54807 18.3535 8.44182 18.3054C8.74745 18.8785 8.6987 18.7335 9.15307 18.446C9.52495 18.4742 9.55682 19.2967 9.92807 18.8573C10.5306 18.8823 10.6956 19.3223 10.4431 19.7792L10.4513 19.7828C10.8673 19.9668 10.9011 19.9818 10.9806 20.4823C11.2787 20.6573 11.3112 20.6667 11.2612 20.9948C11.8249 21.3129 12.2599 19.4573 12.6537 20.3917C12.7156 20.7798 13.1674 20.7985 13.3462 21.0585C13.1556 21.696 13.1531 22.1242 13.9693 21.7679C14.3349 20.7767 15.3431 20.7942 16.0756 21.3373C16.4181 20.846 16.9318 20.666 17.5674 20.8217C18.4324 20.9217 18.7281 21.4542 19.3262 22.0042C19.8387 21.8604 20.5068 22.5317 20.8912 22.3004C21.0074 21.9648 20.4843 21.891 20.3556 21.6648C20.3656 21.2692 20.4656 20.8479 20.1606 20.5429C20.9062 19.2485 22.0374 17.6204 23.2949 16.9192C24.3593 16.3504 22.4068 15.3954 23.5531 15.2573C23.1737 14.9073 23.0606 14.686 22.9243 14.1367C22.4293 13.7154 22.1312 13.0404 21.9281 12.4279C21.9462 12.0885 22.2331 11.7742 21.9268 11.506C22.1818 11.3342 22.1906 10.9798 22.0706 10.6998C21.7862 10.0723 20.0137 10.4148 21.4299 9.38728C22.0324 8.13353 23.1418 8.96166 22.4768 6.90791C22.3031 5.64166 21.4649 4.27478 21.4081 2.85603Z" />
+                  </svg>
+                )}
+                {item.icon === 'bolt' && (
+                  <svg viewBox="0 0 15 22" fill="none">
+                    <path d="M7.72368 0.86378L0.726015 10.2963C0.215015 10.9846 0.625682 12.0661 1.39918 12.0661H4.80468C5.30051 12.0661 5.70301 12.5421 5.70301 13.1313V20.4323C5.70301 21.4146 6.72735 21.8731 7.27568 21.1358L14.2733 11.7044C14.7843 11.0149 14.3725 9.93345 13.599 9.93345H10.1947C9.69885 9.93345 9.29635 9.45745 9.29635 8.86828V1.56728C9.29635 0.584947 8.27202 0.126447 7.72368 0.86378Z" />
+                  </svg>
+                )}
+                {item.icon === 'arrow' && (
+                  <svg viewBox="0 0 16 16" fill="none">
+                    <path d="M0.5 15.5L15.5 0.5M4.25 0.5H15.5V11.75" />
+                  </svg>
+                )}
+                {item.icon === 'globe' && (
+                  <svg viewBox="0 0 31 31" fill="none">
+                    <path d="M15.5002 28.4173C22.634 28.4173 28.4168 22.6345 28.4168 15.5007C28.4168 8.36678 22.634 2.58398 15.5002 2.58398C8.36629 2.58398 2.5835 8.36678 2.5835 15.5007C2.5835 22.6345 8.36629 28.4173 15.5002 28.4173Z" />
+                    <path d="M3.22949 16.1458L10.3337 18.7292L9.04199 23.25L10.3337 27.125M21.9587 26.4792L21.3128 23.25L18.0837 21.9583V17.4375L21.9587 16.1458L27.7712 16.7917M24.542 7.10417L23.8962 9.04167L19.3753 9.6875V13.5625L22.6045 12.2708H25.1878L27.7712 13.5625M3.22949 13.5625L6.45866 10.9792L9.68783 10.3333L12.2712 6.45833L10.9795 3.875" />
+                  </svg>
+                )}
+              </span>
+            </div>
+
+            <div class="growth-timeline__copy reveal" style={`--reveal-index: ${3.1 + index}`}>
+              <p class="growth-timeline__period text-detail">{item.period}</p>
+              <p class="growth-timeline__description text-timeline-copy">{item.description}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .growth-timeline {
+    padding-block-end: var(--space-14);
+    overflow-x: clip;
+    background-color: var(--color-bg);
+  }
+
+  .growth-timeline__heading {
+    width: fit-content;
+    margin-inline: auto;
+    color: var(--color-fg);
+    text-align: center;
+  }
+
+  .growth-timeline__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: var(--timeline-heading-gap) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .growth-timeline__item {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .growth-timeline__title {
+    min-height: calc(var(--text-card-title) * var(--text-card-title--line-height));
+    padding-inline: var(--space-2);
+    color: var(--color-fg);
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .growth-timeline__marker-row {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: var(--timeline-marker-size);
+    margin-top: var(--timeline-title-marker-gap);
+  }
+
+  .growth-timeline__rule-clip {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: var(--timeline-rule-width);
+    overflow: clip;
+  }
+
+  .growth-timeline__rule {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--timeline-rule-color);
+    --reveal-curtain-x: -100%;
+    --reveal-curtain-y: 0%;
+  }
+
+  .growth-timeline__marker {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--timeline-marker-size);
+    height: var(--timeline-marker-size);
+    border: var(--timeline-rule-width) solid var(--timeline-rule-color);
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg);
+    color: var(--color-green);
+    transition:
+      border-color var(--duration-base) var(--ease-standard),
+      background-color var(--duration-base) var(--ease-standard),
+      color var(--duration-base) var(--ease-standard);
+  }
+
+  .growth-timeline__marker svg {
+    width: var(--timeline-rendered-icon-size, var(--timeline-icon-size));
+    height: var(--timeline-rendered-icon-size, var(--timeline-icon-size));
+    overflow: visible;
+  }
+
+  .growth-timeline__marker[data-icon='poland'] {
+    --timeline-rendered-icon-size: var(--timeline-icon-poland-size);
+  }
+
+  .growth-timeline__marker[data-icon='bolt'] {
+    --timeline-rendered-icon-size: var(--timeline-icon-bolt-size);
+  }
+
+  .growth-timeline__marker[data-icon='globe'] {
+    --timeline-rendered-icon-size: var(--timeline-icon-globe-size);
+  }
+
+  .growth-timeline__marker path {
+    stroke: currentColor;
+    stroke-width: var(--timeline-rule-width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .growth-timeline__copy {
+    max-width: 15rem;
+    margin: var(--timeline-marker-copy-gap) auto 0;
+    color: var(--timeline-copy-color);
+  }
+
+  .growth-timeline__period {
+    transition: color var(--duration-base) var(--ease-standard);
+  }
+
+  .growth-timeline__description {
+    margin-top: var(--timeline-period-copy-gap);
+    color: var(--timeline-copy-color);
+  }
+
+  .growth-timeline__item.is-current .growth-timeline__title,
+  .growth-timeline__item.is-current .growth-timeline__period {
+    color: var(--color-green);
+  }
+
+  .growth-timeline__item.is-current .growth-timeline__marker {
+    border-color: var(--color-green);
+    background-color: var(--color-green);
+    color: var(--color-white);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .growth-timeline__list:has(.growth-timeline__item:hover)
+      .growth-timeline__item.is-current:not(:hover)
+      .growth-timeline__title,
+    .growth-timeline__list:has(.growth-timeline__item:hover)
+      .growth-timeline__item.is-current:not(:hover)
+      .growth-timeline__period {
+      color: var(--color-fg);
+    }
+
+    .growth-timeline__list:has(.growth-timeline__item:hover)
+      .growth-timeline__item.is-current:not(:hover)
+      .growth-timeline__marker {
+      border-color: var(--timeline-rule-color);
+      background-color: var(--color-bg);
+      color: var(--color-green);
+    }
+
+    .growth-timeline__item:hover .growth-timeline__title,
+    .growth-timeline__item:hover .growth-timeline__period {
+      color: var(--color-green);
+    }
+
+    .growth-timeline__item:hover .growth-timeline__marker {
+      border-color: var(--color-green);
+      background-color: var(--color-green);
+      color: var(--color-white);
+    }
+  }
+
+  @media (max-width: 1023px) and (min-width: 768px) {
+    .growth-timeline__title {
+      min-height: calc(2 * var(--text-card-title--line-height) * 1em);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .growth-timeline__heading {
+      margin-inline: 0;
+      text-align: left;
+    }
+
+    .growth-timeline__list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--timeline-mobile-item-gap);
+    }
+
+    .growth-timeline__item {
+      position: relative;
+      display: grid;
+      grid-template-columns: var(--timeline-marker-size) minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      column-gap: var(--timeline-mobile-column-gap);
+      text-align: left;
+    }
+
+    .growth-timeline__title {
+      grid-column: 2;
+      grid-row: 1;
+      min-height: 0;
+      padding-inline: 0;
+    }
+
+    .growth-timeline__marker-row {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      align-self: stretch;
+      height: auto;
+      min-height: var(--timeline-marker-size);
+      margin-top: 0;
+      place-items: start center;
+    }
+
+    .growth-timeline__rule-clip,
+    .growth-timeline__item:first-child .growth-timeline__rule-clip,
+    .growth-timeline__item:last-child .growth-timeline__rule-clip {
+      inset-inline: auto;
+      top: calc(var(--timeline-marker-size) / 2);
+      bottom: calc(-1 * (var(--timeline-mobile-item-gap) + var(--timeline-marker-size) / 2));
+      left: 50%;
+      width: var(--timeline-rule-width);
+      height: auto;
+    }
+
+    .growth-timeline__item:last-child .growth-timeline__rule-clip {
+      bottom: auto;
+      height: 0;
+    }
+
+    .growth-timeline__rule {
+      width: 100%;
+      height: 100%;
+      --reveal-curtain-x: 0%;
+      --reveal-curtain-y: -100%;
+    }
+
+    .growth-timeline__copy {
+      grid-column: 2;
+      grid-row: 2;
+      max-width: none;
+      margin: var(--timeline-period-copy-gap) 0 0;
+    }
+  }
+</style>

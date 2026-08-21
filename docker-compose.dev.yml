@@ -1,0 +1,38 @@
+# Lokalny PostgreSQL do developmentu i tworzenia migracji.
+#
+# NIE jest częścią wdrożenia — produkcja korzysta z centralnego PostgreSQL
+# przez zewnętrzną sieć (docker-compose.yml). Ten plik uruchamiasz osobno:
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# i wskazujesz w .env:
+#   DATABASE_URL=postgresql://stora:stora@127.0.0.1:5434/stora
+
+# Własna nazwa projektu jest OBOWIĄZKOWA: bez niej ten plik dzieli projekt
+# (nazwę katalogu) z docker-compose.yml, a `up -d --remove-orphans` z regularnego
+# deploy scriptu usuwa lokalną bazę jako „osieroconą" usługę.
+name: stora-dev
+
+services:
+  postgres-dev:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stora
+      POSTGRES_PASSWORD: stora
+      POSTGRES_DB: stora
+    ports:
+      # 5434: 5432 zajmuje lokalna instalacja PostgreSQL, 5433 — projekt adstic.
+      # Port hosta MUSI być unikalny per projekt (patrz PLAYBOOK P-011).
+      - "5434:5432"
+    volumes:
+      - stora-postgres-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stora -d stora"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  stora-postgres-dev:
+    name: stora-postgres-dev

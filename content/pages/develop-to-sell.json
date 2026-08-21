@@ -1,0 +1,160 @@
+{
+  "slug": "develop-to-sell",
+  "seo": {
+    "title": "JV Portfolio: Dev-to-Sell — Stora Energy",
+    "description": "We co-develop BESS projects in JV structure with IPPs, funds and utilities, delivering ready-to-build assets for resell or joint operations.",
+    "canonicalPath": "/develop-to-sell/"
+  },
+  "blocks": [
+    {
+      "blockType": "pageHero",
+      "heading": "JV Portfolio: Dev-to-Sell",
+      "subheading": "We co-develop BESS projects in JV structure with IPPs, funds and utilities,\ndelivering ready-to-build assets for resell or joint operations",
+      "image": {
+        "src": "content/media/pages/develop-to-sell-hero.jpg",
+        "alt": "A battery storage site under construction, rows of containers laid out beside a substation",
+        "width": 1440,
+        "height": 900
+      }
+    },
+    {
+      "blockType": "metricStatement",
+      "heading": "Leader, not broker",
+      "value": "700",
+      "unit": "MW",
+      "description": "Our JV pipeline spans projects from early stages to RTB, developed for JV partners looking to enter the Polish BESS market."
+    },
+    {
+      "blockType": "featurePair",
+      "heading": "Two ways to develop with us",
+      "items": [
+        {
+          "title": "JV Co-development",
+          "description": "We co-develop projects from initial screening to ready-to-build, leading the development process while our partner provides capital and participates at agreed decision points.",
+          "image": {
+            "src": "content/media/pages/boxes/jv-co-development.jpg",
+            "alt": "",
+            "width": 1074,
+            "height": 698
+          }
+        },
+        {
+          "title": "RtB Acquisition",
+          "description": "We acquire Ready-to-Build projects, fully permitted and grid-connected.",
+          "image": {
+            "src": "content/media/pages/boxes/rtb-acquisition.jpg",
+            "alt": "",
+            "width": 1086,
+            "height": 698
+          }
+        }
+      ]
+    },
+    {
+      "blockRef": "developmentStages"
+    },
+    {
+      "blockRef": "featuredPublications"
+    },
+    {
+      "blockType": "processBehindAsset",
+      "heading": "The process behind the asset",
+      "items": [
+        {
+          "title": "Data-driven development",
+          "subtitle": "The same engine we use for our own portfolio",
+          "description": "Proprietary screening and AI-driven pipelines identify and develop the strongest opportunities — the same process behind every project we run ourselves.",
+          "bullets": [
+            "Data-heavy screening across the whole market",
+            "Proprietary AI pipelines, not manual sourcing",
+            "Same process behind our own portfolio"
+          ],
+          "image": {
+            "src": "content/media/pages/behind-the-asset/data-driven-development.jpg",
+            "alt": "",
+            "width": 620,
+            "height": 489
+          }
+        },
+        {
+          "title": "Local market expertise",
+          "subtitle": "Our DSO/DNO relationships and Polish market knowledge",
+          "description": "Established relationships and on-the-ground knowledge move projects efficiently towards ready-to-build, with a faster, cleaner path than sourcing cold.",
+          "bullets": [
+            "Established DSO/DNO relationships",
+            "On-the-ground knowledge of the Polish market",
+            "Faster, cleaner path to ready-to-build"
+          ],
+          "image": {
+            "src": "content/media/pages/behind-the-asset/local-market-expertise.jpg",
+            "alt": "",
+            "width": 620,
+            "height": 489
+          }
+        }
+      ]
+    },
+    {
+      "blockType": "processIntroduction",
+      "heading": "One process. Shared\nat the right moments",
+      "image": {
+        "src": "content/media/pages/introduction-process/one-process.jpg",
+        "alt": "",
+        "width": 870,
+        "height": 515
+      },
+      "items": [
+        {
+          "title": "Develop",
+          "description": "We lead the development process. Our team screens, secures and de-risks each project end to end."
+        },
+        {
+          "title": "Decide together",
+          "description": "At each key stage, both sides review the project and decide whether to continue, move towards ready-to-build, or pursue another path."
+        },
+        {
+          "title": "Transfer",
+          "description": "Once the agreed stage is reached, the partner takes over the de-risked asset — or continues developing it with us."
+        }
+      ]
+    },
+    {
+      "blockType": "proofPoints",
+      "heading": "Built with partners. Ready to scale.",
+      "metrics": [
+        {
+          "value": "700",
+          "unit": "MW",
+          "label": "JV pipeline"
+        },
+        {
+          "value": "~130",
+          "unit": "MW",
+          "label": "Grid connection awarded or expected"
+        },
+        {
+          "value": "30",
+          "unit": "years",
+          "label": "Land lease"
+        }
+      ],
+      "image": {
+        "src": "content/media/pages/proof-points/built-with-partners.png",
+        "alt": "",
+        "width": 573,
+        "height": 548
+      },
+      "contact": {
+        "name": "Michał Ogiński",
+        "role": "Chief Development Officer (CDO)",
+        "email": "michal.o@storaenergy.pl",
+        "portrait": {
+          "src": "content/media/team/michal-oginski.jpg",
+          "alt": "",
+          "width": 486,
+          "height": 585
+        }
+      }
+    }
+  ]
+}

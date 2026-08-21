@@ -1,0 +1,330 @@
+@import 'tailwindcss';
+@import '@repo/tokens/tokens.css';
+@import './fonts.css';
+
+/*
+ * Tailwind v4 scans sources automatically upwards from the CSS file's directory,
+ * but `@repo/tokens` lives outside `apps/web` — declared explicitly so classes used
+ * in shared components are not tree-shaken out of the bundle.
+ */
+@source '../../src';
+
+@layer base {
+  :root {
+    color-scheme: light;
+    /* Ring colour for anything on a light surface; on-media contexts override it. */
+    --color-focus: var(--color-accent);
+    /* One step of the entrance choreography. See "Entrance" below. */
+    --reveal-step: 90ms;
+  }
+
+  html {
+    /* Anchors should not jump, but the user's preference still wins. */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-regular);
+    line-height: calc(20 / 16);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /*
+   * Headings carry no size of their own. Every heading in this project takes a
+   * `text-*` step from the scale, which is what stops "an h2 here happens to be
+   * 34px" from ever being true.
+   */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: var(--font-weight-medium);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible focus on everything interactive — never `outline: none` without a swap. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  /* Media never pushes the layout past its container, and never sits on a text
+     baseline it did not ask for. */
+  img,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  /*
+   * `<picture>` is a wrapper with no box of its own to contribute. Taking it out
+   * of the layout means a component can position the `<img>` — absolutely, as a
+   * grid item, as a flex item — without the wrapper silently sitting in the way.
+   */
+  picture {
+    display: contents;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    /*
+     * Hard motion kill (AGENT-RULES §6). Not `animation: none` — that would leave
+     * elements parked in their initial state, which for a reveal means invisible.
+     * Collapsing the duration runs the animation to its end frame instantly.
+     */
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+      /*
+       * Below-the-fold groups hold their start frame by pausing the animation
+       * (see "In view" below). A paused animation never advances, so without this
+       * line a reduced-motion visitor whose observer has not fired yet — or a
+       * browser that reports `reduce` and throttles observers in a background tab
+       * — would be left looking at the invisible first frame for good.
+       */
+      animation-play-state: running !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * The one horizontal grid: 1360 px of content centred in at most 1440 px, with
+   * the gutter shrinking to 20 px on small screens. Every section uses this and
+   * nothing declares its own inline padding.
+   *
+   * NOT called `.container`. Tailwind v4 generates a `.container` utility of its
+   * own from `--breakpoint-*`, and utilities outrank components — so a class by
+   * that name silently gets `max-width: 1024px` between 1024 and 1440, and the
+   * layout only looks right at the two widths that happen to be breakpoints.
+   */
+  .container-page {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
+  /* Skip navigation — only visible once focused from the keyboard. */
+  .skip-link {
+    position: absolute;
+    left: var(--space-4);
+    top: var(--space-4);
+    z-index: var(--z-modal);
+    translate: 0 -200%;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-fg);
+    color: var(--color-fg-inverse);
+    font-size: var(--text-ui);
+    font-weight: var(--font-weight-medium);
+    transition: translate var(--duration-fast) var(--ease-standard);
+  }
+
+  .skip-link:focus-visible {
+    translate: 0 0;
+  }
+
+  /* ── Entrance ───────────────────────────────────────────────────────────────
+   * The above-the-fold choreography is pure CSS: it starts at first paint, with
+   * no observer, no hydration and no framework. Elements order themselves with
+   * `--reveal-index`, an integer set in the markup, so the sequence is readable
+   * where it is used instead of hidden in a timeline object.
+   *
+   * Only `transform` and `opacity` are animated (AGENT-RULES §6). Reduced motion
+   * is handled globally above: every one of these lands on its end frame at once.
+   */
+
+  @keyframes reveal-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--reveal-distance, 1.25rem), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes reveal-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes reveal-line {
+    from {
+      transform: translate3d(0, 105%, 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /*
+   * A curtain: an aperture opens from one edge while the picture inside it stays
+   * put. Two elements, both animating `transform` only (AGENT-RULES §6) —
+   * `clip-path` would express this in one element and is not on the compositor's
+   * fast path.
+   *
+   * The pane starts one full step outside the aperture, so nothing shows; the
+   * picture inside starts one full step the other way, which puts it back at rest.
+   * As both run to zero the picture never moves and only the opening travels.
+   *
+   * The axis is the caller's: `--reveal-curtain-x` / `-y` say where the pane comes
+   * from, and the picture negates whatever they are. Defaults to a wipe up from
+   * the bottom. The scale is the only part that is decoration rather than
+   * mechanism: the picture settles out of an overscan, which reads as the shot
+   * arriving rather than the frame merely growing.
+   */
+  @keyframes reveal-curtain {
+    from {
+      transform: translate3d(var(--reveal-curtain-x, 0%), var(--reveal-curtain-y, 100%), 0);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes reveal-curtain-hold {
+    from {
+      transform: translate3d(
+          calc(-1 * var(--reveal-curtain-x, 0%)),
+          calc(-1 * var(--reveal-curtain-y, 100%)),
+          0
+        )
+        scale(var(--reveal-curtain-scale, 1.06));
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /* For small things that should arrive rather than travel — an icon, a marker.
+     Scale from just under 1, so it reads as settling and not as zooming. */
+  @keyframes reveal-pop {
+    from {
+      opacity: 0;
+      transform: scale(var(--reveal-pop-from, 0.86));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes reveal-rule {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .reveal,
+  .reveal-fade,
+  .reveal-pop,
+  .reveal-rule,
+  .reveal-curtain,
+  .reveal-curtain-hold {
+    animation-duration: var(--duration-reveal);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-step));
+  }
+
+  .reveal {
+    animation-name: reveal-rise;
+  }
+
+  .reveal-fade {
+    animation-name: reveal-fade;
+  }
+
+  .reveal-pop {
+    animation-name: reveal-pop;
+  }
+
+  .reveal-rule {
+    animation-name: reveal-rule;
+    transform-origin: bottom;
+  }
+
+  /* The aperture itself is the caller's business: whatever wraps `.reveal-curtain`
+     has to clip, or the pane is simply visible one height too low. */
+  .reveal-curtain {
+    animation-name: reveal-curtain;
+  }
+
+  .reveal-curtain-hold {
+    animation-name: reveal-curtain-hold;
+  }
+
+  /*
+   * A line mask: the child slides up from under a clipped edge.
+   *
+   * `clip-path`, not `overflow: hidden`. With `line-height: 1` the descenders of
+   * "g" and "y" fall below the line box and `overflow` would slice them off, and
+   * the usual fix — padding plus a negative margin — does not survive contact with
+   * margin collapsing: the negative margins escape the heading instead of
+   * cancelling the padding, and the element ends up 0.2em taller than its lines.
+   * A negative bottom inset extends the visible region without touching layout.
+   */
+  .reveal-mask {
+    display: block;
+    clip-path: inset(0 -0.05em -0.16em);
+  }
+
+  .reveal-mask > * {
+    display: block;
+    animation: reveal-line var(--duration-reveal) var(--ease-out-expo) both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-step));
+  }
+
+  /* ── In view ────────────────────────────────────────────────────────────────
+   * The same choreography, for a section the visitor has to scroll to. The only
+   * difference is when the clock starts: a group marked `data-reveal-group` holds
+   * every animation inside it at its first frame until the observer in
+   * BaseLayout marks it `data-inview`.
+   *
+   * `animation-play-state`, not a second set of classes: with `fill-mode: both` a
+   * paused animation renders its `from` frame, so pausing and resuming *is* the
+   * whole mechanism — no duplicate keyframes, no state to keep in sync, and the
+   * per-element `--reveal-index` delays keep working untouched.
+   *
+   * Gated on `html.js`, which BaseLayout sets before the first paint: without
+   * script nothing would ever resume these, and the content would be invisible
+   * rather than merely unanimated.
+   */
+  html.js [data-reveal-group]:not([data-inview]) .reveal,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-fade,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-pop,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-rule,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-curtain,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-curtain-hold,
+  html.js [data-reveal-group]:not([data-inview]) .reveal-mask > * {
+    animation-play-state: paused;
+  }
+}

@@ -1,0 +1,33 @@
+---
+/**
+ * The 16 x 16 LinkedIn mark.
+ *
+ * Inlined and filled with `currentColor`, like `ArrowRight`: the mark changes
+ * colour with the tile it sits in, so it has to inherit that transition rather
+ * than run one of its own — and sixteen pixels of artwork are not worth a request.
+ *
+ * `aria-hidden` is not a shortcut here. The mark never stands alone: it is the
+ * whole visible content of a link, and that link carries the accessible name.
+ */
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+---
+
+<svg
+  class={className}
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M12.2235 12.226H10.4465V9.44147C10.4465 8.77747 10.433 7.923 9.52048 7.923C8.59401 7.923 8.45248 8.64553 8.45248 9.39247V12.226H6.67548V6.5H8.38248V7.28047H8.40548C8.64401 6.83047 9.22401 6.3555 10.0905 6.3555C11.891 6.3555 12.224 7.54053 12.224 9.083L12.2235 12.226ZM4.6685 5.7165C4.0965 5.7165 3.637 5.2535 3.637 4.684C3.637 4.115 4.097 3.6525 4.6685 3.6525C5.2385 3.6525 5.7005 4.115 5.7005 4.684C5.7005 5.2535 5.238 5.7165 4.6685 5.7165ZM5.5595 12.226H3.7775V6.5H5.5595V12.226ZM13.1125 2H2.8855C2.396 2 2 2.387 2 2.8645V13.1355C2 13.6135 2.396 14 2.8855 14H13.111C13.6 14 14 13.6135 14 13.1355V2.8645C14 2.387 13.6 2 13.111 2H13.1125Z"
+    fill="currentColor"></path>
+</svg>

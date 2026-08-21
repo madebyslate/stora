@@ -1,0 +1,176 @@
+---
+import type { LogoWallBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: LogoWallBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'logo-wall-heading'
+
+/**
+ * Reveal order. The two halves of the heading are separate steps because they are
+ * two separate claims — the accent half landing a beat after the neutral one is
+ * the whole point of splitting the colour. Logos then arrive at half steps, so the
+ * row assembles left to right in ~450 ms instead of dragging on for a second.
+ */
+const order = {
+  heading: 0,
+  headingAccent: 1,
+  lead: 2,
+  logos: 3,
+  logoStep: 0.5,
+}
+---
+
+<section class="logo-wall" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    {
+      /*
+        One <h2>, two masked runs. `inline-block` rather than the block-level mask
+        the hero uses: here the break between the halves is not designed, the two
+        clauses share a line at every width that fits them, and only a viewport too
+        narrow for both moves the accent onto its own line.
+      */
+    }
+    <h2 class="logo-wall__heading text-heading" id={headingId}>
+      <span class="reveal-mask" style={`--reveal-index: ${order.heading}`}>
+        <span>{block.heading}</span>
+      </span>{' '}
+      {
+        block.headingAccent && (
+          <span
+            class="reveal-mask logo-wall__accent"
+            style={`--reveal-index: ${order.headingAccent}`}
+          >
+            <span>{block.headingAccent}</span>
+          </span>
+        )
+      }
+    </h2>
+
+    {
+      block.subheading && (
+        <p class="logo-wall__lead text-body reveal" style={`--reveal-index: ${order.lead}`}>
+          {block.subheading}
+        </p>
+      )
+    }
+
+    <ul class="logo-wall__list" role="list">
+      {
+        block.logos.map((logo, index) => (
+          <li
+            class="logo-wall__item reveal"
+            style={`--reveal-index: ${order.logos + index * order.logoStep}; --logo-native-width: ${logo.width}px`}
+          >
+            <Picture
+              image={logo}
+              widths={[logo.width]}
+              sizes={`${Math.round(logo.width)}px`}
+              fallbackFormat="png"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .logo-wall {
+    padding-block: var(--space-14);
+    background-color: var(--color-bg);
+  }
+
+  .logo-wall__heading {
+    color: var(--color-fg);
+    /* The mask clips to the run's own box; without this the accent half sits on
+       the heading's baseline but its descenders would push the line box down. */
+    text-wrap: balance;
+  }
+
+  .logo-wall__accent {
+    color: var(--color-fg-accent);
+  }
+
+  /* `.reveal-mask` is a block by default — the two runs of the heading share a line. */
+  .logo-wall__heading .reveal-mask {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .logo-wall__lead {
+    margin-block-start: var(--space-4);
+    /*
+     * 0.65, not the 0.6 the design specifies. At 0.6 this copy measures 4.04:1 on
+     * white and 16 px regular text needs 4.5:1 (WCAG 1.4.3); 0.65 puts it at
+     * 4.70:1, which is the smallest step off the design that passes. Same token as
+     * every other muted body line on a light surface — see DECISIONS.md.
+     */
+    color: var(--color-fg-muted);
+    /*
+     * The design sets this on one line, 454 px wide, and the copy is a placeholder
+     * that stops mid-sentence. The measure is what keeps the real sentence, when it
+     * arrives, from running the width of the page.
+     */
+    max-inline-size: 32rem;
+  }
+
+  /*
+   * The wall folds twice, and both thresholds are arithmetic.
+   *
+   * A single row needs 1181 px of content (821 px of mark plus five gaps of at
+   * least 72), so it starts at 1280 — the first common width whose gutter leaves
+   * that much. Below it the row is three across, and below 768 two: six marks on a
+   * 390 px screen would leave 55 px each, which is under half the size at which
+   * the wordmarks are still readable.
+   */
+  .logo-wall__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    justify-items: center;
+    gap: var(--space-10) var(--space-8);
+    margin-block-start: var(--space-12);
+    list-style: none;
+    padding: 0;
+  }
+
+  .logo-wall__item {
+    /*
+     * Every mark is exported from the same frame at the same scale, so one factor
+     * reproduces the relative sizing the designer set between them. `--logo-scale`
+     * carries the reasoning; `--logo-native-width` comes from the fixture, which is
+     * the only place the real pixel dimensions of a given file belong.
+     */
+    inline-size: calc(var(--logo-native-width) * var(--logo-scale));
+    max-inline-size: 100%;
+  }
+
+  .logo-wall__item :global(img) {
+    inline-size: 100%;
+    /* The intrinsic ratio does the rest — width/height are on the tag, so nothing
+       reflows when the file lands. */
+    block-size: auto;
+  }
+
+  @media (min-width: 768px) {
+    .logo-wall__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .logo-wall__list {
+      grid-template-columns: repeat(6, auto);
+      /* The design's row is space-between: its five gaps measure 94–103 px against
+         a 98 px average, which is what an even distribution looks like through the
+         ink bounds of six marks of different widths. */
+      justify-content: space-between;
+      gap: 0;
+    }
+  }
+</style>

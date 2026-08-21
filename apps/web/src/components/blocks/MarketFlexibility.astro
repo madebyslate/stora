@@ -1,0 +1,190 @@
+---
+import type { MarketFlexibilityBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: MarketFlexibilityBlock
+}
+
+const { block } = Astro.props
+const headingId = `market-flexibility-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+const headingLines = block.heading.split('\n')
+---
+
+<section class="market-flexibility" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <header class="market-flexibility__header">
+      <h2 class="market-flexibility__heading text-title" id={headingId}>
+        {
+          headingLines.map((line, index) => (
+            <span class="reveal-mask" style={`--reveal-index: ${index}`}>
+              <span>{line}</span>
+            </span>
+          ))
+        }
+      </h2>
+      <p
+        class="market-flexibility__description text-body reveal"
+        style={`--reveal-index: ${headingLines.length}`}
+      >
+        {block.description}
+      </p>
+    </header>
+
+    <div
+      class="market-flexibility__panel reveal-fade"
+      style={`--reveal-index: ${headingLines.length + 1}`}
+    >
+      {
+        block.items.map((item, index) => {
+          const itemOrder = headingLines.length + 2 + index
+          return (
+            <figure
+              class:list={[
+                'market-flexibility__figure',
+                index === 1 && 'market-flexibility__figure--second',
+              ]}
+            >
+              <h3 class="market-flexibility__figure-heading text-chart-heading">
+                <span class="reveal-mask" style={`--reveal-index: ${itemOrder}`}>
+                  <span>{item.heading}</span>
+                </span>
+              </h3>
+              <div class="market-flexibility__graphic">
+                <span
+                  class="market-flexibility__graphic-pane reveal-curtain"
+                  style={`--reveal-index: ${itemOrder + 1}`}
+                >
+                  <span
+                    class="market-flexibility__graphic-hold reveal-curtain-hold"
+                    style={`--reveal-index: ${itemOrder + 1}`}
+                  >
+                    <Picture image={item.graphic} draggable={false} />
+                  </span>
+                </span>
+              </div>
+            </figure>
+          )
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .market-flexibility {
+    padding-block: var(--market-flex-padding-block);
+    overflow: clip;
+    background-color: var(--color-bg-subtle);
+    color: var(--color-fg);
+  }
+
+  .market-flexibility__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--market-flex-intro-measure));
+    gap: var(--market-flex-header-column-gap);
+    align-items: start;
+    padding-inline-end: var(--market-flex-header-end-inset);
+  }
+
+  .market-flexibility__heading span {
+    display: block;
+  }
+
+  .market-flexibility__description {
+    color: var(--market-flex-copy-color);
+  }
+
+  .market-flexibility__panel {
+    display: grid;
+    grid-template-columns: var(--market-flex-left-column) minmax(0, 1fr);
+    align-items: start;
+    margin-block-start: var(--market-flex-panel-gap);
+    padding: var(--market-flex-panel-padding);
+    background-color: var(--color-bg);
+    text-align: left;
+  }
+
+  .market-flexibility__figure {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    justify-items: start;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding-inline-end: var(--market-flex-left-padding-end);
+  }
+
+  .market-flexibility__figure--second {
+    padding-inline: var(--market-flex-right-padding-start) 0;
+    border-inline-start: var(--market-flex-divider-width) solid var(--color-rule-soft);
+  }
+
+  .market-flexibility__figure-heading {
+    color: var(--color-fg);
+  }
+
+  .market-flexibility__graphic {
+    align-self: end;
+    width: 100%;
+    margin-block-start: var(--market-flex-graphic-gap);
+    overflow: clip;
+  }
+
+  .market-flexibility__graphic-pane,
+  .market-flexibility__graphic-hold {
+    display: block;
+    width: 100%;
+  }
+
+  .market-flexibility__graphic-pane {
+    --reveal-curtain-x: var(--market-flex-reveal-x);
+    --reveal-curtain-y: 0%;
+    --reveal-curtain-scale: var(--market-flex-reveal-scale);
+    overflow: clip;
+  }
+
+  .market-flexibility__figure--second .market-flexibility__graphic-pane {
+    --reveal-curtain-x: calc(-1 * var(--market-flex-reveal-x));
+  }
+
+  .market-flexibility__graphic :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: var(--market-flex-left-graphic-width);
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .market-flexibility__figure--second .market-flexibility__graphic :global(img) {
+    max-width: var(--market-flex-right-graphic-width);
+  }
+
+  @media (max-width: 63.9375rem) {
+    .market-flexibility__header {
+      grid-template-columns: minmax(0, 1fr);
+      padding-inline-end: 0;
+    }
+
+    .market-flexibility__description {
+      max-width: var(--market-flex-intro-measure);
+    }
+
+    .market-flexibility__panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .market-flexibility__figure {
+      padding-inline-end: 0;
+    }
+
+    .market-flexibility__figure--second {
+      margin-block-start: var(--market-flex-mobile-divider-gap);
+      padding: var(--market-flex-mobile-divider-gap) 0 0;
+      border-block-start: var(--market-flex-divider-width) solid var(--color-rule-soft);
+      border-inline-start: 0;
+    }
+  }
+</style>

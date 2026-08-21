@@ -1,0 +1,299 @@
+---
+import type { ProcessIntroductionBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: ProcessIntroductionBlock
+}
+
+const { block } = Astro.props
+const headingId = `process-introduction-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+const headingLines = block.heading.split('\n')
+/* Give the lazy image time to decode after the section reaches the preload margin. */
+const imageOrder = headingLines.length + 2
+const itemOrder = (index: number) => imageOrder + 1 + index * 4
+---
+
+<section class="process-intro" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page process-intro__grid">
+    <h2 class="process-intro__heading text-title" id={headingId}>
+      {
+        headingLines.map((line, index) => (
+          <span class="reveal-mask" style={`--reveal-index: ${index}`}>
+            <span>{line}</span>
+          </span>
+        ))
+      }
+    </h2>
+
+    <div class="process-intro__media" data-process-intro-media>
+      <span
+        class="process-intro__media-pane reveal-curtain"
+        style={`--reveal-index: ${imageOrder}`}
+      >
+        <span
+          class="process-intro__media-hold reveal-curtain-hold"
+          style={`--reveal-index: ${imageOrder}`}
+        >
+          <Picture
+            image={block.image}
+            widths={[560, 870]}
+            sizes="(max-width: 1023px) calc(100vw - 40px), 39vw"
+            draggable={false}
+          />
+        </span>
+      </span>
+    </div>
+
+    <ol class="process-intro__list">
+      {
+        block.items.map((item, index) => {
+          const order = itemOrder(index)
+          return (
+            <li class="process-intro__item">
+              <span
+                class="process-intro__badge reveal-pop"
+                style={`--reveal-index: ${order}`}
+                aria-hidden="true"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+
+              <h3 class="process-intro__title">
+                <span class="reveal-mask" style={`--reveal-index: ${order + 1}`}>
+                  <span>{item.title}</span>
+                </span>
+              </h3>
+
+              <p
+                class="process-intro__description text-body reveal"
+                style={`--reveal-index: ${order + 2}`}
+              >
+                {item.description}
+              </p>
+
+              {index < block.items.length - 1 && (
+                <span
+                  class="process-intro__rule"
+                  style={`--reveal-index: ${order + 3}`}
+                  aria-hidden="true"
+                />
+              )}
+            </li>
+          )
+        })
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .process-intro {
+    padding-block: var(--process-intro-padding-block);
+    background-color: var(--color-bg-subtle);
+    overflow: clip;
+  }
+
+  .process-intro__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 8.5fr);
+    grid-template-rows: auto 1fr;
+    column-gap: var(--process-intro-column-gap);
+  }
+
+  .process-intro__heading {
+    grid-column: 1;
+    grid-row: 1;
+    color: var(--color-fg);
+    text-wrap: balance;
+  }
+
+  .process-intro__media {
+    position: relative;
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    aspect-ratio: var(--process-intro-media-ratio);
+    overflow: clip;
+  }
+
+  .process-intro__media-pane,
+  .process-intro__media-hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+    animation-duration: var(--process-intro-media-duration);
+    animation-timing-function: var(--ease-in-out);
+  }
+
+  .process-intro__media-pane {
+    --reveal-curtain-x: -105%;
+    --reveal-curtain-y: 12%;
+    --reveal-curtain-scale: var(--process-intro-media-reveal-scale);
+    overflow: clip;
+  }
+
+  .process-intro__media-hold {
+    overflow: clip;
+  }
+
+  .process-intro__media :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .process-intro__list {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    list-style: none;
+  }
+
+  .process-intro__item:not(:first-child) {
+    margin-block-start: var(--process-intro-rule-item-gap);
+  }
+
+  .process-intro__badge {
+    display: grid;
+    place-items: center;
+    width: var(--process-intro-badge-size);
+    height: var(--process-intro-badge-size);
+    background-color: var(--process-intro-badge-surface);
+    color: var(--color-fg-inverse);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-regular);
+    line-height: 1;
+  }
+
+  .process-intro__title {
+    margin-block-start: var(--process-intro-badge-title-gap);
+    color: var(--color-fg);
+    font-size: var(--text-card-title);
+    font-weight: var(--text-card-title--font-weight);
+    line-height: var(--text-card-title--line-height);
+    letter-spacing: var(--text-card-title--letter-spacing);
+  }
+
+  .process-intro__description {
+    margin-block-start: var(--process-intro-title-copy-gap);
+    color: var(--process-intro-copy-color);
+  }
+
+  @keyframes process-intro-rule-in {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .process-intro__rule {
+    display: block;
+    width: 100%;
+    height: var(--process-intro-rule-width);
+    margin-block-start: var(--process-intro-copy-rule-gap);
+    background-color: var(--process-intro-rule-color);
+    transform-origin: left;
+    animation: process-intro-rule-in var(--duration-reveal) var(--ease-out-expo) both;
+    animation-delay: calc(var(--reveal-index, 0) * var(--reveal-step));
+  }
+
+  :global(html.js)
+    .process-intro:not([data-inview])
+    .process-intro__rule {
+    animation-play-state: paused;
+  }
+
+  /*
+   * The section trigger is intentionally not enough for the photograph. Its frame
+   * sits near the foot of the left column, so the heading can be visible long
+   * before the lazy image is decoded. Hold both halves of the curtain until the
+   * frame is on screen AND the script below confirms that pixels are ready.
+   */
+  :global(html.js)
+    [data-process-intro-media]:not([data-media-inview])
+    .process-intro__media-pane,
+  :global(html.js)
+    [data-process-intro-media]:not([data-media-inview])
+    .process-intro__media-hold {
+    animation-play-state: paused;
+  }
+
+  @media (max-width: 1023px) {
+    .process-intro__grid {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto;
+      row-gap: var(--process-intro-mobile-gap);
+    }
+
+    .process-intro__heading,
+    .process-intro__media,
+    .process-intro__list {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .process-intro__media {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  const mediaFrames = document.querySelectorAll<HTMLElement>('[data-process-intro-media]')
+
+  const revealWhenDecoded = async (frame: HTMLElement) => {
+    const image = frame.querySelector('img')
+    if (!image) {
+      frame.setAttribute('data-media-inview', '')
+      return
+    }
+
+    /*
+     * A fully clipped lazy image may never become a loading candidate: the browser
+     * sees no painted pixels, while the reveal waits for decoded pixels. Once the
+     * frame itself intersects, it is safe to promote this one request to eager and
+     * break that deadlock without loading it during the initial page request.
+     */
+    image.loading = 'eager'
+
+    if (!image.complete) {
+      await new Promise<void>((resolve) => {
+        image.addEventListener('load', () => resolve(), { once: true })
+        image.addEventListener('error', () => resolve(), { once: true })
+      })
+    }
+
+    try {
+      await image.decode()
+    } catch {
+      // A failed decode must not leave the content permanently hidden.
+    }
+
+    requestAnimationFrame(() => frame.setAttribute('data-media-inview', ''))
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    mediaFrames.forEach((frame) => void revealWhenDecoded(frame))
+  } else {
+    const mediaObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          const frame = entry.target as HTMLElement
+          mediaObserver.unobserve(frame)
+          void revealWhenDecoded(frame)
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    )
+
+    mediaFrames.forEach((frame) => mediaObserver.observe(frame))
+  }
+</script>

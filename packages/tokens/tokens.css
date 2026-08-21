@@ -1,0 +1,1538 @@
+/*
+ * Stora design tokens — the only place visual values are defined (AGENT-RULES §4).
+ *
+ * Why a single `@theme` block instead of `:root` plus a Tailwind bridge:
+ * in Tailwind v4 `@theme` emits these variables into `:root` AND generates
+ * utilities from them. Splitting it in two would produce `--color-bg: var(--color-bg)`
+ * — a self-reference that voids the property. Here `bg-bg` and `var(--color-bg)`
+ * resolve to the same value.
+ *
+ * The `--namespace-*: initial` lines below wipe Tailwind's stock scales. That is
+ * deliberate and it is a mechanism, not a convention: with them in place
+ * `text-2xl`, `bg-red-500`, `shadow-lg` and `rounded-xl` simply do not exist, so
+ * a value that never came from the design cannot reach a component by accident.
+ *
+ * Rules:
+ *   – components use a Tailwind class or `var(--token)`, never a literal,
+ *   – a value with no token is a question for the designer, not a magic number,
+ *   – new tokens are added here, never inline in a component.
+ *
+ * Source of truth for the values below: the Stora hero frame (1440 × ~904).
+ * Everything marked `provisional` has no design coverage yet and will be replaced
+ * when the section that needs it is designed.
+ */
+
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --spacing-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --blur-*: initial;
+  --ease-*: initial;
+  --animate-*: initial;
+  --breakpoint-*: initial;
+
+  /* ── Palette ────────────────────────────────────────────────────────────── */
+  /* Raw brand values. Components reference the semantic aliases below, not these. */
+
+  /* Figma calls this `Lime-Dark`. It is the only chromatic value in the hero. */
+  --color-lime-dark: #172e23;
+  /*
+   * Figma calls this `Green`. It arrives with the first section below the hero and
+   * is the second of the two colours the design runs on: Lime-Dark carries the
+   * text, Green marks the half of a heading that is the claim.
+   *
+   * 3.09:1 on white — enough for large text (WCAG 1.4.3 puts the bar at 3:1 for
+   * >= 24 px), NOT enough for body copy. Use it at `--text-heading` and above only;
+   * `--color-fg-accent` below exists so that rule has one address.
+   */
+  --color-green: #18a85b;
+  /* Figma scrim base: every hero gradient stop is `rgba(24, 24, 24, α)`. */
+  --color-ink: #181818;
+  --color-white: #ffffff;
+
+  /*
+   * The two tinted grounds, and the mark colour that goes with them. They arrive
+   * with the team section and are the first surfaces in the design that are not
+   * white, not photography and not Lime-Dark.
+   *
+   * `--color-lime-haze` sits on `--color-lime-mist`, which is why the pair reads
+   * as one surface with a card lifted off it rather than as two colours. Neither
+   * is Lime-Dark at an alpha — checked; no single alpha produces either — so both
+   * are raw values. Figma's own names for them were not supplied.
+   */
+  --color-lime-mist: #f1f2eb;
+  --color-lime-haze: #e4e5dc;
+  /*
+   * Figma calls this `Gray`. It arrives with the process section, on the line of
+   * copy under each photograph, and it is the first neutral in the palette that is
+   * not Lime-Dark: no single alpha reproduces it (0.73 on red against 0.78 on
+   * green), so it is a colour of its own rather than a tint. 6.9:1 on white.
+   */
+  --color-gray: #565d59;
+  /* The resting LinkedIn mark. Also not Lime-Dark at an alpha: it needs 0.28 on
+     red and 0.34 on blue to reproduce, so it is a colour, not a tint. */
+  --color-sage: #abad9e;
+  /* A quiet rule on tinted surfaces, supplied with ProcessIntroduction. */
+  --color-rule-soft: #e0e0e0;
+
+  /* ── Semantic colour ────────────────────────────────────────────────────── */
+  --color-bg: var(--color-white);
+  --color-bg-inverse: var(--color-lime-dark);
+  --color-fg: var(--color-lime-dark);
+  --color-fg-inverse: var(--color-white);
+  --color-accent: var(--color-lime-dark);
+  /* Headline emphasis. Large text only — see the contrast note on `--color-green`. */
+  --color-fg-accent: var(--color-green);
+  /* Interactive Green is darkened just enough for white 14 px button copy:
+     4.79:1, while retaining the brighter Green character rather than reading as
+     the Lime-Dark resting surface. */
+  --color-action-hover: color-mix(
+    in srgb,
+    var(--color-green) 70%,
+    var(--color-lime-dark)
+  );
+
+  /*
+   * The tinted section ground, and the card ground that sits on it. No longer
+   * provisional: the guessed #f4f5f3 was replaced with the value the team section
+   * actually specifies the first time a light surface was designed.
+   */
+  --color-bg-subtle: var(--color-lime-mist);
+  --color-bg-muted: var(--color-lime-haze);
+  --color-fg-muted: color-mix(in oklab, var(--color-lime-dark) 65%, transparent);
+  /*
+   * Lime-Dark at half strength — the quiet half of a two-line section heading.
+   *
+   * Large text only, and more strictly than `--color-fg-accent`: on
+   * `--color-bg-subtle` this measures 2.98:1 against the 3:1 that WCAG 1.4.3 asks
+   * of text at 24 px and up. It is the design's value and it ships as drawn (see
+   * DECISIONS.md); 0.51 would clear the threshold if it ever has to.
+   */
+  --color-fg-subtle: rgb(23 46 35 / 0.5);
+  /*
+   * Body copy that is deliberately quieter than `--color-fg` without being a tint
+   * of it. Distinct from `--color-fg-muted`, which IS a tint and follows Lime-Dark
+   * wherever it goes; this one is a value the design states.
+   */
+  --color-fg-note: var(--color-gray);
+  --color-border: color-mix(in oklab, var(--color-lime-dark) 14%, transparent);
+
+  /*
+   * On-media: text and rules sitting on photography or video. Kept as its own
+   * group because these are not "white with an opacity utility" — the exact
+   * alphas are what make the hero readable over a moving background, and they
+   * are what a contrast audit gets checked against.
+   */
+  --color-on-media: var(--color-white);
+  --color-on-media-muted: rgb(255 255 255 / 0.7);
+  /* One step below `-muted`, for a caption under a name rather than a standfirst
+     under a headline. Its own value because the two scrims behind them differ. */
+  --color-on-media-subtle: rgb(255 255 255 / 0.6);
+  --color-on-media-rule: rgb(255 255 255 / 0.3);
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  /* Aeonik, self-hosted and subset. @font-face lives in apps/web/src/styles/fonts.css. */
+  --font-sans: 'Aeonik', 'Aeonik Fallback', system-ui, sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  /*
+   * The scale is role-named, not t-shirt-sized: `text-display` says what the
+   * step is for, `text-5xl` only says it is big. Each step carries its own
+   * line-height, tracking and weight, so a single class reproduces the design
+   * step exactly and no component can pair the size with the wrong leading.
+   *
+   * Sizes interpolate linearly between 390 px and 1440 px and lock at both ends.
+   * The intercept is in rem so browser zoom still scales the text (WCAG 1.4.4).
+   */
+
+  /* 72 / 72 / -2% — hero H1 */
+  --text-display: clamp(2.5rem, 1.7571rem + 3.0476vw, 4.5rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 500;
+
+  /* 72 / 72 / 500 — the primary number in the product-page proof section. */
+  --text-proof-value: clamp(3rem, 2.4429rem + 2.2857vw, 4.5rem);
+  --text-proof-value--line-height: 1;
+  --text-proof-value--letter-spacing: -0.02em;
+  --text-proof-value--font-weight: 500;
+
+  /*
+   * 60 / 64 / -2% — the section headline that opens a full-bleed block.
+   *
+   * Neither the size nor the leading was given. Both are measured off the
+   * reference frame against a value that WAS given — the 28 px card title in the
+   * same shot: cap height / font size comes out at 0.678 there, and the headline's
+   * cap measures 40.5 px at the same scale, so 40.5 / 0.678 = 59.8. Leading is the
+   * baseline-to-baseline distance across the headline's two lines, 64.6 px.
+   * See ServiceCards.spec.md for the arithmetic and the frame it came from.
+   *
+   * Distinct from `--text-heading` (32) on purpose: LogoWall's heading sits over a
+   * white section and this one opens a full-bleed one. Two sizes, two roles.
+   */
+  --text-headline: clamp(2.125rem, 1.5214rem + 2.4762vw, 3.75rem);
+  --text-headline--line-height: calc(64 / 60);
+  --text-headline--letter-spacing: -0.02em;
+  --text-headline--font-weight: 500;
+
+  /*
+   * 56 / 64 / -2% — the section opener over a tinted ground.
+   *
+   * The size is given. The leading is not: it is set to 64, the same as
+   * `--text-headline`, on the grounds that both steps do the same job — open a
+   * section on two lines — and the reference frame reads ≈ 65 between its two
+   * baselines. Flagged in `TeamGrid.spec.md`.
+   *
+   * A third opener step next to 60 and 32, and it earns its place the same way
+   * they do: 60 opens a full-bleed block, 32 opens a white one, 56 opens a
+   * tinted one. The day two of them are the same number, two of them merge.
+   */
+  --text-title: clamp(2rem, 1.4429rem + 2.2857vw, 3.5rem);
+  --text-title--line-height: calc(64 / 56);
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 500;
+
+  /* 48 / 48 / -2% — statistic value */
+  --text-metric: clamp(2rem, 1.6285rem + 1.5238vw, 3rem);
+  --text-metric--line-height: 1;
+  --text-metric--letter-spacing: -0.02em;
+  --text-metric--font-weight: 500;
+
+  /*
+   * 32 / 40 / -2% — section heading (`<h2>`).
+   *
+   * The size and the weight are given; the leading is not — the design sets this
+   * heading on one line, so 40 is inferred from the family's own ratio rather than
+   * measured (`LogoWall.spec.md`, open questions).
+   */
+  --text-heading: clamp(1.5rem, 1.3143rem + 0.7619vw, 2rem);
+  --text-heading--line-height: calc(40 / 32);
+  --text-heading--letter-spacing: -0.02em;
+  --text-heading--font-weight: 500;
+
+  /* 40 / 48 / 500 — the decision CTA inside a comparison section. */
+  --text-comparison-cta: clamp(2rem, 1.8143rem + 0.7619vw, 2.5rem);
+  --text-comparison-cta--line-height: calc(48 / 40);
+  --text-comparison-cta--letter-spacing: -0.02em;
+  --text-comparison-cta--font-weight: 500;
+
+  /* 28 / 36 / -2% — hero standfirst */
+  --text-lead: clamp(1.25rem, 1.0643rem + 0.7619vw, 1.75rem);
+  --text-lead--line-height: calc(36 / 28);
+  --text-lead--letter-spacing: -0.02em;
+  --text-lead--font-weight: 500;
+
+  /* 28 / 36 / 500 — title at the foot of a photographic feature card. */
+  --text-card-title: 1.75rem;
+  --text-card-title--line-height: calc(36 / 28);
+  --text-card-title--letter-spacing: -0.02em;
+  --text-card-title--font-weight: 500;
+
+  /* 30 / 36 / 500 — a selectable development stage in HowWeDevelop. */
+  --text-stage: clamp(1.5rem, 1.3607rem + 0.5714vw, 1.875rem);
+  --text-stage--line-height: calc(36 / 30);
+  --text-stage--letter-spacing: -0.02em;
+  --text-stage--font-weight: 500;
+
+  /* 24 / 32 / 500 — the selected development-stage panel heading. */
+  --text-panel-title: 1.5rem;
+  --text-panel-title--line-height: calc(32 / 24);
+  --text-panel-title--letter-spacing: -0.02em;
+  --text-panel-title--font-weight: 500;
+
+  /* 24 / 32 / 500 — headings above the two market data graphics. */
+  --text-chart-heading: 1.5rem;
+  --text-chart-heading--line-height: calc(32 / 24);
+  --text-chart-heading--letter-spacing: -0.02em;
+  --text-chart-heading--font-weight: 500;
+
+  /* 18 / 24 / 500 — compact interactive row label and its counter. */
+  --text-tab: 1.125rem;
+  --text-tab--line-height: calc(24 / 18);
+  --text-tab--letter-spacing: 0em;
+  --text-tab--font-weight: 500;
+
+  /* 18 / 24 / 400 — values inside a comparison table. */
+  --text-table-value: 1.125rem;
+  --text-table-value--line-height: calc(24 / 18);
+  --text-table-value--letter-spacing: 0em;
+  --text-table-value--font-weight: 400;
+
+  /*
+   * 20 / 28 / 500 — the line under the closing call's headline.
+   *
+   * Its own step rather than a variant of `--text-claim` (22) or `--text-body`
+   * (16): this one sits under a 72 px headline and has to read as its second
+   * sentence, not as body copy. The size and the weight are given; the leading is
+   * not — 28 keeps the same 1.4 the 20 px step of the family sets, and the design
+   * shows the line unwrapped, so nothing measurable contradicts it. Flagged in
+   * `Cta.spec.md`.
+   */
+  --text-standfirst: clamp(1.125rem, 1.0786rem + 0.1905vw, 1.25rem);
+  --text-standfirst--line-height: calc(28 / 20);
+  --text-standfirst--letter-spacing: -0.02em;
+  --text-standfirst--font-weight: 500;
+
+  /*
+   * 16 / 24 / 500 — a line in a list of details: a footer link, an address, a
+   * phone number, the copyright.
+   *
+   * Same size as `--text-body` and deliberately not the same step, for the reason
+   * `--text-caption` is not `--text-ui`: body copy is 400 on 20 because it is read
+   * as prose, this is 500 on 24 because it is scanned as a list. The 24 is
+   * measured — the footer's contact lines sit 18.7 crop px apart on a reference
+   * drawn at 0.768, i.e. 24.3.
+   */
+  --text-detail: 1rem;
+  --text-detail--line-height: calc(24 / 16);
+  --text-detail--letter-spacing: 0em;
+  --text-detail--font-weight: 500;
+
+  /* 16 / 24 / 400 — the explanatory line below a timeline period. */
+  --text-timeline-copy: 1rem;
+  --text-timeline-copy--line-height: calc(24 / 16);
+  --text-timeline-copy--letter-spacing: 0em;
+  --text-timeline-copy--font-weight: 400;
+
+  /* 24 / 24 — unit suffix next to a statistic value */
+  --text-unit: clamp(1rem, 0.8143rem + 0.7619vw, 1.5rem);
+  --text-unit--line-height: 1;
+  --text-unit--letter-spacing: 0em;
+  --text-unit--font-weight: 500;
+
+  /*
+   * 22 / 28 — the statement that carries a section's claim beside a picture.
+   *
+   * The size and the weight are given (22 / 500); the leading is measured off the
+   * reference frame — four lines of the market slider's copy sit 17 screenshot px
+   * apart at the 0.6 scale that frame is drawn to, i.e. 28.3 px, so 28.
+   *
+   * Its own step rather than a variant of `--text-lead` (28) or `--text-unit`
+   * (24): `--text-lead` is the hero's standfirst under a 72 px headline and
+   * `--text-unit` is a suffix on a number. This one is a paragraph that has to
+   * read as a statement, and it is the only step in the scale between 24 and 16.
+   */
+  --text-claim: clamp(1.125rem, 1.0321rem + 0.381vw, 1.375rem);
+  --text-claim--line-height: calc(28 / 22);
+  --text-claim--letter-spacing: 0em;
+  --text-claim--font-weight: 500;
+
+  /* 16 / 20 — captions and body copy */
+  --text-body: 1rem;
+  --text-body--line-height: calc(20 / 16);
+  --text-body--letter-spacing: 0em;
+  --text-body--font-weight: 400;
+
+  /*
+   * 14 / 20 — a name and the line under it.
+   *
+   * Same size as `--text-ui`, and deliberately not the same step: `--text-ui` is
+   * 500 on 16 because it labels a control, this is 400 on 20 because it is read.
+   * Merging them would put a nav weight on a caption or a caption's leading in a
+   * button. The 20 is inferred, not given — see `TeamGrid.spec.md`.
+   */
+  --text-caption: 0.875rem;
+  --text-caption--line-height: calc(20 / 14);
+  --text-caption--letter-spacing: 0em;
+  --text-caption--font-weight: 400;
+
+  /* 14 / 16 — navigation and buttons */
+  --text-ui: 0.875rem;
+  --text-ui--line-height: calc(16 / 14);
+  --text-ui--letter-spacing: 0em;
+  --text-ui--font-weight: 500;
+
+  /* 12 / 16 / 500 — publication category and date metadata. */
+  --text-publication-meta: 0.75rem;
+  --text-publication-meta--line-height: calc(16 / 12);
+  --text-publication-meta--letter-spacing: 0em;
+  --text-publication-meta--font-weight: 500;
+
+  /* ── Space ──────────────────────────────────────────────────────────────── */
+  /* A 4 px step scale. Every gap in the hero lands on it; the one that does not
+     is `--gap-inline-icon` below, and it is flagged there. */
+  --spacing-0: 0rem;
+  --spacing-1: 0.25rem; /*  4 */
+  --spacing-2: 0.5rem; /*  8 */
+  --spacing-3: 0.75rem; /* 12 */
+  --spacing-4: 1rem; /* 16 */
+  --spacing-5: 1.25rem; /* 20 */
+  --spacing-6: 1.5rem; /* 24 */
+  --spacing-7: 1.75rem; /* 28 */
+  --spacing-8: 2.25rem; /* 36 */
+  --spacing-9: 2.5rem; /* 40 */
+  --spacing-10: 3rem; /* 48 */
+  --spacing-11: 4rem; /* 64 */
+  --spacing-12: 4.5rem; /* 72 */
+  --spacing-13: 6rem; /* 96 */
+  --spacing-14: 7.5rem; /* 120 */
+
+  /* ── Radius ─────────────────────────────────────────────────────────────── */
+  /* The design is square-cornered throughout — buttons included. `--radius-full`
+     exists only for future pill-shaped tags; there is deliberately nothing between. */
+  --radius-none: 0px;
+  --radius-full: 9999px;
+
+  /* ── Motion ─────────────────────────────────────────────────────────────── */
+  /* Expo-out is the entrance curve: it covers most of the distance in the first
+     third, which reads as "arrived" rather than "still moving" (AGENT-RULES §6). */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Breakpoints ────────────────────────────────────────────────────────── */
+  /* The widths we compare against the design (AGENT-RULES §3.5). */
+  --breakpoint-sm: 390px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+}
+
+/*
+ * Tokens with no Tailwind namespace, plus the `--space-*` aliases required by
+ * AGENT-RULES §4. Used through `var(--token)`.
+ */
+:root {
+  /* Durations — Tailwind has no namespace for them. */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 450ms;
+  --duration-reveal: 900ms;
+
+  /* ── Layout ───────────────────────────────────────────────────────────────
+   * The single horizontal grid for the whole site. 1360 px of content inside a
+   * 1440 px frame leaves 40 px each side, which is exactly what the header
+   * measures in Figma; below 1440 the gutter shrinks with the viewport and
+   * bottoms out at 20 px.
+   */
+  --container-inner: 85rem; /* 1360 */
+  --container-max: 90rem; /* 1440 = 1360 + 2 × 40 */
+  --container-gutter: clamp(1.25rem, 2.7778vw, 2.5rem); /* 20 → 40 */
+
+  /* ── Layers ─────────────────────────────────────────────────────────────── */
+  --z-base: 0;
+  --z-media: -1;
+  --z-scrim: 1;
+  --z-content: 2;
+  --z-header: 20;
+  --z-overlay: 30;
+  --z-modal: 40;
+
+  /* ── Component tokens ─────────────────────────────────────────────────────
+   * Values that belong to one component but must not be literals inside it.
+   */
+
+  /* Header sits over the hero: 40 px of content between 16 px of padding. */
+  --header-content-height: 2.5rem; /* 40 */
+  --header-padding-block: 1rem; /* 16 */
+  --header-height: calc(var(--header-content-height) + 2 * var(--header-padding-block));
+  --header-nav-gap: 2.5rem; /* 40 */
+  --header-sticky-threshold: 12rem; /* 192 — four 48 px spacing steps */
+  --header-button-surface: var(--color-lime-dark);
+  --header-button-surface-hover: var(--color-action-hover);
+  --header-button-fg: var(--color-white);
+  --header-panel-button-surface-hover: var(--color-action-hover);
+
+  --button-padding-block: 0.75rem; /* 12 */
+  --button-padding-inline: 1.75rem; /* 28 */
+  --button-surface: var(--color-white);
+  /* Both resting tones converge on the same Green reveal on hover. */
+  --button-surface-hover: var(--color-action-hover);
+  --button-fg: var(--color-lime-dark);
+  --button-fg-hover: var(--color-white);
+  /*
+   * 9 px, straight from Figma, and the only value in the system that is off the
+   * 4 px scale. Kept rather than rounded because the arrow reads as too close to
+   * the label at 8 px; revisit if a second icon button ever disagrees.
+   */
+  --gap-inline-icon: 0.5625rem;
+  --icon-size-inline: 0.6875rem; /* 11 — the arrow glyph box */
+
+  /*
+   * Hero scrims.
+   *
+   * These are NOT the Figma values, and the deviation is deliberate — see
+   * DECISIONS.md. Figma specifies a 145 px / 350 px pair with peak alphas of
+   * 0.50 and 0.60, measured against a single still. The clip is 12 seconds long
+   * and ends on white battery containers sitting exactly behind the headline: at
+   * the design values the H1 falls to 2.9:1 and the standfirst to 3.4:1 on the
+   * last frame, and the H1 to 2.3:1 at 390 px even on the poster. Both fail
+   * WCAG 1.4.3, and both are plainly unreadable on screen.
+   *
+   * The bottom scrim is therefore sized by the content block rather than fixed at
+   * 350 px, so it covers the copy at every viewport instead of only at 1440, and
+   * both peaks are raised. Verified by tests/a11y/contrast.spec.ts, which measures
+   * the real composited pixels under the glyphs at the worst frame of the video.
+   */
+  --hero-scrim-top-height: 9.0625rem; /* 145 — the Figma height, kept */
+  --hero-scrim-top: linear-gradient(
+    to top,
+    rgb(24 24 24 / 0) 0%,
+    rgb(24 24 24 / 0.44) 55.29%,
+    rgb(24 24 24 / 0.64) 100%
+  );
+
+  /*
+   * Two bottom scrims, because the copy occupies a very different share of the
+   * frame at 1440 than it does on a phone. The wide one is tuned so the weakest
+   * point clears its threshold with roughly 10-15% headroom and no more — every
+   * extra percent of alpha is photography thrown away.
+   */
+  --hero-scrim-bottom: linear-gradient(
+    to bottom,
+    rgb(24 24 24 / 0) 0%,
+    rgb(24 24 24 / 0.28) 26%,
+    rgb(24 24 24 / 0.48) 60%,
+    rgb(24 24 24 / 0.66) 100%
+  );
+
+  --stat-column-width: 11.25rem; /* 180 */
+  --stat-column-padding: 1rem; /* 16 */
+  --stat-unit-gap: var(--space-1); /* 4 */
+
+  /*
+   * Measures for the hero copy. Both are derived from where Figma breaks the
+   * lines rather than stated by it: the standfirst has to break after "large-"
+   * and the headline after "Accelerating", which brackets the values to
+   * 505–571 px and 526–585 px respectively. Middle of each range, pending exact
+   * numbers from the designer.
+   */
+  --hero-heading-measure: 34.5rem; /* 552 */
+  /* The standfirst window is narrow: "…operate large-" ends at 504.5 px and
+     "…large-scale" would end at 514, so anything outside 505–513 breaks the line
+     somewhere the design does not. */
+  --hero-lead-measure: 31.75rem; /* 508 */
+
+  /*
+   * Logo wall.
+   *
+   * All six logos are exported from one Figma frame at the same scale, and the
+   * design draws them at two thirds of the exported pixels (measured: the six ink
+   * boxes come out at 0.667 +/- 0.01 of the PNG dimensions). Scaling by a single
+   * factor is what preserves the relative sizing the designer set between one mark
+   * and the next; sizing them one by one would not.
+   *
+   * 0.70 rather than 0.667 because the design's row spans 1270 px inside a 1440
+   * frame and the site grid gives this section 1360. Stretching the marks by the
+   * same 3% the row itself stretches keeps the gaps at the ~105 px the design sets
+   * instead of opening them to 116. A logo exported at another scale needs its own
+   * factor, not this one.
+   */
+  --logo-scale: 0.7;
+
+  /*
+   * Service cards.
+   *
+   * The panel geometry is given: 600 px tall, 32 px of padding, a 40 px toggle
+   * inset 16 px from the top-right corner. The two gaps inside the copy stack are
+   * not — they are reconstructed from the reference frame by fitting the stack
+   * bottom-up (32 padding + 40 button + gap + 3 x 24 of copy + gap + 36 of title)
+   * against the measured cap-top of the title, 212.8 px above the card's bottom
+   * edge. 20 and 16 are the only pair on the 4 px scale that lands it.
+   */
+  --service-card-height: 37.5rem; /* 600 */
+  --service-card-padding: 2rem; /* 32 */
+  --service-card-toggle-size: 2.5rem; /* 40 */
+  --service-card-toggle-inset: 1rem; /* 16 */
+  --service-card-toggle-surface: rgb(0 0 0 / 0.5);
+  /* The toggle's two bars, straight from the 14 x 2 / 2 x 14 glyphs in the design. */
+  --service-card-toggle-bar-length: 0.875rem; /* 14 */
+  --service-card-toggle-bar-weight: 0.125rem; /* 2 */
+  /* 16 px copy set at 24, not the 20 of `--text-body`: measured baseline to
+     baseline across the three lines of the reference panel. */
+  --service-card-copy-leading: calc(24 / 16);
+  /*
+   * The copy's measure, and it is narrower than the panel: the design breaks the
+   * first line after "Battery" while the 416 px content box fits "Battery Energy".
+   * Bracketed by those two — 357 px is the line as drawn, 413 px the line plus the
+   * next word — so the measure is somewhere in between. Middle of the bracket.
+   */
+  --service-card-copy-measure: 23.5rem; /* 376 */
+  --service-card-title-gap: 1rem; /* 16 — title to copy */
+  --service-card-cta-gap: 1.25rem; /* 20 — copy to button */
+  /*
+   * The scrim is 312 px of the 600, pinned to the bottom edge. The shape is the
+   * design's: front-loaded, flat through the middle where the copy sits, deepening
+   * again at the very bottom. Flattening it to two stops would put a visible ramp
+   * behind the copy.
+   *
+   * The alphas are NOT the design's, and the deviation is deliberate — see
+   * DECISIONS.md. Figma gives 0.48 / 0.48 / 0.56 with the copy at 70% white. On the
+   * real photography that measures 3.21:1 under the glyphs, against the 4.5:1 that
+   * WCAG 1.4.3 requires of 16 px regular text, and it does not clear even at 100%
+   * white — the backdrop is too bright for any text colour to fix on its own. The
+   * plateau is therefore deepened, and the copy alpha raised with it, so neither
+   * value has to move far. Verified against the composited pixels under the glyphs,
+   * not against the token: ServiceCards.spec.md carries the measurement.
+   */
+  --service-card-scrim-height: 19.5rem; /* 312 */
+  --service-card-scrim: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0) 0%,
+    rgb(0 0 0 / 0.56) 25.5%,
+    rgb(0 0 0 / 0.56) 58.17%,
+    rgb(0 0 0 / 0.63) 100%
+  );
+  /*
+   * 0.85, not the 0.70 the design gives. The other half of the same fix; the two
+   * were chosen together, off a grid of both, as the pair that clears 4.5:1 with
+   * roughly 10% to spare while moving each value the least. Its own token rather
+   * than `--color-on-media-muted`, because that one is tuned against the hero's
+   * scrim and must not follow this one.
+   */
+  --service-card-copy-color: rgb(255 255 255 / 0.85);
+  /*
+   * The resting scrim, for a panel showing nothing but its title.
+   *
+   * The 312 px band exists to carry three lines of copy and a button. Left at full
+   * strength under a lone title it is a dark stripe with no reason for being, which
+   * is what the design shows on its two closed panels and what we do not want. But
+   * it cannot simply go: the title still has to clear 3:1, and on the M&A photograph
+   * — bright lime water directly behind the words — bare photography measures
+   * 1.64:1.
+   *
+   * So the resting state gets its own scrim instead: short, so it reads as a
+   * shadow under the words rather than a band across the panel, and no deeper than
+   * the title needs. The two cross-fade, so an open panel is exactly the gradient
+   * the design specifies and nothing is stacked on top of it.
+   */
+  --service-card-scrim-title-height: 8.75rem; /* 140 */
+  --service-card-scrim-title: linear-gradient(180deg, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0.55) 100%);
+  /*
+   * 0.55 at the foot, ramping from nothing over 140 px. Behind the title itself —
+   * which sits 32 to 68 px up — that works out at 0.28 to 0.42, against the flat
+   * 0.56 of the panel band it replaces. Worst measured title contrast 3.77:1
+   * against a 3.0 bar; 0.45 would also pass, at 3.20, which is not enough margin
+   * for a photograph that gets swapped.
+   */
+  /*
+   * The headline's measure. Bracketed rather than given: the design breaks after
+   * "energy", so it is wider than that line (612 px) and narrower than the same
+   * line plus " storage" (~852 px). Middle of the bracket.
+   */
+  --service-headline-measure: 44rem; /* 704 */
+  /* Headline baseline to the top edge of the panels: 68.6 px measured, on the
+     scale at 64. No padding above or below the block itself — the panels run to
+     the section's edges, and the space above comes from LogoWall's own padding. */
+  --service-headline-gap: var(--space-11);
+
+  /*
+   * Team grid.
+   *
+   * Everything here hangs off one decision: the tile carries the portrait's own
+   * aspect ratio, which turns the resting and featured states into a single
+   * uniform `scale()` on one element — no width, no height, no `clip-path`, no
+   * counter-scaled second element. It also runs the scale *downwards* from the
+   * portrait's full size, so the picture rasterises large and stays sharp in both
+   * states; scaling up from the small one does not.
+   *
+   * It costs the tile 7 px of height against the frame's 390, and the reasoning
+   * for spending it there rather than on the portrait's ratio is in
+   * `TeamGrid.spec.md`. The short version: the frame's own tile measures 0.834
+   * against 36/43 = 0.8372, so 36/43 is what the designer drew — the 390 belongs
+   * to a row 29 px narrower than the site grid.
+   */
+  --team-tile-ratio: 36 / 43;
+  --team-tile-gap: 0.625rem; /* 10 */
+  --team-tile-padding: 1rem; /* 16 */
+  --team-tile-surface: var(--color-bg-muted);
+  /*
+   * 180 / 332.5 — the resting portrait against the tile at the design width. The
+   * tile and the portrait share a ratio, so this one number reproduces both given
+   * dimensions exactly: 332.5 x 0.5414 = 180.0 and 397.2 x 0.5414 = 215.0.
+   */
+  --team-portrait-rest-scale: 0.5414;
+  --team-name-gap: var(--space-1); /* 4 */
+  --team-mark-size: 1rem; /* 16 */
+  --team-mark-color: var(--color-sage);
+  /* 120 px of Lime-Dark ramping to 0.80, pinned to the tile's foot. Straight from
+     the design; `rgb(23 46 35)` is `--color-lime-dark` written out, because a
+     gradient stop needs the channels and the alpha in one place. */
+  --team-scrim-height: 7.5rem; /* 120 */
+  --team-scrim: linear-gradient(180deg, rgb(23 46 35 / 0) 0%, rgb(23 46 35 / 0.8) 100%);
+  /* Heading to the top edge of the row. Given, and it lands on the scale. */
+  --team-heading-gap: var(--space-10); /* 48 */
+
+  /* Wider team: the only visual addition to the shared team-card treatment is
+     the supplied quiet rule separating it from Credibility. */
+  --wider-team-rule-width: 0.0625rem; /* 1 */
+  --wider-team-rule-color: var(--color-rule-soft);
+
+  /* Featured publications: four bordered press cards on the site grid. */
+  --featured-publications-padding-bottom: var(--space-14); /* 120 — supplied */
+  --featured-publications-heading-gap: var(--space-10); /* 48 — measured */
+  --featured-publications-card-gap: 0.625rem; /* 10 — measured */
+  --featured-publications-card-padding: 2rem; /* 32 — supplied */
+  --featured-publications-content-gap: var(--space-6); /* 24 — supplied */
+  --featured-publications-border-width: 0.0625rem; /* 1 — supplied */
+  --featured-publications-border-color: var(--color-rule-soft);
+  --featured-publications-logo-height: 2.625rem; /* 42 — supplied asset frame */
+  --featured-publications-meta-gap: var(--space-1); /* 4 */
+  --featured-publications-meta-color: rgb(23 46 35 / 0.6);
+  --featured-publications-button-hover: var(--color-action-hover);
+  /* Resting portraits sit above centre so their lower edge clears two lines of
+     metadata. Mobile cards need the stronger lift because their text wraps more. */
+  --wider-team-portrait-rest-y: -57%;
+  --wider-team-portrait-rest-y-mobile: -63%;
+
+  /*
+   * Growth timeline.
+   *
+   * The 80 px heading gap and 64 px marker are supplied directly. The icon box
+   * is sized per supplied SVG after visual review: the arrow fills its viewBox
+   * and stays at 14 px, while Poland, the narrow bolt and the padded globe return
+   * close to their authored dimensions so their actual strokes remain legible.
+   * Quiet text and the axis use the supplied Lime-Dark alphas. They remain local
+   * to this component because changing a global muted colour would alter unrelated
+   * sections whose contrast decisions have already been measured separately.
+   */
+  --timeline-heading-gap: 5rem; /* 80 */
+  --timeline-title-marker-gap: var(--space-7); /* 28 */
+  --timeline-marker-copy-gap: var(--space-7); /* 28 */
+  --timeline-period-copy-gap: var(--space-2); /* 8 */
+  --timeline-marker-size: var(--space-11); /* 64 */
+  --timeline-icon-size: 0.875rem; /* 14 — arrow, the optical reference */
+  --timeline-icon-poland-size: 1.5rem; /* 24 */
+  --timeline-icon-bolt-size: 1.375rem; /* 22 */
+  --timeline-icon-globe-size: 1.9375rem; /* 31 */
+  --timeline-rule-width: 0.0625rem; /* 1 */
+  --timeline-rule-color: rgb(23 46 35 / 0.4);
+  --timeline-copy-color: rgb(23 46 35 / 0.6);
+  --timeline-mobile-item-gap: var(--space-9); /* 40 */
+  --timeline-mobile-column-gap: var(--space-5); /* 20 */
+
+  /*
+   * Our process.
+   *
+   * Everything positional here is a PERCENTAGE of the photograph's own box, not a
+   * pixel value, and that is the load-bearing decision: the photo is the only
+   * fixed thing in the section — the badge hangs off its left edge, both halves of
+   * the step name are placed against its edges, the description sits under it. Tie
+   * them to the box and the whole composition scales with one number
+   * (`--process-frame-width`) instead of five media queries.
+   *
+   * The percentages come from the measured insets in OurProcess.spec.md over the
+   * stated 460 x 540: 180/460, 288/460, 123/540, 334/540.
+   */
+  --process-frame-width: min(28.75rem, 44vw); /* 460 */
+  --process-frame-ratio: 460 / 540;
+  --process-badge-size: var(--space-8); /* 36 */
+  --process-badge-gap: var(--space-2); /* 8 */
+  /*
+   * The plate under the number. The brief gives Lime-Dark for the number itself
+   * and says nothing about the fill; both screenshots show a light green that is
+   * neither this value nor a tint of Lime-Dark. Green is the closest thing in the
+   * palette and it clears 4.5:1 under the 16 px number — but only just (4.6), which
+   * is why the spec asks for the real value.
+   */
+  --process-badge-surface: var(--color-green);
+  /*
+   * Only the block direction is a number here. Horizontally each half is centred
+   * on the edge of the photograph it straddles — a rule, not an inset, and the
+   * reasoning (with the nine measurements it was re-derived from) is in the
+   * component and in OurProcess.spec.md.
+   */
+  --process-word-lead-block: 22.78%;
+  --process-word-trail-block: 61.85%;
+  /*
+   * How far a half of the name travels to clear its own aperture, and how much it
+   * drifts while it is standing still.
+   *
+   * These two numbers are one decision, and the decision is how long the flight is
+   * VISIBLE for.
+   *
+   * The aperture is the line box opened by `--process-word-mask-bleed` top and
+   * bottom, and a half of the name is on screen only while it is inside it. At a
+   * 0.25em bleed the visible path was 1.25em — the half appeared, and was already
+   * home. At 0.75em it is 1.75em, half again as long, which is what turns a wipe
+   * into a flight.
+   *
+   * The travel then has to clear the whole aperture: 1em of line box + 2 x 0.75em
+   * of bleed = 2.5em is the floor, plus the ink that overshoots the line box at
+   * `line-height: 1`. 2.8em is that with room to spare, checked by sweep rather
+   * than by arithmetic.
+   */
+  --process-word-travel: 2.8em;
+  --process-word-mask-bleed: 0.75em;
+  /*
+   * The horizontal half of the glide, and the horizontal opening in the aperture
+   * that lets it happen. The bleed is generous — the aperture's job is to hide the
+   * half vertically, and clipping it sideways would only chop the glide.
+   */
+  --process-word-glide: 0.14em;
+  --process-word-glide-bleed: 0.5em;
+  /*
+   * The slow middle of the flight. The two halves never actually stop: through the
+   * hold the lead half is still rising and the trail half still sinking, which is
+   * where they pass one another. 0.12em over a third of a window is a crawl — but
+   * a crawl is what makes the ends read as travel rather than as a cut.
+   */
+  --process-word-drift: 0.12em;
+  /*
+   * The picture inside its panel. It is taller than the panel and hangs off the
+   * top, so it can lag behind the panel's travel and give the strip some depth
+   * without ever uncovering an edge.
+   *
+   * The three numbers are one decision: the picture overhangs by 20% above and
+   * 20% below, and lags by 10.71% of ITS OWN height, which is 15% of the panel.
+   * At either extreme it still overhangs the panel by 5% — the margin that stops a
+   * rounding error from showing a hairline of background.
+   */
+  /*
+   * The panel overhangs its aperture by a hair. Parked at `translateY(100%)` its
+   * top edge otherwise lands exactly on the clip boundary, and on a frame of
+   * fractional height that boundary falls mid-pixel: the rasteriser paints a
+   * hairline of photograph across the foot of an empty card. Both panels carry the
+   * same overhang, so the strip still meets edge to edge.
+   */
+  --process-panel-overhang: 2px;
+  --process-photo-oversize: 140%;
+  --process-photo-inset: -20%;
+  --process-photo-lag: 10.71%;
+  --process-caption-gap: var(--space-6); /* 24 — bracketed 24/36, see the spec */
+  /*
+   * The description's aperture, in lines.
+   *
+   * It has to be a number rather than the content's own height: in the pinned
+   * sequence all four steps are exactly superimposed, so a step whose description
+   * runs a line longer would move the card under it. The number is therefore the
+   * LONGEST description at that width, measured, not the design's own two lines
+   * taken on faith — the same copy sets on two lines at 1440 and three at 768,
+   * where the photograph is at its narrowest (44vw = 338 px).
+   */
+  --process-caption-window: 2.5rem; /* 40 = 2 x 20 */
+
+  /*
+   * The mark.
+   *
+   * 300 px at 1440, and it still has to be a mark rather than a wall on a phone:
+   * 80 px at 390, interpolated. It grows past both by transform rather than by
+   * font-size, so the growth costs no layout — and it keeps growing, very slowly,
+   * for the rest of the section, because a still background reads as a still page.
+   *
+   * Two colours rather than one animated one: the design's solid Lime-Dark on the
+   * way in, the design's 0.1 watermark once the card is on stage. Cross-faded, so
+   * the compositor does the work and both values stay exactly as drawn.
+   */
+  --process-mark-size: clamp(5rem, -0.1071rem + 20.9524vw, 18.75rem);
+  --process-mark-color-solid: var(--color-fg);
+  --process-mark-color-faint: rgb(23 46 35 / 0.1);
+  --process-mark-scale-from: 0.28;
+  /*
+   * The pin. 1.6 viewports per step plus 1.6 for the mark — the component computes
+   * the height from the step count and sets it inline; this is the four-step
+   * value, and the fallback if the markup ever stops saying.
+   */
+  --process-section-height: 560vh;
+
+  /*
+   * Market slider.
+   *
+   * The block is a bordered box inside the page grid: a band with the heading in
+   * it, a rule, and under it a body as tall as the illustration. Everything
+   * positional here is that geometry.
+   *
+   * The rule and the step buttons are the same value — white at 8% — and it is
+   * given, not derived. It is NOT `--color-on-media-rule` (0.3): that one is
+   * tuned for a hairline over photography and would read as a hard frame here.
+   */
+  --market-rule: rgb(255 255 255 / 0.08);
+  /* 640 — the illustrations' native size, and what the frame draws them at. */
+  --market-figure-size: 40rem;
+  /*
+   * The inset of everything inside the box: the heading from the left border, the
+   * copy from it, the button from the box's foot.
+   *
+   * Given as 20. The frame measures 28.3 to the left edge of the button and 30 to
+   * the foot (both at the 0.6 scale the reference is drawn to, so ±1.7 px of
+   * reading error each) — the stated value is what ships, and the measurement is
+   * recorded in MarketSlider.spec.md as an open question.
+   */
+  --market-pad: 1.25rem; /* 20 */
+  /*
+   * The heading band. Neither number is given: the rule sits 208 px below the top
+   * of the reference crop and the heading's own line box occupies 64 of that, so
+   * the two paddings have to sum to ~144. Split 96 / 36 — the pair on the 4 px
+   * scale closest to the measured split (107 / 37), and the 96 carries the whole
+   * error because the crop's top edge is not proof of the section's.
+   */
+  --market-head-pad-block: var(--space-13); /* 96 */
+  --market-head-gap: var(--space-8); /* 36 */
+  /*
+   * The copy's measure, and it is narrower than the column it sits in. Bracketed
+   * rather than given: the frame breaks the second line after "permits" while the
+   * line plus " for" would still fit the 340 px column, so the measure is between
+   * the line as drawn (278) and the line plus the next word (~310). Middle.
+   */
+  --market-copy-measure: 18.5rem; /* 296 */
+  /* Copy to button: 25 screenshot px at 0.6 = 41.6, i.e. the 40 step. */
+  --market-copy-gap: var(--space-9); /* 40 */
+  /*
+   * The step buttons. 40 x 40 with a 1 px gap between them, both given, and the
+   * pair sits directly against the illustration's right edge with no gap at all —
+   * measured, not assumed: the first button's left edge is the picture's right
+   * edge to the pixel.
+   */
+  --market-step-size: var(--space-9); /* 40 */
+  --market-step-gap: 1px;
+  --market-step-surface: var(--market-rule);
+  /*
+   * No hover state in the frame. Doubling the alpha is the same move the button
+   * makes with its 8% tint — the smallest change that still registers on a
+   * surface this quiet.
+   */
+  --market-step-surface-hover: rgb(255 255 255 / 0.16);
+  /*
+   * One step of the copy's entrance, per WORD.
+   *
+   * Shorter than the global `--reveal-step` (90 ms) by a lot, and it has to be:
+   * this is not four headings arriving one after another, it is fourteen words of
+   * one sentence. At 90 the last word would land 1.3 s after the first and the
+   * sentence would read as a list. At 26 the whole line is away in 360 ms and the
+   * eye reads a wave crossing it, which is the effect the design asks for.
+   */
+  --market-word-step: 26ms;
+  /* How far a word travels out of its own line box. Just past its own height, so
+     it starts fully hidden behind the clip and never shows a sliver. */
+  --market-word-travel: 105%;
+
+
+  /*
+   * Audience tabs.
+   *
+   * The block is one 500 px band split into two halves with 10 px between them:
+   * a tinted box carrying three switches on the left, the photograph the active
+   * switch selects on the right. Both numbers are given.
+   *
+   * Everything else here is measured off the reference crop, which is drawn at
+   * 0.4479 of 1440 (645 px wide). The scale is not assumed — the band measures
+   * 223 crop px against the stated 500, i.e. 2.2321 px of design per crop px,
+   * and 1440 / 645 = 2.2326. The two agree to a fifth of a percent, so a crop
+   * pixel is worth 2.2326 design pixels and every reading below uses that.
+   */
+  --audience-band-height: 31.25rem; /* 500 */
+  --audience-gap: 0.625rem; /* 10 */
+  /*
+   * The inset inside both halves: the switches from the box's edges, the button
+   * from the photograph's. Given as 40, and the crop agrees — the button sits
+   * 42.4 px from the right edge and 38.0 from the foot, i.e. 40 ± one crop pixel
+   * on each axis.
+   */
+  --audience-pad: var(--space-9); /* 40 */
+  /* Heading baseline block to the top of the band: 22 crop px of gap between the
+     heading's line box and the box's top edge, 49.1 design px, on the scale at 48. */
+  --audience-heading-gap: var(--space-10); /* 48 */
+
+  /*
+   * The switch label. 40 px is given; the crop confirms it — the cap of "Have
+   * Land?" measures 13 crop px = 29.0, and Aeonik's `sCapHeight` is 0.70 em, so
+   * the size is 29.0 / 0.70 = 41.5, one crop pixel from the stated 40.
+   *
+   * It shrinks with the viewport for the same reason every other step on the
+   * scale does, and to the same rule: linear between 390 and 1440, locked at both
+   * ends. 24 at the bottom is what keeps the longest label — "Buy or Selling a
+   * Project?", 439 px of advance width at 40 — inside a phone-width row.
+   */
+  --audience-tab-size: clamp(1.5rem, 1.1286rem + 1.5238vw, 2.5rem);
+  /*
+   * Not assumed from the scale — derived. The three labels' ink measures 200.9,
+   * 419.7 and 408.5 design px; their advance widths in Aeonik Medium at 40 px are
+   * 213.0, 439.4 and 433.0. Taking off the side bearings, the three deltas work
+   * out at -0.017, -0.015 and -0.020 em per character. The scale's own -0.02
+   * is inside that spread, so the label tracks with every other large step.
+   */
+  --audience-tab-tracking: -0.02em;
+  /*
+   * Line box 40 (leading 1) plus 20 above and below, i.e. a switch every 80 px and
+   * three hit areas that tile with no dead ground between them. Measured pitch is
+   * 78.1 (35.0 crop px between cap tops, ±2.2 for the crop's own resolution), so
+   * 80 is the value on the 4 px scale inside the reading's error bar — and it is
+   * the same 40 the padding is, which is unlikely to be a coincidence.
+   */
+  --audience-tab-pad-block: var(--space-5); /* 20 */
+  /* The row on small screens, where the switches sit side by side. No design
+     coverage; 24 is the step that keeps two labels from reading as one phrase. */
+  --audience-tab-pad-inline: var(--space-6); /* 24 */
+  /*
+   * The inactive switch: the same Lime-Dark, at 0.2. Given, and it is the one
+   * value in this block that is a contrast problem rather than a style — see
+   * AudienceTabs.spec.md, which carries the measurement and the question.
+   */
+  --audience-tab-rest-opacity: 0.2;
+  /*
+   * No hover state in the frame. Halfway between rest and active: enough that a
+   * pointer confirms the switch is a switch, not so much that it reads as a
+   * second active one.
+   */
+  --audience-tab-hover-opacity: 0.5;
+
+  /*
+   * Closing call.
+   *
+   * One centred column: the mark, a two-colour headline, one line under it, one
+   * button. Everything here is a gap, because there is no box — the section is
+   * white ground and nothing else, and what makes it read is the rhythm between
+   * five things stacked on the page's centre line.
+   */
+  --cta-padding-block: var(--space-14); /* 120 — given */
+  /* The mark at its native size. 116 is off the 4 px scale and stays that way:
+     it is the artwork's own box, not a spacing decision. */
+  --cta-mark-size: 7.25rem; /* 116 */
+  --cta-mark-gap: var(--space-10); /* 48 — mark to the headline's cap line */
+  /*
+   * The headline breaks where the design breaks it — each half is its own line —
+   * so this is not a measure that shapes the copy, only a ceiling that stops a
+   * long half from running the width of a wide screen. Same value as
+   * `--service-headline-measure`, and for the same reason: it is the width at
+   * which a 72 px line stops being one gesture.
+   */
+  --cta-heading-measure: 44rem; /* 704 */
+  --cta-lead-gap: var(--space-7); /* 28 — given */
+  /* Line to button: 38 crop px at 0.768 = 49.5, i.e. the 48 step. */
+  --cta-action-gap: var(--space-10); /* 48 */
+  /*
+   * The inverted button. The design's default button is a white surface with a
+   * Lime-Dark label; the closing call runs it the other way round, because here
+   * it sits on white ground rather than on video and a white button on white is
+   * not a button. The tokens are the Button component's own, overridden on the
+   * wrapper — custom properties inherit, so the component is not touched.
+   *
+   * Both the light and Lime-Dark resting buttons now reveal the same interactive
+   * Green, so the closing action joins the shared choreography without a variant.
+   */
+  --cta-button-surface: var(--color-lime-dark);
+  --cta-button-fg: var(--color-white);
+  --cta-button-surface-hover: var(--color-action-hover);
+
+  /*
+   * Footer.
+   *
+   * Three columns divided by rules that run the full height of the block, not
+   * just the height of the tallest column's content. That is why the block
+   * padding lives on the columns and not on the container around them: the rule
+   * is the column's own edge, so it reaches the top border and the foot by
+   * construction instead of by a matched pair of numbers.
+   *
+   * The tracks come off the reference, which is drawn at 0.768: the two rules sit
+   * at 360 and 583 of 1106, giving columns of 360 / 223 / 523 — 1.62 : 1 : 2.34.
+   */
+  --footer-columns: minmax(0, 1.426fr) minmax(0, 1fr) minmax(0, 2.157fr);
+  /*
+   * Rule to the first cap line, and to the foot. 54 crop px above the navigation's
+   * first line at 0.768 is 70 of design, of which ~6 is the line box above the cap,
+   * so the padding is ~64 and not the 48 a first reading of the crop suggests.
+   * Checked from the other end: with 64 top and bottom the copyright — which is
+   * pinned to the column's foot — lands 497 px under the rule against the 497 the
+   * crop reads. That agreement is what the value rests on.
+   */
+  --footer-padding-block: var(--space-11); /* 64 */
+  /* Rule to the copy beside it: 35 ± 2 crop px = 45 ± 3 of design, taken through
+     the ink of "Home" and of "Warsaw Office". 48 is the step inside that bracket. */
+  --footer-column-pad: var(--space-10); /* 48 */
+  --footer-brand-gap: var(--space-8); /* 36 — wordmark to the tagline */
+  /* Item pitch is 40 in a 24 line box, so the gap is 16. Same value for the
+     navigation and for a group title over its lines — measured on both. */
+  --footer-nav-gap: var(--space-4); /* 16 */
+  --footer-group-title-gap: var(--space-4); /* 16 */
+  /*
+   * Between two contact groups stacked in the same column: the three title rows sit
+   * 142 and 123 crop px apart, i.e. 184.9 and 160.1 of design, over groups of 112
+   * and 88. Both readings leave the same 72.9 — and the 24.8 between them is the
+   * 24 line box of the extra line, which is what says the two readings agree.
+   */
+  --footer-group-gap: var(--space-12); /* 72 */
+  /*
+   * The two contact columns are a fixed measure, not two halves of the column they
+   * sit in: the design leaves ~90 px of slack at the right edge, so the pair is
+   * sized by its content and not by the box. Their pitch is 197 crop px = 256.5,
+   * and the widest line in either of them ("42-575 Gródków k. Będzina") sets at
+   * 201.2 — so 208 is the first step on the 4 px scale that holds every line on
+   * one row, and the gap is what is left of the pitch.
+   */
+  --footer-contact-column: 13rem; /* 208 */
+  --footer-contact-gap: var(--space-10); /* 48 — 208 + 48 = the measured 256 pitch */
+  /*
+   * The group title. Given as Lime-Dark at 0.5 — the same halving the design uses
+   * on the quiet half of a section heading, and the same contrast question:
+   * 0.5 measures 2.98:1 on white against the 4.5:1 WCAG 1.4.3 asks of 16 px text.
+   * These are labels over their own lines rather than the lines themselves, and
+   * they ship as drawn; `Footer.spec.md` carries the question and the measurement.
+   */
+  --footer-group-title-opacity: 0.5;
+  /* The minimum air between the tagline and the copyright pinned to the column's
+     foot, for a viewport where the contact column is not the tallest one. */
+  --footer-copyright-gap: var(--space-13); /* 96 */
+
+  /*
+   * Page hero.
+   *
+   * The opening screen of every page that is not `home`. It shares the home
+   * hero's copy stack — 72 px headline, 28 px line under it at `--space-5`, both
+   * standing 72 px off the block's foot — so the only values that belong to this
+   * block are the ones the home hero has no equivalent for.
+   */
+  /*
+   * 900, and never more than the viewport. The photographs are drawn at exactly
+   * 1440 x 900 and the frame's white section starts 906 px down, so 900 is both
+   * the stated and the measured height. The `min()` is what keeps the copy — which
+   * lives at the foot — above the fold on a laptop: at a flat 900 an 800 px
+   * viewport opens on photography with the `<h1>` below it, and the `<h1>` is the
+   * LCP element.
+   */
+  --page-hero-height: min(56.25rem, 100svh); /* 900 */
+  /*
+   * The subheading's measure. The service pages break this line by hand, so this
+   * is a guard rather than a layout value: it has to sit above the longest line
+   * the design draws (888 px, Dev-to-Sell) or it would rewrap a designed break,
+   * and far enough below the container for About us — whose sentence is drawn
+   * nowhere and runs 145 characters — to arrive as three lines rather than two.
+   */
+  --page-hero-copy-measure: 60rem; /* 960 */
+  /*
+   * The page hero's own top scrim, over the header. The height is the home hero's
+   * 145 px — that is the header's own band and it does not change — but the alphas
+   * are deeper, for the reason the bottom one is: four photographs, and the
+   * Dev-to-Sell site is bright sky exactly where the navigation sits. At the home
+   * hero's 0.44 / 0.64 the nav links measure 4.28:1 against the 4.5 that 14 px
+   * text needs.
+   *
+   * 0.50 / 0.70 is the shallowest pair on a sweep that clears it: worst 5.08:1,
+   * the same ~13% of headroom the bottom scrim carries. Verified against the
+   * composited pixels, not the token.
+   */
+  --page-hero-scrim-top: linear-gradient(
+    to top,
+    rgb(24 24 24 / 0) 0%,
+    rgb(24 24 24 / 0.5) 55.29%,
+    rgb(24 24 24 / 0.7) 100%
+  );
+  /*
+   * The page hero's own bottom scrim, deeper than the home hero's.
+   *
+   * NOT a shared value, and the reason is the same one that made `Hero`'s scrim a
+   * measured value rather than a Figma one: the home hero covers one clip, this
+   * covers four unrelated photographs — and one of them, the Dev-to-Sell site,
+   * puts white battery containers directly behind the copy. At the home hero's
+   * gradient (0.28 / 0.48 / 0.66) the standfirst measures 3.56:1 there against the
+   * 4.5 it needs, and the About us headline 2.91:1 against 3.
+   *
+   * 0.36 / 0.60 / 0.80 is the shallowest point on a sweep of four candidates that
+   * clears both bars with the same ~13% of headroom: worst headline 3.39:1 and
+   * worst standfirst 5.08:1, over four pages x five viewports. Every extra percent
+   * of alpha is photography thrown away, which is why it is not simply set deeper.
+   * Verified by tests/a11y/page-hero-contrast.spec.ts against the composited
+   * pixels under the glyphs — a photograph swapped for a brighter one has to be
+   * re-run, not assumed.
+   */
+  --page-hero-scrim-bottom: linear-gradient(
+    to bottom,
+    rgb(24 24 24 / 0) 0%,
+    rgb(24 24 24 / 0.36) 26%,
+    rgb(24 24 24 / 0.6) 60%,
+    rgb(24 24 24 / 0.8) 100%
+  );
+
+  /*
+   * About story.
+   *
+   * The reference is a 1016 px export of a 1440 px frame. The six source files
+   * confirm that scale independently: each is drawn at exactly two thirds of its
+   * exported width. Positions below are percentages of the 1440 x 966 section so
+   * the constellation contracts with the viewport without losing its geometry.
+   */
+  --about-story-height: clamp(46rem, 67.0833vw, 60.375rem); /* 966 at 1440 */
+  --about-story-stage-height: min(var(--about-story-height), 100svh);
+  --about-story-viewport-height: 100svh;
+  --about-story-pin-distance: 100svh;
+  --about-hero-target-size: clamp(7rem, 10.8333vw, 9.75rem); /* 156 at 1440 */
+  --about-hero-target-top: 20.704%; /* 200 / 966 */
+  --about-statement-top: 42.65%; /* 412 / 966 */
+  --about-statement-measure: 45rem; /* 720 */
+
+  --about-photo-1-width: clamp(8rem, 13.4722vw, 12.125rem); /* 194 */
+  --about-photo-1-top: 23.188%;
+  --about-photo-1-left: -6.6%; /* the frame crops roughly half this image */
+  --about-photo-2-width: clamp(4.5rem, 7.3611vw, 6.625rem); /* 106 */
+  --about-photo-2-top: 12.319%;
+  --about-photo-2-left: 22.847%;
+  --about-photo-3-width: clamp(7rem, 11.1111vw, 10rem); /* 160 */
+  --about-photo-3-top: 16.253%;
+  --about-photo-3-right: 4.167%;
+  --about-photo-4-width: clamp(10rem, 17.7778vw, 16rem); /* 256 */
+  --about-photo-4-top: 61.801%;
+  --about-photo-4-right: 6.319%;
+  --about-photo-5-width: clamp(8rem, 13.4722vw, 12.125rem); /* 194 */
+  --about-photo-5-top: 70.704%;
+  --about-photo-5-left: 32.986%;
+  --about-photo-6-width: clamp(7.5rem, 12.7778vw, 11.5rem); /* 184 */
+  --about-photo-6-top: 59.006%;
+  --about-photo-6-left: 4.444%;
+
+  --about-photo-entry-scale: 0.86;
+  --about-photo-travel: var(--space-8);
+  --about-photo-reveal-speed: 4;
+  --about-photo-1-start: 0.03;
+  --about-photo-2-start: 0.08;
+  --about-photo-3-start: 0.12;
+  --about-photo-4-start: 0.18;
+  --about-photo-5-start: 0.15;
+  --about-photo-6-start: 0.1;
+
+  --about-word-resting-opacity: 0.5;
+  --about-word-reveal-start: 0.08;
+  --about-word-reveal-step: 0.03;
+  --about-word-reveal-speed: 5;
+  --about-hero-handoff-start: 0.96;
+  --about-hero-handoff-range: 0.04;
+  --about-hero-copy-fade-speed: 2;
+
+  /*
+   * Metric statement.
+   *
+   * One figure at the size of a section ground, and the sentence that explains it.
+   */
+  /*
+   * 300 at 1440 down to 120 at 390, interpolated on the same rule the type scale
+   * uses. Deliberately NOT a step in that scale: nothing else in the project will
+   * ever be set at 300 px, and adding it to the scale is an invitation to try.
+   * Measured: the digits stand 214.1 px tall against Aeonik's 0.700 cap ratio.
+   */
+  --metric-figure-size: clamp(7.5rem, 3.3214rem + 17.1429vw, 18.75rem);
+  /*
+   * Lime-Dark at a tenth. Specified as 0.10; the frame samples rgb(228, 231, 230)
+   * on white, which is 0.115 on every channel. One value of 255 apart, and the
+   * round number is the one worth a token.
+   *
+   * This is 1.2:1 and that is not a contrast failure — the figure is marked
+   * `aria-hidden` and the paragraph beside it states the number in words. See
+   * MetricStatement.spec.md.
+   */
+  --metric-figure-color: rgb(23 46 35 / 0.1);
+  /* Heading line box to the figure's. Measured 35.6. */
+  --metric-figure-gap: var(--space-8); /* 36 */
+  /*
+   * The paragraph's column: 480 flush to the right edge of the grid. Given by
+   * where it opens — 919.4 and 921.7 on the two frames that agree, against a right
+   * edge at 1400.
+   */
+  --metric-copy-measure: 30rem; /* 480 */
+  /*
+   * How far the paragraph starts below the top of the figure's box. Measured 70.7
+   * on both frames that agree. Not an alignment to anything in the figure — see
+   * the deviation in the spec.
+   */
+  --metric-copy-offset: var(--space-12); /* 72 */
+
+  /*
+   * Two-card service-page feature.
+   *
+   * The 10 px column gap and 275 px scrim height are supplied directly. The
+   * remaining geometry is measured from the client composite; see
+   * FeaturePair.spec.md.
+   */
+  --feature-pair-padding-top: 10rem; /* 160 */
+  --feature-pair-heading-gap: var(--space-11); /* 64 */
+  --feature-pair-heading-measure: 60rem; /* 960 — keeps the designed first line intact at 56 */
+  --feature-card-gap: 0.625rem; /* 10 */
+  --feature-card-min-width: 30rem; /* 480 */
+  --feature-card-height: 29.0625rem; /* 465 — supplied directly */
+  --feature-card-scrim-height: 17.1875rem; /* 275 */
+  --feature-card-padding: 3.3125rem; /* 53 — supplied directly */
+  --feature-card-copy-gap: var(--space-2); /* 8 */
+  --feature-card-copy-measure: 30rem; /* 480 */
+  --feature-card-title-line-height: 2.25rem; /* 36 */
+  --feature-card-image-scale: 1.025;
+  --feature-card-reveal-scale: 1.04;
+  --feature-word-step: 26ms;
+  --feature-word-travel: 105%;
+
+  /*
+   * Brokerage technical-depth switcher.
+   * The 560 square, 18/500 row and 120 top padding are supplied directly.
+   */
+  --technical-padding-top: var(--space-14); /* 120 */
+  --technical-padding-bottom: var(--space-14); /* 120 */
+  --technical-heading-gap: var(--space-10); /* 48 */
+  --technical-media-size: 35rem; /* 560 */
+  --technical-column-gap: var(--space-14); /* 120 */
+  --technical-tab-padding-block: 0.875rem; /* 14 — supplied */
+  --technical-tab-rest-opacity: 0.5;
+  --technical-tab-hover-opacity: 0.72;
+  --technical-arrow-width: 1.875rem; /* 30 */
+  --technical-arrow-height: 0.8125rem; /* 13 */
+  --technical-arrow-start: -0.5rem; /* -8 */
+  --technical-label-active-shift: 2.375rem; /* 30 + 8 */
+  --technical-copy-window: 7.75rem; /* 124 — title + gap + up to 3 body lines */
+  --technical-copy-measure: 32rem; /* 512 */
+  --technical-copy-gap: var(--space-6); /* 24 */
+  --technical-copy-shift: var(--space-4); /* 16 */
+  --technical-copy-color: rgb(23 46 35 / 0.6);
+  --technical-image-reveal-scale: 1.04;
+  --technical-mobile-stage-gap: var(--space-10); /* 48 */
+  --technical-mobile-copy-gap: var(--space-10); /* 48 */
+
+  /* Dev-to-Hold market case: supplied 55 px panel inset and native-size SVGs. */
+  --market-flex-padding-block: var(--space-14); /* 120 */
+  --market-flex-header-column-gap: var(--space-14); /* 120 */
+  --market-flex-header-end-inset: 3.4375rem; /* 55 — aligns copy with panel content */
+  --market-flex-intro-measure: 32.8125rem; /* 525 — supplied maximum */
+  --market-flex-copy-color: rgb(23 46 35 / 0.6);
+  --market-flex-panel-gap: var(--space-11); /* 64 — inferred from reference */
+  --market-flex-panel-padding: 3.4375rem; /* 55 — supplied directly */
+  --market-flex-left-column: 46.4%;
+  --market-flex-left-padding-end: var(--space-10); /* 48 */
+  --market-flex-right-padding-start: var(--space-9); /* 40 */
+  --market-flex-divider-width: 0.0625rem; /* 1 */
+  --market-flex-graphic-gap: var(--space-9); /* 40 */
+  --market-flex-left-graphic-width: 31.0625rem; /* 497 — intrinsic SVG */
+  --market-flex-right-graphic-width: 38.625rem; /* 618 — intrinsic SVG */
+  --market-flex-mobile-divider-gap: var(--space-10); /* 48 */
+  --market-flex-reveal-x: -105%;
+  --market-flex-reveal-scale: 1.04;
+
+  /*
+   * Dev-to-Sell development-stage tabs.
+   * The 120 px section edge, 30 px labels, 6 px markers and 974:564 media ratio
+   * are supplied directly; the 560 / 120 / 680 grid uses the site container.
+   */
+  --how-develop-padding-block: var(--space-14); /* 120 */
+  --how-develop-heading-gap: var(--space-10); /* 48 */
+  --how-develop-left-width: 35rem; /* 560 */
+  --how-develop-column-gap: var(--space-14); /* 120 */
+  --how-develop-tab-padding-block: var(--space-5); /* 20 */
+  --how-develop-tab-hover-opacity: 0.72;
+  --how-develop-label-active-shift: var(--space-1); /* 4 */
+  --how-develop-rule-width: 0.0625rem; /* 1 */
+  --how-develop-bullet-marker: 0.375rem; /* 6 */
+  --how-develop-bullet-marker-start-scale: 0.15;
+  --how-develop-bullet-gap: var(--space-3); /* 12 */
+  --how-develop-bullet-row-gap: var(--space-2); /* 8 */
+  --how-develop-bullets-top-gap: var(--space-3); /* 12 */
+  --how-develop-bullets-bottom-gap: var(--space-5); /* 20 */
+  --how-develop-bullet-step: 70ms;
+  --how-develop-bullet-text-delay: 55ms;
+  --how-develop-bullet-text-shift: var(--space-2); /* 8 */
+  --how-develop-copy-gap: var(--space-3); /* 12 */
+  --how-develop-copy-media-gap: var(--space-6); /* 24 */
+  --how-develop-surface: var(--color-bg);
+  --how-develop-heading-color: var(--color-fg);
+  --how-develop-tab-color: var(--color-fg);
+  --how-develop-active-color: var(--color-fg-accent);
+  --how-develop-rule-color: var(--color-rule-soft);
+  --how-develop-copy-color: rgb(23 46 35 / 0.6);
+  --how-develop-copy-title-shift: var(--space-3); /* 12 */
+  --how-develop-copy-description-shift: var(--space-2); /* 8 */
+  --how-develop-copy-description-delay: 90ms;
+  --how-develop-media-ratio: 974 / 564;
+  --how-develop-image-crop-inline-end: 0.0625rem; /* 1 */
+  --how-develop-image-reveal-scale: 1.04;
+  --how-develop-mobile-gap: var(--space-10); /* 48 */
+
+  /* Develop-to-Sell proof points with alternating 620 × 489 images. */
+  --process-behind-padding-block: var(--space-14); /* 120 */
+  --process-behind-heading-gap: var(--space-12); /* 72 */
+  --process-behind-row-gap: var(--space-12); /* 72 */
+  --process-behind-column-gap: 5rem; /* 80 */
+  --process-behind-copy-measure: 38.75rem; /* 620 */
+  --process-behind-media-ratio: 620 / 489;
+  --process-behind-title-size: clamp(2rem, 1.6285rem + 1.5238vw, 3rem);
+  --process-behind-title-line-height: 1;
+  --process-behind-title-letter-spacing: -0.02em;
+  --process-behind-title-subtitle-gap: var(--space-7); /* 28 */
+  --process-behind-subtitle-description-gap: var(--space-6); /* 24 */
+  --process-behind-description-list-gap: var(--space-6); /* 24 */
+  --process-behind-bullet-row-gap: var(--space-4); /* 16 */
+  --process-behind-marker-size: 0.3125rem; /* 5 — supplied */
+  --process-behind-marker-gap: var(--space-3); /* 12 */
+  --process-behind-copy-color: rgb(23 46 35 / 0.6);
+  --process-behind-image-reveal-scale: 1.04;
+  --process-behind-mobile-item-gap: var(--space-8); /* 36 */
+
+  /*
+   * Numbered service-page introduction.
+   * The desktop grid is 560 + 120 + 680 inside the established 1360 px container.
+   */
+  --process-intro-padding-block: var(--space-14); /* 120 — supplied */
+  --process-intro-column-gap: var(--space-14); /* 120 — supplied */
+  --process-intro-media-ratio: 870 / 515;
+  --process-intro-media-reveal-scale: 1.04;
+  --process-intro-media-duration: 1.3s;
+  --process-intro-badge-size: var(--space-8); /* 36 — supplied */
+  --process-intro-badge-surface: var(--color-green);
+  --process-intro-badge-title-gap: 1.875rem; /* 30 — supplied */
+  --process-intro-title-copy-gap: 2.125rem; /* 34 — supplied */
+  --process-intro-copy-rule-gap: var(--space-11); /* 64 — supplied */
+  --process-intro-rule-item-gap: 2.625rem; /* 42 — supplied */
+  --process-intro-rule-width: 0.0625rem; /* 1 */
+  --process-intro-rule-color: var(--color-rule-soft);
+  --process-intro-copy-color: rgb(23 46 35 / 0.6);
+  --process-intro-mobile-gap: var(--space-10); /* 48 */
+
+  /* Brokerage Retained / Ad-Hoc comparison and its attached green CTA. */
+  --engagement-padding-top: var(--space-11); /* 64 — measured from reference */
+  --engagement-heading-gap: var(--space-10); /* 48 */
+  --engagement-label-column: 42%;
+  --engagement-column-gap: 0.625rem; /* 10 — measured */
+  --engagement-cell-padding-block: var(--space-5); /* 20 — 64 px row with 24 px line */
+  --engagement-cell-padding-inline: var(--space-6); /* 24 */
+  --engagement-mobile-cell-padding-inline: var(--space-3); /* 12 */
+  --engagement-rule-width: 0.0625rem; /* 1 */
+  --engagement-plan-icon-size: 1.375rem; /* 22 — supplied */
+  --engagement-check-icon-size: 1.5rem; /* 24 — supplied SVG */
+  --engagement-cross-icon-size: 1.25rem; /* 20 — supplied SVG */
+  --engagement-icon-gap: var(--space-3); /* 12 */
+  --engagement-status-gap: var(--space-2); /* 8 */
+  --engagement-retained-surface: color-mix(in srgb, var(--color-green) 10%, var(--color-white));
+  --engagement-adhoc-surface: color-mix(in srgb, var(--color-lime-dark) 5%, var(--color-white));
+  --engagement-value-color: rgb(23 46 35 / 0.6);
+  --engagement-cta-gap: var(--space-14); /* 120 — measured */
+  --engagement-cta-padding-block: var(--space-10); /* 48 */
+  --engagement-cta-column-gap: var(--space-10); /* 48 */
+  --engagement-cta-copy-gap: var(--space-5); /* 20 */
+  --engagement-button-surface-hover: var(--color-action-hover);
+
+  /* Shared closing proof section on the three product pages. */
+  --proof-padding-block: var(--space-14); /* 120 — inferred from reference */
+  --proof-heading-layout-gap: var(--space-6); /* 24 — measured approximately */
+  --proof-metrics-width: 30rem; /* 480 */
+  --proof-column-gap: var(--space-14); /* 120 */
+  --proof-artwork-width: 35.8125rem; /* 573 — supplied source width */
+  --proof-artwork-height: 34.25rem; /* 548 — supplied source height */
+  --proof-artwork-ratio: 573 / 548;
+  --proof-metrics-top-inset: var(--space-10); /* 48 */
+  --proof-metric-row-padding: var(--space-8); /* 36 */
+  --proof-metric-label-gap: var(--space-6); /* 24 */
+  --proof-rule-width: 0.0625rem; /* 1 — supplied */
+  --proof-metric-rule: rgb(255 255 255 / 0.08);
+  --proof-unit-color: rgb(255 255 255 / 0.4);
+  --proof-contact-width: 25.75rem; /* 412 = 14 + 92 + 16 + copy + 14 */
+  --proof-contact-padding: 0.875rem; /* 14 — supplied */
+  --proof-contact-portrait-size: 5.75rem; /* 92 — supplied */
+  --proof-contact-gap: var(--space-4); /* 16 */
+  --proof-contact-role-color: rgb(23 46 35 / 0.6);
+  --proof-contact-email-color: var(--color-green);
+  --proof-contact-line-gap: var(--space-1); /* 4 */
+  --proof-mobile-column-gap: var(--space-12); /* 72 */
+  --proof-artwork-reveal-x: 105%;
+  --proof-artwork-reveal-y: 8%;
+  --proof-artwork-reveal-scale: 1.04;
+  --feature-card-scrim: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0) 0%,
+    rgb(0 0 0 / 0.48) 25.5%,
+    rgb(0 0 0 / 0.48) 58.17%,
+    rgb(0 0 0 / 0.56) 100%
+  );
+
+  /* ── `--space-*` aliases (AGENT-RULES §4) ────────────────────────────────── */
+  --space-0: var(--spacing-0);
+  --space-1: var(--spacing-1);
+  --space-2: var(--spacing-2);
+  --space-3: var(--spacing-3);
+  --space-4: var(--spacing-4);
+  --space-5: var(--spacing-5);
+  --space-6: var(--spacing-6);
+  --space-7: var(--spacing-7);
+  --space-8: var(--spacing-8);
+  --space-9: var(--spacing-9);
+  --space-10: var(--spacing-10);
+  --space-11: var(--spacing-11);
+  --space-12: var(--spacing-12);
+  --space-13: var(--spacing-13);
+  --space-14: var(--spacing-14);
+}
+
+/*
+ * Below 1360 the statistics move under the copy instead of beside it, so the block
+ * grows taller and the headline climbs into the bright half of the frame — while
+ * the video still ends on white containers. The narrow scrim is correspondingly
+ * stronger. The threshold matches the layout fold in Hero.astro; the numbers behind
+ * both gradients are in tests/a11y/hero-contrast.spec.ts.
+ */
+@media (max-width: 1359px) {
+  :root {
+    --hero-scrim-bottom: linear-gradient(
+      to bottom,
+      rgb(24 24 24 / 0) 0%,
+      rgb(24 24 24 / 0.46) 24%,
+      rgb(24 24 24 / 0.64) 58%,
+      rgb(24 24 24 / 0.78) 100%
+    );
+  }
+}
+
+/*
+ * Below the fold of the design the photograph stops being a 460 px object in a
+ * 1440 px frame and becomes most of the screen. 72vw rather than 44 — the two
+ * halves of the step name centre on it there (OurProcess.spec.md, deviation 2)
+ * and need the width.
+ */
+@media (max-width: 1023px) {
+  :root {
+    /* Three lines: measured at 390, 600 and 768. The worst case is 768, not the
+       narrowest viewport — below it the photograph switches to 72vw and gets
+       *wider* than the 44vw it has just above. */
+    --process-caption-window: 3.75rem; /* 60 = 3 x 20 */
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --process-frame-width: min(28.75rem, 72vw);
+
+    /* No mobile frame was supplied. Keep the collage legible and inside 390 px. */
+    --about-story-height: 52rem;
+    --about-hero-target-size: 7rem;
+    --about-hero-target-top: 6.25%;
+    --about-statement-top: 32.692%;
+    --about-statement-measure: calc(100% - 2 * var(--container-gutter));
+    --about-photo-1-width: 7rem;
+    --about-photo-1-top: 19.231%;
+    --about-photo-1-left: -8%;
+    --about-photo-2-width: 4.5rem;
+    --about-photo-2-top: 3.846%;
+    --about-photo-2-left: 5.128%;
+    --about-photo-3-width: 6.5rem;
+    --about-photo-3-top: 15.385%;
+    --about-photo-3-right: 3.205%;
+    --about-photo-4-width: 9rem;
+    --about-photo-4-top: 65.385%;
+    --about-photo-4-right: -8%;
+    --about-photo-5-width: 8rem;
+    --about-photo-5-top: 75%;
+    --about-photo-5-left: 34%;
+    --about-photo-6-width: 7rem;
+    --about-photo-6-top: 61.538%;
+    --about-photo-6-left: 3.205%;
+  }
+}
+
+/*
+ * Under 1024 the figure and the paragraph stop being two columns and become two
+ * rows, and the 72 px the paragraph hangs below the figure's box stops meaning
+ * anything: there is no second column for it to align against, and the figure
+ * itself is under 200 px tall by then. It becomes an ordinary gap.
+ */
+@media (max-width: 1023px) {
+  :root {
+    --metric-copy-offset: var(--space-8); /* 36 */
+    --metric-copy-measure: 100%;
+    --market-flex-header-column-gap: var(--space-8); /* 36 */
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --market-flex-padding-block: var(--space-13); /* 96 */
+    --market-flex-panel-gap: var(--space-10); /* 48 */
+    --market-flex-panel-padding: var(--space-5); /* 20 */
+    --market-flex-graphic-gap: var(--space-8); /* 36 */
+  }
+}

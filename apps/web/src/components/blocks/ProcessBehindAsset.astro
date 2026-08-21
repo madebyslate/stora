@@ -1,0 +1,203 @@
+---
+import type { ProcessBehindAssetBlock } from '@repo/shared'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: ProcessBehindAssetBlock
+}
+
+const { block } = Astro.props
+const headingId = `process-behind-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+---
+
+<section class="process-behind" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 class="process-behind__heading text-title reveal-mask" id={headingId}>
+      <span>{block.heading}</span>
+    </h2>
+
+    <div class="process-behind__items">
+      {
+        block.items.map((item, itemIndex) => {
+          const order = 2 + itemIndex * 7
+          return (
+            <article class:list={['process-behind__item', itemIndex % 2 === 1 && 'process-behind__item--reverse']}>
+              <div class="process-behind__copy">
+                <h3 class="process-behind__title reveal-mask" style={`--reveal-index: ${order}`}>
+                  <span>{item.title}</span>
+                </h3>
+                <p class="process-behind__subtitle reveal" style={`--reveal-index: ${order + 1}`}>
+                  {item.subtitle}
+                </p>
+                <p class="process-behind__description text-body reveal" style={`--reveal-index: ${order + 2}`}>
+                  {item.description}
+                </p>
+                <ul class="process-behind__bullets text-body">
+                  {item.bullets.map((bullet, bulletIndex) => (
+                    <li>
+                      <span class="process-behind__marker reveal-pop" style={`--reveal-index: ${order + 3 + bulletIndex * 0.5}`} aria-hidden="true" />
+                      <span class="reveal" style={`--reveal-index: ${order + 3.25 + bulletIndex * 0.5}`}>
+                        {bullet}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <figure class="process-behind__media">
+                <span class="process-behind__pane reveal-curtain" style={`--reveal-index: ${order + 1}`}>
+                  <span class="process-behind__hold reveal-curtain-hold" style={`--reveal-index: ${order + 1}`}>
+                    <Picture image={item.image} widths={[390, 560, 620]} sizes="(max-width: 1023px) calc(100vw - 40px), 46vw" draggable={false} />
+                  </span>
+                </span>
+              </figure>
+            </article>
+          )
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .process-behind {
+    padding-block: var(--process-behind-padding-block);
+    overflow: clip;
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  .process-behind__heading {
+    color: var(--color-fg);
+  }
+
+  .process-behind__items {
+    display: grid;
+    gap: var(--process-behind-row-gap);
+    margin-block-start: var(--process-behind-heading-gap);
+  }
+
+  .process-behind__item {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--process-behind-column-gap);
+    align-items: center;
+  }
+
+  .process-behind__copy {
+    grid-column: 1;
+    max-width: var(--process-behind-copy-measure);
+  }
+
+  .process-behind__media {
+    position: relative;
+    grid-column: 2;
+    aspect-ratio: var(--process-behind-media-ratio);
+    overflow: clip;
+  }
+
+  .process-behind__item--reverse .process-behind__copy {
+    grid-column: 2;
+  }
+
+  .process-behind__item--reverse .process-behind__media {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .process-behind__title {
+    color: var(--color-fg);
+    font-size: var(--process-behind-title-size);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--process-behind-title-line-height);
+    letter-spacing: var(--process-behind-title-letter-spacing);
+  }
+
+  .process-behind__subtitle {
+    margin-block-start: var(--process-behind-title-subtitle-gap);
+    color: var(--color-fg);
+    font-size: var(--text-panel-title);
+    font-weight: var(--text-panel-title--font-weight);
+    line-height: var(--text-panel-title--line-height);
+    letter-spacing: var(--text-panel-title--letter-spacing);
+  }
+
+  .process-behind__description {
+    margin-block-start: var(--process-behind-subtitle-description-gap);
+    color: var(--process-behind-copy-color);
+  }
+
+  .process-behind__bullets {
+    display: grid;
+    gap: var(--process-behind-bullet-row-gap);
+    margin-block-start: var(--process-behind-description-list-gap);
+    padding: 0;
+    color: var(--process-behind-copy-color);
+    list-style: none;
+  }
+
+  .process-behind__bullets li {
+    display: grid;
+    grid-template-columns: var(--process-behind-marker-size) minmax(0, 1fr);
+    gap: var(--process-behind-marker-gap);
+    align-items: center;
+  }
+
+  .process-behind__marker {
+    width: var(--process-behind-marker-size);
+    height: var(--process-behind-marker-size);
+    background-color: var(--color-green);
+  }
+
+  .process-behind__pane,
+  .process-behind__hold {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .process-behind__pane {
+    --reveal-curtain-x: -105%;
+    --reveal-curtain-y: 8%;
+    --reveal-curtain-scale: var(--process-behind-image-reveal-scale);
+    overflow: clip;
+  }
+
+  .process-behind__item--reverse .process-behind__pane {
+    --reveal-curtain-x: 105%;
+  }
+
+  .process-behind__media :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  @media (max-width: 63.9375rem) {
+    .process-behind__item {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--process-behind-mobile-item-gap);
+    }
+
+    .process-behind__copy,
+    .process-behind__media,
+    .process-behind__item--reverse .process-behind__copy,
+    .process-behind__item--reverse .process-behind__media {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .process-behind__copy {
+      max-width: none;
+    }
+
+    .process-behind__media {
+      width: 100%;
+    }
+  }
+</style>

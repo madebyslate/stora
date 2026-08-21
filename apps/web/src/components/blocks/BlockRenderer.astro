@@ -1,0 +1,80 @@
+---
+import type { Block, BlockOf } from '@repo/shared'
+import AudienceTabs from './AudienceTabs.astro'
+import AboutStory from './AboutStory.astro'
+import EngagementComparison from './EngagementComparison.astro'
+import FeaturePair from './FeaturePair.astro'
+import FeaturedPublications from './FeaturedPublications.astro'
+import Hero from './Hero.astro'
+import GrowthTimeline from './GrowthTimeline.astro'
+import HowWeDevelop from './HowWeDevelop.astro'
+import LogoWall from './LogoWall.astro'
+import MarketSlider from './MarketSlider.astro'
+import MarketFlexibility from './MarketFlexibility.astro'
+import MetricStatement from './MetricStatement.astro'
+import OurProcess from './OurProcess.astro'
+import PageHero from './PageHero.astro'
+import ProcessIntroduction from './ProcessIntroduction.astro'
+import ProcessBehindAsset from './ProcessBehindAsset.astro'
+import ProofPoints from './ProofPoints.astro'
+import ServiceCards from './ServiceCards.astro'
+import TeamGrid from './TeamGrid.astro'
+import TechnicalDepthTabs from './TechnicalDepthTabs.astro'
+import WiderTeam from './WiderTeam.astro'
+
+interface Props {
+  blocks: Block[]
+}
+
+const { blocks } = Astro.props
+
+/**
+ * `blockType` → component map.
+ *
+ * An explicit registry rather than a dynamic import by name: this way TypeScript
+ * enforces that every variant of the `Block` union has a component, and a missing
+ * one surfaces at `pnpm typecheck` instead of as an empty section in production.
+ */
+const registry = {
+  hero: Hero,
+  logoWall: LogoWall,
+  serviceCards: ServiceCards,
+  ourProcess: OurProcess,
+  teamGrid: TeamGrid,
+  marketSlider: MarketSlider,
+  audienceTabs: AudienceTabs,
+  engagementComparison: EngagementComparison,
+  pageHero: PageHero,
+  aboutStory: AboutStory,
+  growthTimeline: GrowthTimeline,
+  metricStatement: MetricStatement,
+  featurePair: FeaturePair,
+  featuredPublications: FeaturedPublications,
+  howWeDevelop: HowWeDevelop,
+  processBehindAsset: ProcessBehindAsset,
+  technicalDepthTabs: TechnicalDepthTabs,
+  marketFlexibility: MarketFlexibility,
+  processIntroduction: ProcessIntroduction,
+  proofPoints: ProofPoints,
+  widerTeam: WiderTeam,
+} satisfies { [K in Block['blockType']]: (props: { block: BlockOf<K> }) => unknown }
+---
+
+{
+  blocks.map((block) => {
+    /*
+      `as never` is not a hole in the typing — it is the one place TypeScript
+      cannot express what the registry already guarantees. Indexing the registry
+      with a union key yields the union of components, and a JSX element typed as
+      a union of components takes the *intersection* of their props: `block` ends
+      up `HeroBlock & LogoWallBlock`, which reduces to `never` because `blockType`
+      cannot be two literals at once. TS has no correlated-union narrowing here.
+
+      The `satisfies` above is what does the real checking: a block variant with no
+      component, or a component whose `block` prop does not match its own variant,
+      still fails `pnpm typecheck`.
+    */
+    const Component = registry[block.blockType]
+    return <Component block={block as never} />
+  })
+}
