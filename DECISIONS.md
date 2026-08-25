@@ -5,6 +5,20 @@ Dopisujesz każdą decyzję niestandardową (AGENT-RULES §9.7).
 
 ---
 
+## 2026-08-25 — Userback działa globalnie na wszystkich stronach stagingu
+
+**Decyzja.** `BaseLayout` ładuje asynchronicznie publiczny widget Userback na
+każdej stronie. Token dostępu widgetu jest identyfikatorem klientowym i celowo
+znajduje się w wygenerowanym HTML; skrypt pochodzi z oficjalnego CDN Userback.
+
+**Powód.** Osoby oceniające staging mają móc zostawić feedback kontekstowy na
+dowolnej podstronie bez powielania integracji w blokach ani fixtures.
+
+**Koszt i odwracalność.** Jest to zewnętrzny skrypt ładowany po stronie klienta,
+więc jego transfer i dostępność nie są kontrolowane przez aplikację. Loader jest
+asynchroniczny i nie blokuje renderowania; usunięcie jednego bloku z
+`BaseLayout` całkowicie wyłącza integrację.
+
 ## 2026-08-25 — Drugi staging ma osobny stack, port i wolumen
 
 **Decyzja.** `stora2.madebyslate.dev` korzysta z

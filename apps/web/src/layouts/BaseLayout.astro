@@ -184,5 +184,24 @@ const { seo, path, site, headerTone = 'default' } = Astro.props
         }
       }
     </script>
+
+    {
+      /*
+        Userback is loaded once for every page so reviewers can leave contextual
+        feedback anywhere on the staging site. The access token identifies the
+        public widget and is intentionally present in the client-side source.
+      */
+    }
+    <script is:inline>
+      window.Userback = window.Userback || {}
+      window.Userback.access_token = 'A-lHdCLHE4SAS2N1vVFJ1eekBxm'
+
+      ;(function (document) {
+        const script = document.createElement('script')
+        script.async = true
+        script.src = 'https://static.userback.io/widget/v1.js'
+        ;(document.head || document.body).appendChild(script)
+      })(document)
+    </script>
   </body>
 </html>
