@@ -31,18 +31,19 @@ const headingId = 'our-process-heading'
  * percent, every window is the same length and the keyframes below can be written
  * once, in fractions of a window, for any number of steps.
  */
-const INTRO = 24
-const TRANSITION = 0.5
+const INTRO = 18
+const TRANSITION = 0.8
 const span = (100 - INTRO) / block.steps.length
 const overlap = span * TRANSITION
 
 /**
- * 1.6 viewports per step plus 1.6 for the mark. It was one per step, and one per
- * step is not enough scroll to read as motion rather than as a cut: a photograph
- * swap had 38 vh to happen in and a half of a step name had 11. At 1.6 they get
- * 44 and 22, on the same fractions.
+ * The active pin gets 50 vh per step, with one extra viewport for the approach.
+ * Four steps therefore use 300 vh instead of the previous 560 vh. Combined with
+ * the wider window overlap, each photograph still gets roughly one third of a
+ * viewport to trade places, while the inert gap between swaps falls to about
+ * eight viewport-height points.
  */
-const sectionVh = (block.steps.length + 1.6) * 100
+const sectionVh = block.steps.length * 50 + 100
 
 /**
  * Where the mark's act begins, expressed on the `cover` range rather than
@@ -589,7 +590,7 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
       .step:first-child .step__badge {
         animation-timeline: --process;
         animation-range: contain var(--step-from) contain var(--step-to);
-        animation-timing-function: var(--ease-in-out);
+        animation-timing-function: linear;
         animation-fill-mode: both;
         animation-name: process-plate;
       }
@@ -622,13 +623,13 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
         animation-timeline: --process, --process;
         /*
          * Starts on `cover`, i.e. before the pin — see `--process-mark-from` in
-         * the markup. Ends at `contain 24%`, which is the frame the first
+         * the markup. Ends at `contain 18%`, which is the frame the first
          * photograph lands on.
          */
         animation-range:
-          var(--process-mark-from) contain 24%,
-          var(--process-mark-from) contain 24%;
-        animation-timing-function: var(--ease-in-out);
+          var(--process-mark-from) contain 18%,
+          var(--process-mark-from) contain 18%;
+        animation-timing-function: linear;
         animation-fill-mode: both;
       }
 
@@ -650,7 +651,7 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
       .process__mark {
         animation-timeline: --process;
         animation-range: contain 90% contain 100%;
-        animation-timing-function: var(--ease-in-out);
+        animation-timing-function: linear;
         animation-fill-mode: both;
         animation-name: process-mark-out;
       }
@@ -663,11 +664,9 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
        *
        * The keyframes are written in fractions of a window, and every window is
        * the same length, so these percentages are the whole choreography:
-       *   0 – 33.3   the photograph arrives (and the one before it leaves)
-       *   33.3 – 44  the name, the number and the description wipe in
-       *   44 – 66.7  the hold; the two halves of the name drift past each other
-       *   66.7 – 76  the name, the number and the description wipe out
-       *   66.7 – 100 the photograph leaves (and the next one arrives)
+       *   0 – 44.4    the photograph arrives (and the one before it leaves)
+       *   44.4 – 55.6 the short reading beat; the name halves pass each other
+       *   55.6 – 100  the photograph leaves (and the next one arrives)
        * The text is gone before the pictures start trading places and arrives
        * after they have finished, so no word is ever set on a half-empty frame.
        */
@@ -681,23 +680,22 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
         animation-fill-mode: both;
       }
 
-      /* Symmetric, cinematic — the strip is the one thing here that should read as
-         weight rather than as snap. */
+      /* Lenis already eases wheel input. Keeping the scroll timeline linear avoids
+         easing that eased position a second time and slowing every handover. */
       .step__panel,
       .step__panel :global(img) {
-        animation-timing-function: var(--ease-in-out);
+        animation-timing-function: linear;
       }
 
       /*
-       * In-out, not expo-out. On a scrubbed timeline expo-out puts nine tenths of
-       * the distance into the first third of the segment, which reads as a snap
-       * with a long tail rather than as travel — that is what "za szybko,
-       * przeskakuje" was. The strip and the text now share one curve.
+       * Text uses the same direct progress as the strip. The hold is encoded in
+       * the keyframes, rather than manufactured by slowing the user's scroll at
+       * both ends of every step.
        */
       .word__line,
       .badge__digit,
       .caption__line {
-        animation-timing-function: var(--ease-in-out);
+        animation-timing-function: linear;
       }
 
       .step__panel {
@@ -724,7 +722,7 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
        * The number is the one thing that waits for the photograph. Its plate sits
        * against the frame's edge, so a number arriving while the frame is still
        * half empty reads as a label for nothing — which is exactly what it looked
-       * like. Plate and digit both start at 33.3%, the frame the photograph lands
+       * like. Plate and digit start around 44.4%, the frame the photograph lands
        * on.
        */
       .badge__digit {
@@ -738,17 +736,17 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
    *
    * The step keyframes are fractions of one window, and every window is the same
    * length, so these percentages are the whole choreography:
-   *   0    – 33.3   the photograph arrives — and the one before it leaves
-   *   3.5  – 33.3   the two halves of the name fly in with it
-   *   33.3 – 66.7   the slow middle of the same flight; they pass each other here
-   *   66.7 – 96     they fly out with the photograph
-   *   66.7 – 100    the photograph leaves — and the next one arrives
+   *   0    – 44.4   the photograph arrives — and the one before it leaves
+   *   3.5  – 44.4   the two halves of the name fly in with it
+   *   44.4 – 55.6   the short reading beat; they pass each other here
+   *   55.6 – 96     they fly out with the photograph
+   *   55.6 – 100    the photograph leaves — and the next one arrives
    *
    * The name's flight now brackets the photograph's exactly, and that is what
    * closes the dead time. Measured on the previous timing: 41% of the on-stage
    * scroll had no name on screen at all, in three runs of 10% of the pin — 46 vh
    * of empty card, three times. The cause was arithmetic rather than taste: two
-   * neighbouring windows overlap by exactly half a span, and the whole handover
+   * neighbouring windows overlapped by exactly half a span, and the whole handover
    * was happening OUTSIDE that band — the outgoing name had left before the band
    * opened and the incoming one arrived after it closed. Inside the band the two
    * cross at the aperture's edges, one leaving through the top while the other
@@ -824,10 +822,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
      photograph to fill the frame and comes up with the number. */
   @keyframes process-plate {
     0%,
-    33.333% {
+    44.444% {
       opacity: 0;
     }
-    45% {
+    50% {
       opacity: 1;
     }
     100% {
@@ -839,16 +837,16 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
      to arrive, so the plate never holds two digits. */
   @keyframes process-digit {
     0%,
-    36% {
+    40% {
       transform: translate3d(0, 105%, 0);
     }
-    52% {
+    50% {
       transform: none;
     }
-    70% {
+    55.556% {
       transform: none;
     }
-    78.5%,
+    65.556%,
     100% {
       transform: translate3d(0, var(--process-line-end, -105%), 0);
     }
@@ -864,10 +862,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
     0% {
       transform: translate3d(0, 100%, 0);
     }
-    33.333% {
+    44.444% {
       transform: none;
     }
-    66.667% {
+    55.556% {
       transform: none;
     }
     100% {
@@ -881,10 +879,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
     0% {
       transform: translate3d(0, calc(-1 * var(--process-photo-lag)), 0);
     }
-    33.333% {
+    44.444% {
       transform: none;
     }
-    66.667% {
+    55.556% {
       transform: none;
     }
     100% {
@@ -908,10 +906,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
         0
       );
     }
-    33.333% {
+    44.444% {
       transform: translate3d(0, var(--process-word-drift), 0);
     }
-    66.667% {
+    55.556% {
       transform: translate3d(0, calc(-1 * var(--process-word-drift)), 0);
     }
     96%,
@@ -933,10 +931,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
         0
       );
     }
-    33.333% {
+    44.444% {
       transform: translate3d(0, calc(-1 * var(--process-word-drift)), 0);
     }
-    66.667% {
+    55.556% {
       transform: translate3d(0, var(--process-word-drift), 0);
     }
     96%,
@@ -956,10 +954,10 @@ const PHOTO_WIDTHS = [320, 460, 690, 920]
     12% {
       transform: translate3d(0, 105%, 0);
     }
-    33.333% {
+    44.444% {
       transform: none;
     }
-    66.667% {
+    55.556% {
       transform: none;
     }
     88%,

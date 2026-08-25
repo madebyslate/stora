@@ -72,8 +72,11 @@ button 40 tall inset 39.7 from the right edge and 39.8 from the foot, heading
    so it cannot be mistaken for a second active one. Not in the file.
 3. **The photographs cross-fade** (250 ms) rather than cutting. The frame is a
    still and says nothing about the transition.
-4. **Below 1024 the tinted ground goes** and the questions become a scrolling row
-   above the photograph. No mobile frame was supplied; see "Breakpoints".
+4. **Below 1024 the tinted ground goes** and the questions become three compact
+   full-width rows above the photograph. Each row has a rule and counter; the
+   active row also has a directional arrow. No mobile frame was supplied; the
+   treatment follows `TechnicalDepthTabs` after client feedback that the earlier
+   horizontal scroller was not intuitive enough. See "Breakpoints".
 
 ## Breakpoints
 
@@ -81,7 +84,7 @@ button 40 tall inset 39.7 from the right edge and 39.8 from the foot, heading
 |---|---|
 | ≥ 1440 | The design's arrangement. Band 1360 × 500, halves 675 each. |
 | 1024–1439 | The same arrangement, both halves shrinking with the grid; the question shrinks with it, 40 → 33.7 at 1024. |
-| < 1024 | The questions become a horizontal scroller above the photograph, bled out to the page edges and snapped by question; no tinted ground; the photograph is the full width of the page and keeps its 500 px height. |
+| < 1024 | All questions are visible as compact full-width rows above the photograph; each has `0N/0T` and a lower rule, while the active one gains an arrow. There is no tinted ground; the photograph is the full width of the page and keeps its 500 px height. |
 
 The fold is at 1024 for margin, not because the design breaks there: the
 arrangement lives or dies on the longest question setting on one line inside the
@@ -97,6 +100,8 @@ leaves the last width that keeps it ~90 px of room rather than two.
 | Inactive question | Lime-Dark at 0.2 | `--audience-tab-rest-opacity` |
 | Question hover | 0.5, inactive ones only (2.95:1) | `--audience-tab-hover-opacity` |
 | Question focus | 2 px ring on the label, not the radio | `--color-focus`, `label:has(:focus-visible)` |
+| Mobile inactive row | 0.65, with rule and counter still visible (4.71:1 on white) | `--audience-mobile-tab-rest-opacity` |
+| Mobile active row | opacity 1, arrow visible, full-strength rule and counter | `label:has(:checked)` |
 | Photograph hover | the button reveals Green from the left and its content turns white | `Button`, `--button-surface-hover` |
 | Photograph focus | the ring lands on the whole panel, and the button completes the same Green reveal | `--color-focus: var(--color-on-media)` inside the panel |
 | CTA disabled | the planned button remains visible, but the photograph has no `href` or tab stop | `Link.disabled` |
@@ -131,9 +136,8 @@ the built page, not by reading it (measured 0.94 and still climbing).
 
 - `<h2 id="audience-tabs-heading">` and `aria-labelledby` on the section.
 - Keyboard: the questions are a native radio group — one Tab stop, arrow keys
-  between them; on small screens the browser scrolls the focused one into view by
-  itself (verified). The visible ring is drawn on the label, because the radio is
-  a pixel wide.
+  between them. On small screens all options are visible at once. The visible
+  ring is drawn on the label, because the radio is a pixel wide.
 - Once destinations are published, exactly one photograph is a link at a time: the inactive panels are
   `visibility: hidden`, which takes them out of the tab order as well as out of
   sight. During the fixture-only staging all three planned destinations are
@@ -149,13 +153,14 @@ the built page, not by reading it (measured 0.94 and still climbing).
 
 ## Open questions
 
-- [ ] **The inactive question at 0.2 is unreadable, and it is a control.** On
+- [ ] **The inactive desktop question at 0.2 is unreadable, and it is a control.** On
       `#F1F2EB` that composites to **1.47:1**, against the 3:1 WCAG 1.4.3 asks of
       text at 24 px and up. It ships as drawn, as with the other two documented
       contrast deviations, but this one is not a caption — it is the switch a
       visitor has to read to know it is there. **0.51 is the first alpha that
       clears the bar** (3.03:1), and even the hover value of 0.5 lands just under
-      it at 2.95. Which way?
+      it at 2.95. Mobile no longer inherits this state: its inactive 18 px rows use
+      0.65 on white, measured at 4.71:1. Which way for desktop?
 - [ ] **The button copy for questions 1 and 3.** The frame shows only
       "Call with M&A Lead", on question 2. The other two are built to the same
       pattern — "Call with Land Lead", "Call with Investment Lead" — and all three

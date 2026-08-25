@@ -91,6 +91,20 @@ test.describe('PageHero block', () => {
     await expect(page.locator('h1')).toHaveCount(1)
     await expect(page.locator('section[aria-labelledby="page-hero-heading"]')).toHaveCount(1)
   })
+
+  test('fills the viewport on every subpage, including screens taller than the reference', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1100 })
+
+    for (const path of ['/about-us/', '/brokerage/', '/develop-to-sell/', '/develop-to-hold/']) {
+      await page.goto(path)
+      const height = await page.locator('.page-hero').evaluate((hero) =>
+        hero.getBoundingClientRect().height,
+      )
+      expect(height, path).toBe(1100)
+    }
+  })
 })
 
 test.describe('MetricStatement block', () => {

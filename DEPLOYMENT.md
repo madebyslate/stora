@@ -83,6 +83,17 @@ Każdy redeploy przebudowuje stronę z bieżących `content/**/*.json`. Trasy
 przez zmianę pliku Compose na `docker-compose.yml` i wykonanie procedury z §4;
 wolumenu stagingowego nie używa się jako wolumenu produkcyjnego.
 
+Drugi, niezależny preview `stora2.madebyslate.dev` korzysta z
+`docker-compose.staging2.yml`. Ma osobną nazwę projektu Compose, domyślny port
+hosta `18084` i wolumen `stora2-staging-website-dist`, więc może działać obok
+pierwszego stagingu. W xCloud ustaw:
+
+```env
+PUBLIC_SITE_URL=https://stora2.madebyslate.dev
+APP_PORT=18084
+WEBSITE_DIST_VOLUME=stora2-staging-website-dist
+```
+
 ### 3.1. Baza
 
 Jako administrator PostgreSQL:

@@ -5,6 +5,82 @@ Dopisujesz każdą decyzję niestandardową (AGENT-RULES §9.7).
 
 ---
 
+## 2026-08-25 — Drugi staging ma osobny stack, port i wolumen
+
+**Decyzja.** `stora2.madebyslate.dev` korzysta z
+`docker-compose.staging2.yml`, ale z tego samego targetu `website-builder` i
+konfiguracji Nginx co pierwszy staging. Stack ma nazwę `stora2-staging`, port
+hosta `18084` i wolumen `stora2-staging-website-dist`.
+
+**Powód.** Sama zmiana `PUBLIC_SITE_URL` wystarcza do zbudowania canonicali,
+sitemapy i metadanych dla nowej domeny, ale nie izoluje zasobów Compose. Osobna
+nazwa projektu, port i wolumen pozwalają uruchomić oba preview równolegle na
+tym samym hoście bez nadpisania opublikowanego katalogu ani kolizji routerów.
+`Dockerfile` nie wymaga wariantu zależnego od domeny.
+
+**Odwracalność.** Usunięcie drugiego środowiska wymaga zatrzymania wyłącznie
+stacka `stora2-staging`; pierwszy staging i pełny stack pozostają bez zmian.
+
+## 2026-08-24 — Lenis wygładza kółko globalnie, a `OurProcess` nie wygładza go drugi raz
+
+**Kontekst.** Animacje sterowane bezpośrednio pozycją scrolla były płynne na
+touchpadzie, ale ujawniały skokowe impulsy kółka Logitech MX Master. Najbardziej
+uciążliwy był `OurProcess`: 560 vh sekcji dawało 460 vh aktywnego przypięcia,
+a `--ease-in-out` dodatkowo zwalniało początek i koniec każdej zmiany slajdu.
+
+**Decyzja.** Oficjalny `lenis` 1.3.26 wygładza wyłącznie wejście `wheel` dla całej
+strony (`lerp: 0.1`, mnożnik 1). Dotyk pozostaje natywny, a przy
+`prefers-reduced-motion: reduce` silnik nie jest pobierany ani uruchamiany. Menu
+kompaktowe zatrzymuje i wznawia instancję tym samym stanem, którym blokuje scroll.
+`OurProcess` pozostaje jedną CSS-ową `view-timeline`, ale jego czterokrokowa
+wysokość spada do 300 vh, udział intro do 18%, a wszystkie odcinki osi są liniowe.
+Okna kroków nachodzą na siebie w 80% rozpiętości kroku: sama wymiana nadal
+zajmuje około 33 vh, a nieruchomy odcinek pomiędzy wymianami tylko około 8 vh.
+
+**Powód.** Lenis normalizuje kółko, kotwice, cykl klatek i natywną pozycję scrolla
+w kilku kilobajtach bez zależności runtime; własny globalny silnik powielałby tę
+obsługę i jej przypadki brzegowe. Liniowy scrub czyta już wygładzoną pozycję
+przeglądarki — druga krzywa dawała podwójne hamowanie zamiast dodatkowej płynności.
+Skrócenie pin-distance o 57% rozwiązuje wysiłek przewijania niezależnie od myszy,
+a szersze nakładanie okien usuwa wyczuwalne przestoje bez przyspieszania wymiany.
+
+**Koszt i odwracalność.** Bootstrap ma 1,06 KB gzip, a osobny, dynamicznie
+ładowany chunk Lenisa 5,39 KB gzip (razem 6,45 KB gzip). CSS `OurProcess` nadal
+działa bez niego i ma ten sam statyczny fallback przy ograniczeniu ruchu.
+Usunięcie importu przywraca natywny scroll bez zmian w blokach.
+
+## 2026-08-24 — Mobile `AudienceTabs` pokazuje wszystkie opcje jako listę
+
+**Kontekst.** Poziomy pasek ze snapowaniem przyjęty 2026-08-21 ukrywał kolejne
+opcje poza viewportem, nie miał widocznego wskaźnika przewijania, a ich krycie
+0,2 utrudniało rozpoznanie, że są sterowaniem. Klient poprosił o bardziej
+intuicyjne przełączanie na mobile.
+
+**Decyzja.** Poniżej 1024 px trzy opcje są jednocześnie widoczne jako kompaktowe
+wiersze nad zdjęciem. Każdy wiersz ma licznik `0N/0T` i dolną regułę, aktywny
+dostaje strzałkę, a nieaktywne mają krycie 0,65 — 4,71 : 1 na białym tle.
+Mechanizm pozostaje natywną grupą radio bez JS. Ta decyzja zastępuje mobilną
+część wpisu z 2026-08-21; desktop pozostaje bez zmian.
+
+**Powód.** Wszystkie możliwe działania i aktualny stan są widoczne bez gestu
+odkrywania. Wzorzec strzałki, licznika i reguły jest już używany przez
+`TechnicalDepthTabs`, więc nie tworzy drugiego języka przełączników.
+
+## 2026-08-24 — Sticky header nie opuszcza viewportu podczas zmiany tonu
+
+**Decyzja.** Globalny nagłówek jest przypięty od pierwszej klatki. Na hero
+zaczyna jako przezroczysty wariant `on-media`, a przy pierwszym scrollu
+natychmiast przechodzi w białą powierzchnię z ciemnym tekstem i CTA. Nie ma
+progu wejścia, zanikania ani translacji samego nagłówka.
+
+**Powód.** Klient odrzucił sekwencję, w której nagłówek przewijał się poza
+ekran, a po 192 px wracał z góry. Stała geometria zachowuje ciągłość
+nawigacji; scroll zmienia wyłącznie jej wariant kolorystyczny.
+
+**Odwracalność.** Próg i animacja zostały usunięte, a stan jest izolowany
+w atrybucie `data-scrolled`; ewentualna korekta momentu zmiany nie wymaga zmian
+w strukturze nagłówka.
+
 ## 2026-08-21 — Staging etapu 1 działa bez Payloada
 
 **Decyzja.** `stora.madebyslate.dev` korzysta z osobnego

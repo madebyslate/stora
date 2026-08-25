@@ -41,7 +41,7 @@ nothing is a panel that should not open, and the reveal is the block.
 | Element | Value | How it was established |
 |---|---|---|
 | Panel height | 600 px | given |
-| Panel width | viewport ÷ 3, butted | measured: three thirds of 1440, edges shared, no gutter and no page grid |
+| Panel width | viewport ÷ 3 through 1440, then 480 px | measured: three thirds of 1440, edges shared, no gutter and no page grid; capped at the reference width on ultrawide screens |
 | Panel padding | 32 px | given; confirmed at 32.9 px measured on the button's left edge |
 | Toggle | 40 × 40, `rgb(0 0 0 / 0.5)`, inset 16 px from the top-right | given |
 | Toggle glyphs | 14 × 2 and 2 × 14 bars | given as two SVGs |
@@ -102,10 +102,12 @@ Both are bracketed by where the design breaks a line rather than stated by it.
    same 16 px discrepancy — it is an open question to the designer there, and
    answering it differently in two adjacent sections would be worse than either
    answer. Listed in `BLOCKS.md` with `LogoWall`'s.
-2. **The panels are full-bleed, outside `.container-page`.** Not a deviation from
-   the frame — the frame's panels are exact thirds of 1440 — but it is the one
-   place in the project where a section does not use the page grid, so it is
-   recorded rather than left to be discovered.
+2. **The panels are full-bleed through 1440, outside `.container-page`, and capped
+   there on wider screens.** Not a deviation from the frame — the frame's panels
+   are exact thirds of 1440 — but it is the one place in the project where a
+   section does not use the page grid. Extending the thirds beyond the only
+   supplied composition makes the cards increasingly panoramic, so the complete
+   row stays centred at 1440 on ultrawide displays.
 3. **The scrim is deepened and the copy is lightened, because the design's pair
    is unreadable on the supplied photography.** Figma gives a 0.48 / 0.48 / 0.56
    scrim under copy at 70% white. Measured against the real composited pixels
@@ -143,7 +145,7 @@ Compared against the design at 1440 / 768 / 390. Only 1440 has a frame.
 
 | Width | What changes |
 |---|---|
-| ≥ 1440 | as designed: three panels of 480 × 600, first one open |
+| ≥ 1440 | three panels of 480 × 600 in a centred 1440 px row, first one open |
 | 1024–1439 | three panels, each a third of the viewport; everything else unchanged |
 | < 1024 | one column, three panels of full width × 600 |
 

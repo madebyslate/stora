@@ -7,9 +7,10 @@ import Button from '@/components/ui/Button.astro'
  * Site header.
  *
  * Two opening tones. `on-media` lifts the header out of the flow and lays it over
- * a full-bleed hero in white; `default` keeps it in the flow for pages that open
- * on a light surface. After the delayed scroll threshold either one becomes the
- * same fixed light bar. The page decides its opening tone from its first block,
+ * a full-bleed hero in white; `default` reserves its height before pages that open
+ * on a light surface. The header stays fixed from the first frame and switches
+ * to the same light treatment as soon as the page is scrolled. The page decides
+ * its opening tone from its first block,
  * so a page without a hero can never end up with white type on white.
  *
  * The navigation is optically centred on the viewport, not merely placed between
@@ -32,8 +33,6 @@ const ctaIndex = site.navigation.length + 1
 ---
 
 <header class:list={['header', `header--${tone}`]} data-site-header>
-  <span class="header__sticky-threshold" data-sticky-threshold aria-hidden="true"></span>
-
   <div class="header__inner container-page">
     <a
       class="header__brand reveal"
@@ -121,6 +120,9 @@ const ctaIndex = site.navigation.length + 1
 
 <style>
   .header {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
     z-index: var(--z-header);
     /* One step faster than the hero: the chrome should be settled before the
        headline finishes arriving. */
@@ -128,16 +130,12 @@ const ctaIndex = site.navigation.length + 1
   }
 
   .header--on-media {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline: 0;
     color: var(--color-on-media);
     /* A white ring reads on the video; the default Lime-Dark one does not. */
     --color-focus: var(--color-on-media);
   }
 
   .header--default {
-    position: relative;
     background-color: var(--color-bg);
     color: var(--color-fg);
     border-block-end: 1px solid var(--color-border);
@@ -146,10 +144,7 @@ const ctaIndex = site.navigation.length + 1
     --button-fg: var(--header-button-fg);
   }
 
-  .header[data-sticky] {
-    position: fixed;
-    inset-block-start: 0;
-    inset-inline: 0;
+  .header[data-scrolled] {
     background-color: var(--color-bg);
     color: var(--color-fg);
     border-block-end: 1px solid var(--color-border);
@@ -159,36 +154,13 @@ const ctaIndex = site.navigation.length + 1
     --button-fg: var(--header-button-fg);
   }
 
-  .header[data-sticky] .header__inner {
-    animation: header-enter var(--duration-slow) var(--ease-out-expo) both;
-  }
-
-  .header--default[data-sticky] + .header__spacer {
+  .header--default + .header__spacer {
     display: block;
   }
 
   .header__spacer {
     display: none;
     block-size: var(--header-height);
-  }
-
-  .header__sticky-threshold {
-    position: absolute;
-    inset-block-start: var(--header-sticky-threshold);
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  @keyframes header-enter {
-    from {
-      opacity: 0;
-      transform: translate3d(0, -100%, 0);
-    }
-
-    to {
-      opacity: 1;
-      transform: none;
-    }
   }
 
   .header__inner {
@@ -450,7 +422,7 @@ const ctaIndex = site.navigation.length + 1
 
 <script>
   /*
-   * Compact menu and delayed sticky state. 569 B gzip, no bundle, no island — the
+   * Compact menu and scroll colour state. No bundle, no island — the
    * budget note is in Header.spec.md. A disclosure that keeps its promises needs Escape to close,
    * focus to return to the button, and the page behind it to stop being reachable
    * by Tab. None of that is expressible in CSS, and a menu that traps a keyboard
@@ -461,7 +433,6 @@ const ctaIndex = site.navigation.length + 1
   const label = document.querySelector<HTMLElement>('[data-menu-label]')
   const main = document.querySelector<HTMLElement>('#main')
   const header = document.querySelector<HTMLElement>('[data-site-header]')
-  const stickyThreshold = document.querySelector<HTMLElement>('[data-sticky-threshold]')
 
   if (toggle && panel) {
     const isOpen = () => toggle.getAttribute('aria-expanded') === 'true'
@@ -471,6 +442,7 @@ const ctaIndex = site.navigation.length + 1
       panel.hidden = !open
       header?.toggleAttribute('data-menu-open', open)
       document.documentElement.style.overflow = open ? 'hidden' : ''
+      window.dispatchEvent(new CustomEvent('stora:scroll-lock', { detail: open }))
       if (label) label.textContent = open ? 'Close menu' : 'Open menu'
       if (main) main.inert = open
       if (!open) toggle.focus()
@@ -494,36 +466,17 @@ const ctaIndex = site.navigation.length + 1
     })
   }
 
-  if (header && stickyThreshold) {
-    let stickyAfter = Number.POSITIVE_INFINITY
-    let framePending = false
+  if (header) {
+    let isScrolled = false
 
-    const updateSticky = () => {
-      header.toggleAttribute('data-sticky', window.scrollY > stickyAfter)
-      framePending = false
+    const updateScrolled = () => {
+      const nextScrolled = window.scrollY > 0
+      if (nextScrolled === isScrolled) return
+      isScrolled = nextScrolled
+      header.toggleAttribute('data-scrolled', isScrolled)
     }
 
-    const measureStickyThreshold = () => {
-      stickyAfter = stickyThreshold.offsetTop
-      updateSticky()
-    }
-
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (framePending) return
-        framePending = true
-        window.requestAnimationFrame(updateSticky)
-      },
-      { passive: true },
-    )
-
-    window.addEventListener('resize', measureStickyThreshold, { passive: true })
-
-    if (document.readyState === 'complete') {
-      measureStickyThreshold()
-    } else {
-      window.addEventListener('load', measureStickyThreshold, { once: true })
-    }
+    updateScrolled()
+    window.addEventListener('scroll', updateScrolled, { passive: true })
   }
 </script>

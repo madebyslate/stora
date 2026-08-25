@@ -27,8 +27,8 @@ middle, and a pair of step buttons against the illustration's right edge. On
 | `slides[].description` | `string` | no | falls back to the block's |
 | `slides[].cta` | `Link` | no | falls back to the block's |
 
-Today no slide states its own line, so all three borrow the block's — one
-statement, three drawings of it. The moment a slide has copy of its own, the copy
+Today no slide states its own line, so both borrow the block's — one statement,
+two drawings of it. The moment a slide has copy of its own, the copy
 changes with the picture and nothing in the component moves.
 
 ## Measured geometry
@@ -146,8 +146,8 @@ are identical, so an animated swap would smear two things that look the same.
 | Item | Budget | Actual |
 |---|---|---|
 | JavaScript | ≤ 1 KB | **470 B gz** (858 B raw, inlined — no request) |
-| Requests | 3 pictures | 3 (AVIF, lazy) |
-| Largest asset | — | `poland-2` at 640 px |
+| Requests | 2 pictures | 2 (AVIF, lazy) |
+| Largest asset | — | 960 px source |
 
 The slider itself has no script: one radio per slide, and the stylesheet turns
 "which one is checked" into `--active`, an integer every moving part reads. The
@@ -177,19 +177,19 @@ a slider that cannot be swiped reads as broken.
 - Contrast: white on Lime-Dark, 13.4:1 — heading, copy and the chevrons alike. The
   chevrons sit on white-8%-over-Lime-Dark, which is lighter still. No text sits on
   the illustrations, so there is nothing here that an automated audit cannot see.
-- `alt` is empty on all three slides: they are three drawings of the statement
+- `alt` is empty on both slides: they are two drawings of the statement
   standing next to them, and describing them would repeat the copy in place of it.
 
 ## Open questions
 
 - [ ] **The inset: 20 or 28?** Given as 20, measured at 28.3 left and 30 bottom.
       One token either way.
-- [ ] **Copy for slides 2 and 3.** The schema is ready for it —
+- [ ] **Copy for slide 2.** The schema is ready for it —
       `slides[].description` and `slides[].cta` — and the component already
-      animates whatever the active slide says. Until they arrive, all three slides
+      animates whatever the active slide says. Until it arrives, both slides
       borrow the block's line.
 - [ ] **What is above and below the box?** The crop starts and ends on it, so
       neither the section's own top padding nor its foot is known. The box
       currently closes flush against both.
-- [ ] **Masters are 640 px.** The illustration is drawn at 640, so a 2× screen
-      gets a 1× picture. 1280 px masters would fix it with no code change.
+- [ ] **Masters are 960 px.** The illustration is drawn at 640, so a 2× screen
+      still scales beyond the source. 1280 px masters would fix it with no code change.

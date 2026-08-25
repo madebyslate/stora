@@ -96,6 +96,61 @@ const { seo, path, site, headerTone = 'default' } = Astro.props
 
     {
       /*
+        Lenis smooths wheel input globally while leaving touch scrolling native.
+        It still updates the browser's real scroll position, so sticky layout and
+        CSS view timelines keep one source of truth. Reduced-motion visitors do
+        not download the dynamically imported engine at all.
+      */
+    }
+    <script>
+      type LenisInstance = import('lenis').default
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      let lenis: LenisInstance | undefined
+      let loading: Promise<void> | undefined
+      let scrollLocked = document.documentElement.style.overflow === 'hidden'
+
+      const enableSmoothScroll = () => {
+        if (reducedMotion.matches || lenis || loading) return
+
+        loading = import('lenis').then(({ default: Lenis }) => {
+          loading = undefined
+          if (reducedMotion.matches || lenis) return
+
+          lenis = new Lenis({
+            autoRaf: true,
+            anchors: true,
+            lerp: 0.1,
+            smoothWheel: true,
+            syncTouch: false,
+            wheelMultiplier: 1,
+          })
+
+          if (scrollLocked) lenis.stop()
+        })
+      }
+
+      const disableSmoothScroll = () => {
+        lenis?.destroy()
+        lenis = undefined
+      }
+
+      enableSmoothScroll()
+
+      reducedMotion.addEventListener('change', () => {
+        if (reducedMotion.matches) disableSmoothScroll()
+        else enableSmoothScroll()
+      })
+
+      window.addEventListener('stora:scroll-lock', (event) => {
+        scrollLocked = Boolean((event as CustomEvent<boolean>).detail)
+        if (scrollLocked) lenis?.stop()
+        else lenis?.start()
+      })
+    </script>
+
+    {
+      /*
         Scroll choreography. ~0.3 KB, one observer for the whole page: every
         section marked `data-reveal-group` holds its entrance at the first frame
         (CSS does the holding, see "In view" in global.css) until it is close

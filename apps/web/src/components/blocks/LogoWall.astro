@@ -23,6 +23,8 @@ const order = {
   logos: 3,
   logoStep: 0.5,
 }
+
+const marqueeGroups = [false, true]
 ---
 
 <section class="logo-wall" aria-labelledby={headingId} data-reveal-group>
@@ -59,23 +61,33 @@ const order = {
       )
     }
 
-    <ul class="logo-wall__list" role="list">
-      {
-        block.logos.map((logo, index) => (
-          <li
-            class="logo-wall__item reveal"
-            style={`--reveal-index: ${order.logos + index * order.logoStep}; --logo-native-width: ${logo.width}px`}
-          >
-            <Picture
-              image={logo}
-              widths={[logo.width]}
-              sizes={`${Math.round(logo.width)}px`}
-              fallbackFormat="png"
-            />
-          </li>
-        ))
-      }
-    </ul>
+    <div class="logo-wall__marquee">
+      <div class="logo-wall__track">
+        {
+          marqueeGroups.map((isDuplicate) => (
+            <ul
+              class="logo-wall__list"
+              role="list"
+              aria-hidden={isDuplicate ? 'true' : undefined}
+            >
+              {block.logos.map((logo, index) => (
+                <li
+                  class="logo-wall__item reveal"
+                  style={`--reveal-index: ${order.logos + index * order.logoStep}; --logo-native-width: ${logo.width}px`}
+                >
+                  <Picture
+                    image={logo}
+                    widths={[logo.width]}
+                    sizes={`${Math.round(logo.width)}px`}
+                    fallbackFormat="png"
+                  />
+                </li>
+              ))}
+            </ul>
+          ))
+        }
+      </div>
+    </div>
   </div>
 </section>
 
@@ -119,27 +131,32 @@ const order = {
     max-inline-size: 32rem;
   }
 
-  /*
-   * The wall folds twice, and both thresholds are arithmetic.
-   *
-   * A single row needs 1181 px of content (821 px of mark plus five gaps of at
-   * least 72), so it starts at 1280 — the first common width whose gutter leaves
-   * that much. Below it the row is three across, and below 768 two: six marks on a
-   * 390 px screen would leave 55 px each, which is under half the size at which
-   * the wordmarks are still readable.
-   */
-  .logo-wall__list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: center;
-    justify-items: center;
-    gap: var(--space-10) var(--space-8);
+  .logo-wall__marquee {
+    overflow: hidden;
     margin-block-start: var(--space-12);
+  }
+
+  .logo-wall__track {
+    display: flex;
+    inline-size: max-content;
+    will-change: transform;
+    animation: logo-wall-marquee var(--logo-marquee-duration) linear infinite;
+  }
+
+  .logo-wall__list {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--logo-marquee-gap);
+    inline-size: max-content;
+    min-inline-size: 100%;
     list-style: none;
     padding: 0;
   }
 
   .logo-wall__item {
+    flex: none;
     /*
      * Every mark is exported from the same frame at the same scale, so one factor
      * reproduces the relative sizing the designer set between them. `--logo-scale`
@@ -157,20 +174,51 @@ const order = {
     block-size: auto;
   }
 
-  @media (min-width: 768px) {
-    .logo-wall__list {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+  @keyframes logo-wall-marquee {
+    to {
+      transform: translateX(-50%);
     }
   }
 
-  @media (min-width: 1280px) {
+  @media (prefers-reduced-motion: reduce) {
+    .logo-wall__marquee {
+      overflow: visible;
+    }
+
+    .logo-wall__track {
+      display: block;
+      inline-size: 100%;
+      will-change: auto;
+      animation-name: none !important;
+      transform: none;
+    }
+
     .logo-wall__list {
-      grid-template-columns: repeat(6, auto);
-      /* The design's row is space-between: its five gaps measure 94–103 px against
-         a 98 px average, which is what an even distribution looks like through the
-         ink bounds of six marks of different widths. */
-      justify-content: space-between;
-      gap: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      justify-items: center;
+      gap: var(--space-10) var(--space-8);
+      inline-size: 100%;
+      min-inline-size: 0;
+      padding: 0;
+    }
+
+    .logo-wall__list[aria-hidden='true'] {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .logo-wall__list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .logo-wall__list {
+        grid-template-columns: repeat(6, auto);
+        justify-content: space-between;
+        gap: 0;
+      }
     }
   }
 </style>

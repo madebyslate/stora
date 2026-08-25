@@ -58,7 +58,7 @@ const cardOrder = (index: number) => {
   }
 }
 
-const CARD_SIZES = '(min-width: 1024px) 33.34vw, 100vw'
+const CARD_SIZES = '(min-width: 1440px) 480px, (min-width: 1024px) 33.34vw, 100vw'
 const CARD_WIDTHS = [400, 640, 960, 1280]
 ---
 
@@ -83,10 +83,10 @@ const CARD_WIDTHS = [400, 640, 960, 1280]
 
   {
     /*
-      Full-bleed: the row sits outside `.container-page` on purpose. The panels are
-      exact thirds of the viewport in the design — 480 px each at 1440 — and running
-      them inside the 1360 px grid would put a 40 px white margin down each side
-      that the design does not have.
+      Full-bleed through the design width: the row sits outside `.container-page`
+      on purpose. The panels are exact thirds of the viewport in the design —
+      480 px each at 1440 — then the row stops growing and stays centred so an
+      ultrawide display does not distort the composition.
     */
   }
   <ul class="services__row" role="list">
@@ -193,8 +193,11 @@ const CARD_WIDTHS = [400, 640, 960, 1280]
 
   .services__row {
     display: grid;
+    inline-size: 100%;
+    max-inline-size: var(--container-max);
     list-style: none;
-    margin: 0;
+    margin-block: 0;
+    margin-inline: auto;
     padding: 0;
     /* Butted, not gapped: the design's panels share their edges. */
     gap: 0;

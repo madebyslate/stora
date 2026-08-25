@@ -6,8 +6,8 @@ The same credentials wall appears on `home` and `about-us`, resolved from one
 reusable fixture so its copy and marks cannot drift between the pages.
 
 The first section under the hero: a two-tone claim — "Deep expertise." in
-Lime-Dark, "Proven track record." in Green — a one-line standfirst, and a row of
-six organisation marks that back the claim up. Home page only for now.
+Lime-Dark, "Proven track record." in Green — a one-line standfirst, and a
+continuously scrolling row of six organisation marks that back the claim up.
 
 - Figma: frame supplied as a screenshot, 1189 × 376 px, no node link.
 - Variants in Figma: none.
@@ -52,7 +52,7 @@ it was pinned three ways, and all three agree on 1.2111:
 | Heading → standfirst | 16 px (`--space-4`) | box edges 17.6 px apart in the frame; nearest step on the 4 px scale |
 | Standfirst → logos | 72 px (`--space-12`) | box edges 73.3 px apart |
 | Logo scale | 0.70 × exported px | measured 0.667, **deviation below** |
-| Logo row | `space-between`, marks centred on one baseline | the five gaps measure 98.1 / 103.0 / 94.4 / 101.7 / 95.7 — an even distribution read through six ink boxes of different widths. Equal columns would have produced 86 px for the first gap, which it is not. All six marks share a centre line at 243.3 ± 0.3 export px |
+| Logo track | marquee clipped to the shared inner container; each set is at least as wide as that container, with marks centred on one baseline | the supplied still shows `space-between`: the five gaps measure 98.1 / 103.0 / 94.4 / 101.7 / 95.7. A set retains that distribution at 1440 and grows to its max-content width when the container becomes narrower than the readable marks plus gaps |
 | Section height | 438 px built vs ~439 px measured in the frame | |
 
 ## Deviations from Figma
@@ -80,19 +80,14 @@ it was pinned three ways, and all three agree on 1.2111:
 
 ## Breakpoints
 
-The design covers 1440 only; everything below is inference, and both folds are
-arithmetic rather than taste.
+With motion enabled there is no fold: one set stays on a single line at its
+readable max-content width, or at the shared inner-container width when the
+container is wider. The moving row stays aligned with the page grid without
+shrinking any mark.
 
-| Width | What changes |
-|---|---|
-| ≥ 1280 | six marks in one row, `space-between` |
-| 768–1279 | 3 × 2 grid, marks centred in their cells |
-| < 768 | 2 × 3 grid |
-
-The row needs 821 px of mark plus five gaps of at least 72 px — 1181 px of
-content. 1280 is the first common width whose gutter (35.6) leaves that much
-(1209). Six across at 390 would give each mark 55 px, under half the size at
-which the wordmarks are legible, hence the second fold at 768.
+`prefers-reduced-motion: reduce` restores the previous complete static layout:
+six columns from 1280, 3 × 2 from 768, and 2 × 3 below 768. The duplicate set
+is removed from layout in that mode.
 
 ## States
 
@@ -106,11 +101,19 @@ adding href to the schema before that decision is made would be inventing one.
 | Heading, both halves | section 15% into view | 900 ms | `--ease-out-expo` | end frame at once |
 | Standfirst | + 180 ms | 900 ms | `--ease-out-expo` | end frame at once |
 | Logos, staggered 45 ms apart | + 270 ms | 900 ms | `--ease-out-expo` | end frame at once |
+| Complete logo track | continuously after paint | 32 s per complete set | linear | animation removed; complete responsive grid shown |
 
 Same choreography as the hero, only the clock starts later: the group holds every
 animation at its first frame (`animation-play-state: paused`) until one shared
 IntersectionObserver marks it `data-inview`. No second set of keyframes and no
 per-element state — see "In view" in `global.css`.
+
+The marquee is a CSS-only pair of identical flex groups. Translating their shared
+track by exactly 50% replaces the first group with the second at the same
+position, so the loop has no jump. The first group is the real semantic list; the
+second is `aria-hidden` and exists only to close the visual loop. One group has a
+minimum width of the inner container and a max-content width large enough to
+preserve the supplied logo sizes and a 72 px minimum gap.
 
 Only `transform` and `opacity` are animated. The two halves of the heading are
 separate steps, so the accent lands a beat after the claim it qualifies; the marks
@@ -131,7 +134,7 @@ Two failure modes the mechanism creates, and what covers them:
 | Item | Budget | Actual |
 |---|---|---|
 | JavaScript | 0 KB external | 352 B inline / 243 B gz — the shared observer, in `BaseLayout` |
-| Requests | 6 | six AVIF marks, lazy, below the fold |
+| Requests | 6 unique assets | twelve image nodes reuse six AVIF URLs; the browser cache prevents duplicate transfers |
 | Largest asset | — | 2 951 B (`nextera-energy.avif`) |
 | All six marks | — | 12.9 KB AVIF, from 44 KB of source PNG |
 | Page CSS | < 50 KB | 5.67 KB gz (23.9 KB raw), up from 5.5 KB gz |
@@ -144,6 +147,10 @@ no extra cost.
 - `<h2>` inside `<section aria-labelledby="logo-wall-heading">`. The page keeps
   exactly one `<h1>`, in the hero.
 - Keyboard navigation: nothing focusable.
+- The continuously moving duplicate is `aria-hidden`; assistive technology reads
+  each organisation once, from the first list.
+- Reduced motion removes the marquee rather than merely accelerating it, and
+  displays all six marks in the static responsive grid.
 - Contrast, measured on rendered pixels (`tests/a11y`-style sampling, values above):
   heading 14.47:1, accent 3.09:1 (large text, threshold 3:1), standfirst 4.71:1.
 - `alt` is the organisation name, from the fixture. The marks say who the partners
@@ -157,6 +164,7 @@ no extra cost.
       it at 40. Built on 40 — confirm which is right, because it moves the hero too.
 - [ ] Standfirst copy stops mid-sentence: "…a relatively new technology, present".
       Kept verbatim rather than invented. Needs the real sentence.
-- [ ] Behaviour below 1280 has no design coverage. Both folds are argued above.
+- [ ] Marquee speed and direction have no motion reference. Implemented leftward
+      at 32 s per full set as a calm baseline; confirm against the motion design.
 - [ ] The marks are PNG. When they come as SVG the `--logo-scale` reasoning goes
       away with them — a vector mark is sized from the design, not from an export.

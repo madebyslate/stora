@@ -2,6 +2,7 @@
 import type { AudienceTabsBlock } from '@repo/shared'
 import Button from '@/components/ui/Button.astro'
 import Picture from '@/components/ui/Picture.astro'
+import LongArrowRight from '@/components/ui/icons/LongArrowRight.astro'
 
 interface Props {
   block: AudienceTabsBlock
@@ -34,6 +35,7 @@ const headingLines = block.heading.split('\n')
  */
 const group = 'audience-tabs'
 const optionId = (index: number) => `${group}-${index + 1}`
+const optionCount = block.options.length.toString().padStart(2, '0')
 
 /**
  * Reveal order. Both halves of the band arrive together — they are one object
@@ -104,11 +106,19 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
                   ended the entrance at full strength. The mask animates transform
                   only, so the two never meet.
                 */}
-                <span
-                  class="audience__label reveal-mask"
-                  style={`--reveal-index: ${order.tab + index * TAB_STAGGER}`}
-                >
-                  <span>{option.label}</span>
+                <span class="audience__tab-main">
+                  <span class="audience__arrow" aria-hidden="true">
+                    <LongArrowRight />
+                  </span>
+                  <span
+                    class="audience__label reveal-mask"
+                    style={`--reveal-index: ${order.tab + index * TAB_STAGGER}`}
+                  >
+                    <span>{option.label}</span>
+                  </span>
+                </span>
+                <span class="audience__counter" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}/{optionCount}
                 </span>
               </label>
             ))
@@ -224,6 +234,16 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
     display: block;
     padding-block: var(--audience-tab-pad-block);
     cursor: pointer;
+  }
+
+  .audience__tab-main {
+    display: block;
+  }
+
+  /* Mobile-only wayfinding. The desktop composition is intentionally text-only. */
+  .audience__arrow,
+  .audience__counter {
+    display: none;
   }
 
   /*
@@ -352,14 +372,15 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
    * breakpoint, so the last width that keeps it has ~90 px of margin rather than
    * two.
    *
-   * Below it the questions become a row above the photograph: a scroller with the
-   * active one in it, which is the shape a phone can flick through. The radios are
+   * Below it the questions become three compact rows above the photograph. All
+   * destinations remain visible at once, and the active one gains the same arrow
+   * plus counter language as the site's other tabbed blocks. The radios are
    * untouched, so the keyboard story does not change.
    */
   @media (max-width: 1023px) {
     .audience {
-      /* A 40 px band above and below a row of questions is a desktop measure; in
-         a scroller it is a third of the phone's screen spent on nothing. */
+      /* A 40 px band above and below the questions is a desktop measure; in the
+         compact list it is a third of the phone's screen spent on nothing. */
       --audience-tab-pad-block: var(--space-3); /* 12 */
     }
 
@@ -369,7 +390,7 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
     }
 
     .audience__box {
-      /* The row is the whole box now: no tint behind it, and nothing to clip. */
+      /* The switch list is the whole box now: no tint and nothing to clip. */
       padding: 0;
       place-items: stretch;
       overflow: visible;
@@ -379,38 +400,79 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
       display: none;
     }
 
-    /*
-     * Out to the page edges and back in by the gutter: a scroller that stops short
-     * of the screen edge reads as a box with a bug, and the last question would sit
-     * against the gutter with nothing after it.
-     */
     .audience__switches {
-      flex-direction: row;
-      gap: var(--audience-tab-pad-inline);
-      margin-inline: calc(-1 * var(--container-gutter));
-      padding-inline: var(--container-gutter);
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      /* Both sides: the browser scrolls a focused question into view itself, and
-         without this it parks the last one hard against the screen edge. */
-      scroll-padding-inline: var(--container-gutter);
-      /* The row is a strip of three words; a scrollbar under it is louder than the
-         thing it describes, and the row is also driven by the arrow keys. */
-      scrollbar-width: none;
+      flex-direction: column;
       text-align: start;
     }
 
-    .audience__switches::-webkit-scrollbar {
-      display: none;
+    .audience__tab {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--audience-mobile-tab-gap);
+      border-block-end: var(--audience-mobile-rule-width) solid currentColor;
+      color: var(--color-fg);
+      font-size: var(--text-tab);
+      font-weight: var(--text-tab--font-weight);
+      line-height: var(--text-tab--line-height);
+      letter-spacing: var(--text-tab--letter-spacing);
+      opacity: var(--audience-mobile-tab-rest-opacity);
+      transition: opacity var(--duration-base) var(--ease-standard);
     }
 
-    .audience__tab {
+    .audience__tab:has(.audience__pick:checked) {
+      opacity: 1;
+    }
+
+    .audience__tab-main {
+      display: grid;
+      grid-template-columns: var(--audience-mobile-arrow-width) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--audience-mobile-arrow-gap);
+      min-inline-size: 0;
+    }
+
+    .audience__arrow {
+      display: block;
+      inline-size: var(--audience-mobile-arrow-width);
+      block-size: var(--audience-mobile-arrow-height);
+      opacity: 0;
+      transform: translate3d(var(--audience-mobile-arrow-start), 0, 0);
+      transition:
+        opacity var(--duration-base) var(--ease-standard),
+        transform var(--duration-base) var(--ease-out-expo);
+    }
+
+    .audience__arrow :global(svg) {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+    }
+
+    .audience__counter {
+      display: block;
       flex: none;
-      scroll-snap-align: start;
+    }
+
+    .audience__tab:has(.audience__pick:checked) .audience__arrow {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
     }
 
     .audience__label {
-      white-space: nowrap;
+      min-inline-size: 0;
+      font: inherit;
+      opacity: 1;
+    }
+
+    @media (hover: hover) {
+      .audience__tab:not(:has(.audience__pick:checked)):hover {
+        opacity: var(--audience-mobile-tab-hover-opacity);
+      }
+
+      .audience__tab:not(:has(.audience__pick:checked)):hover .audience__label {
+        opacity: 1;
+      }
     }
 
     .audience__stage {

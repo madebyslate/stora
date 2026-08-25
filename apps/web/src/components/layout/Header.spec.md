@@ -3,9 +3,8 @@
 ## What it is
 
 Global site navigation shown on every page. It starts either over opening media
-(`on-media`) or as a light in-flow bar (`default`), and becomes the same light,
-fixed bar only after the visitor has scrolled beyond the opening portion of the
-page.
+(`on-media`) or as a light bar (`default`). It remains fixed in place from the
+first frame and switches to the light treatment as soon as the page is scrolled.
 
 - Figma: opening hero frames and the light header used on content pages
 - Variants in Figma: `on-media` / `default`
@@ -23,15 +22,14 @@ the designed shape but has no `href` and no tab stop.
 |---|---|---|
 | Header | 72 px | 40 px content between the supplied 16 px vertical insets |
 | Desktop navigation gaps | 40 px | Opening desktop frame |
-| Delayed sticky threshold | 192 px | Four 48 px spacing steps; enough to leave the opening state before the fixed bar enters |
 
 ## Deviations from Figma
 
 - There is no supplied compact-menu frame. Mobile uses a full-screen dark panel,
   keeps the header controls above it, and turns the menu icon into an explicit
   close icon.
-- No sticky transition is supplied. The fixed light state enters from above after
-  192 px of scrolling and reuses the existing light-header colours.
+- No sticky transition is supplied. Per client review, the header stays in place
+  and changes to the existing light-header colours on the first scroll.
 
 ## Breakpoints
 
@@ -49,7 +47,7 @@ Compared against the design at 1440 / 768 / 390.
 - An open compact menu keeps the logo and close control visible above the panel.
 - The compact panel fades in while its navigation items and CTA enter from below
   in a short staggered sequence.
-- Once sticky, both original tones use a white surface, Lime-Dark foreground and
+- Once scrolled, both original tones use a white surface, Lime-Dark foreground and
   the dark CTA treatment.
 - The current page remains exposed through `aria-current="page"`.
 
@@ -58,7 +56,7 @@ Compared against the design at 1440 / 768 / 390.
 | What | When | Duration | Easing | `prefers-reduced-motion: reduce` |
 |---|---|---|---|---|
 | Desktop label roll | Hover / focus | 450 ms | in-out | Instant |
-| Sticky header entrance | Scroll passes 192 px | 450 ms | expo-out | Instant |
+| Header colour switch | First scroll | Instant | none | Instant |
 | Compact icon → close | Menu opens | 250 ms | expo-out | Instant |
 | Compact panel and items | Menu opens | 450 ms + 60 ms stagger | standard / expo-out | Instant |
 
@@ -68,7 +66,7 @@ Only `transform` and `opacity` are used for movement.
 
 | Item | Budget | Actual |
 |---|---|---|
-| JavaScript | ≤ 1 KB gzip | 569 B gzip (minified production script) |
+| JavaScript | ≤ 1 KB gzip | 514 B gzip (minified production script) |
 | Requests | 0 | 0 |
 | Largest asset | none | none |
 
@@ -86,5 +84,4 @@ return, inert page content, scroll lock) and for the scroll-dependent fixed stat
 
 ## Open questions
 
-- [ ] Confirm whether 192 px is the preferred sticky delay after reviewing the
-  motion in-browser; it is isolated in `--header-sticky-threshold`.
+None.

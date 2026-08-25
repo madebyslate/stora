@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '@repo/tokens/tokens.css';
 @import './fonts.css';
+@import 'lenis/dist/lenis.css';
 
 /*
  * Tailwind v4 scans sources automatically upwards from the CSS file's directory,

@@ -131,25 +131,25 @@ element taller than the viewport is exactly the window in which the sticky stage
 is pinned. Every animation below is a range on that one timeline, so nothing has
 to be kept in sync with anything.
 
-The section is **560 vh** — 1.6 viewports per step plus 1.6 for the mark. It was
-one per step, and one per step is not enough scroll to read as motion rather than
-as a cut: a photograph swap had 38 vh to happen in and half a step name had 11.
-At 1.6 they get 44 and 22, on the same fractions.
+The four-step section is **300 vh**: one viewport for the approach and 50 vh per
+step. Its pinned range is therefore 200 vh, down from 460 vh in the original
+560-vh version. A photograph swap still occupies roughly 33 vh, while the inert
+reading beat between swaps falls from roughly 33 vh to 8 vh.
 
-The mark takes the first 24% of the pin; the rest is split between the steps, and
-each step's window reaches back into its predecessor by half a span, so **one
+The mark takes the first 18% of the pin; the rest is split between the steps, and
+each step's window reaches back into its predecessor by 80% of a span, so **one
 step's exit and the next one's entrance occupy exactly the same stretch of
 scroll**. Every window is therefore the same length, and the keyframes are written
 once, in fractions of a window:
 
 | Fraction of a window | What happens |
 |---|---|
-| 0 – 33.3 | the photograph arrives from below — and the one before it leaves upward |
-| 3.5 – 33.3 | the two halves of the name and the description fly in with it |
-| 33.3 – 66.7 | the slow middle of the same flight; the halves pass one another here |
-| 33.3 – 45 | the plate fades up and the number wipes in, once the frame is full |
-| 66.7 – 96 | name and description fly out with the photograph |
-| 66.7 – 100 | the photograph leaves — and the next one arrives |
+| 0 – 44.4 | the photograph arrives from below — and the one before it leaves upward |
+| 3.5 – 44.4 | the two halves of the name and the description fly in with it |
+| 44.4 – 55.6 | the short reading beat; the halves pass one another here |
+| 44.4 – 50 | the plate fades up and the number wipes in, once the frame is full |
+| 55.6 – 96 | name and description fly out with the photograph |
+| 55.6 – 100 | the photograph leaves — and the next one arrives |
 
 The name's flight **brackets the photograph's exactly**, and it is one monotonic
 path rather than an entrance, a pause and an exit: the lead half travels upwards
@@ -159,19 +159,21 @@ take turns — and it is what closed the dead time (see below).
 
 The number is the one thing that waits. Its plate sits against the frame's edge,
 so a number arriving while the frame is still half empty reads as a label for
-nothing; plate and digit both start at 33.3%, the frame the photograph lands on.
+nothing; plate and digit start around 44.4%, the frame the photograph lands on.
 
-Every segment runs on `--ease-in-out`. It ran on `--ease-out-expo`, and on a
-scrubbed timeline that is the wrong curve for this: expo-out puts nine tenths of
-the distance into the first third of the segment, which reads as a snap with a
-long tail rather than as travel.
+Every scroll-driven segment is linear. Lenis already interpolates discrete wheel
+input into continuous browser scroll positions; easing that result again with
+`--ease-in-out` slowed the beginning and end of every slide handover. A short
+reading beat remains encoded explicitly in the keyframes, but it is no longer
+long enough to read as a stop between slides.
 
 ### The dead time, and why it was arithmetic
 
 On the first timing, **41% of the on-stage scroll had no name on screen at all**,
 in three runs of 10% of the pin each — 46 vh of empty card, three times over.
 
-The cause was not taste. Two neighbouring windows overlap by exactly half a span,
+The cause was not taste. In that timing, two neighbouring windows overlapped by
+exactly half a span,
 and that band is the only stretch of scroll in which the outgoing step and the
 incoming one both exist. The whole handover was happening *outside* it: the
 outgoing name had already left before the band opened, and the incoming one
@@ -262,13 +264,13 @@ Three things about its act are deliberate and each replaced something worse:
 
 | What | When | `reduce` |
 |---|---|---|
-| Mark grows, centred, and stops | `cover 50 vh → contain 24%` | not run — static stack |
+| Mark grows, centred, and stops | `cover 50 vh → contain 18%` | not run — static stack |
 | Mark solid → watermark | last 30% of that range | not run |
 | Mark fades out | `contain 90%–100%` | not run |
 | Photograph strip | each step's window | not run |
 | Picture lags its panel | each step's window | not run |
 | Name, number, description | each step's window | not run |
-| The plate arrives with the number, once the photograph fills the frame | step 01's window, 33.3–50% | not run |
+| The plate arrives with the number, once the photograph fills the frame | step 01's window, 44.4–50% | not run |
 
 Only `transform` and `opacity` (AGENT-RULES §6).
 
@@ -310,7 +312,7 @@ the pin, at **1440 / 1024 / 768 / 390**, asserting at every position that
 3. no two halves of a name are visible in either aperture,
 4. the photographic aperture is fully covered once the card is on stage,
 5. the plate is not on stage while the frame is still uncovered,
-6. the mark's scale never drifts from 1 after `contain 24%`,
+6. the mark's scale never drifts from 1 after `contain 18%`,
 7. the last step's lead half never travels back down at the end,
 8. every half's centre sits on the edge it straddles, to within 0.6 px,
 9. **the card and the mark are centred on the viewport**, to within 1 px,
@@ -368,7 +370,7 @@ wrong answer first:
 
 | Item | Budget | Actual |
 |---|---|---|
-| JavaScript | 0 KB | **0 B** — the pin, the sequencing and the cross-fades are CSS scroll-driven animations |
+| JavaScript | 0 KB local | **0 B local** — the pin and sequencing remain CSS scroll-driven; global wheel smoothing is owned by `BaseLayout` |
 | Requests | 4 | four photographs, lazy |
 | Largest asset | — | 920 × 1080 masters, served as AVIF/WebP through `Picture` |
 

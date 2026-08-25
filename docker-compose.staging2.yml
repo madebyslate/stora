@@ -1,0 +1,35 @@
+name: stora2-staging
+
+# Independent Stage 1 preview for stora2.madebyslate.dev. It uses the same
+# website image as the primary staging stack, but a separate host port and
+# named volume so both environments can run on the same Docker host.
+services:
+  website-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: website-builder
+    init: true
+    restart: "no"
+    environment:
+      CONTENT_SOURCE: fixtures
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-https://stora2.madebyslate.dev}
+    volumes:
+      - website-dist:/output
+
+  router:
+    image: nginx:1.28-alpine
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-18084}:8080"
+    volumes:
+      - website-dist:/srv/website:ro
+      - ./docker/nginx.staging.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      website-build:
+        condition: service_completed_successfully
+
+volumes:
+  website-dist:
+    name: ${WEBSITE_DIST_VOLUME:-stora2-staging-website-dist}

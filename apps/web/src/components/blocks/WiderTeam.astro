@@ -87,8 +87,8 @@ const PORTRAIT_WIDTHS = [120, 160, 215]
     display: block;
     inline-size: 100%;
     aspect-ratio: var(--team-tile-ratio);
-    translate: -50% var(--wider-team-portrait-rest-y-mobile);
-    scale: var(--team-portrait-rest-scale);
+    translate: -50% -50%;
+    scale: 1;
     transition:
       translate var(--duration-slow) var(--ease-out-expo),
       scale var(--duration-slow) var(--ease-out-expo);
@@ -107,7 +107,7 @@ const PORTRAIT_WIDTHS = [120, 160, 215]
     display: block;
     block-size: var(--team-scrim-height);
     background: var(--team-scrim);
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
     transition: opacity var(--duration-base) var(--ease-standard);
   }
@@ -120,13 +120,13 @@ const PORTRAIT_WIDTHS = [120, 160, 215]
 
   .member__name {
     margin: 0;
-    color: var(--color-fg);
+    color: var(--color-on-media);
     transition: color var(--duration-base) var(--ease-standard);
   }
 
   .member__role {
     margin-block-start: var(--team-name-gap);
-    color: var(--color-fg-note);
+    color: var(--color-on-media-subtle);
     transition: color var(--duration-base) var(--ease-standard);
   }
 
@@ -137,6 +137,19 @@ const PORTRAIT_WIDTHS = [120, 160, 215]
 
     .member__frame {
       translate: -50% var(--wider-team-portrait-rest-y);
+      scale: var(--team-portrait-rest-scale);
+    }
+
+    .member__scrim {
+      opacity: 0;
+    }
+
+    .member__name {
+      color: var(--color-fg);
+    }
+
+    .member__role {
+      color: var(--color-fg-note);
     }
   }
 

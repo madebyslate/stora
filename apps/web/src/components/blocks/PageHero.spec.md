@@ -39,7 +39,7 @@ measured from the top of the frame; the hero's own foot is at 906.
 
 | Element | Value | How it was established |
 |---|---|---|
-| Hero height | **900** | The three photographs in `_inbox/` are exactly 1440 × 900, and the frame's white section starts at crop row 402 → 906. The two agree to 0.7%; 900 is the value the asset states, so 900 is the value we set. |
+| Hero height | **900 in the reference; 100svh in the implementation** | The three photographs in `_inbox/` are exactly 1440 × 900, and the frame's white section starts at crop row 402 → 906. The two agree to 0.7%; at the reference viewport `100svh` resolves to the same 900 px. |
 | Heading size | 72 / 500 | Given. The reference measures 47.3 px cap-top to baseline → 47.3 / 0.700 = 67.6 (Aeonik Medium's `sCapHeight` is 700/1000, read from the TTF), so the frame is drawn at ≈ 68. Within the ±2.3 px a single crop pixel is worth, and 72 is what was specified — see **Deviations**. |
 | Subheading size | 28 / 36 / 500 | Two lines of the Dev-to-Sell subheading sit 16 crop px apart → 36.1. Size follows from the band height, 11.3 crop px ascender-to-descender → 25.4 design ÷ 0.9 = 28. Exactly `--text-lead`. |
 | Heading → subheading | 20 | Heading line box ends at 773.4 (72/72), subheading line box opens at 794.3. Same `--space-5` the home hero sets between the same two elements. |
@@ -67,18 +67,24 @@ measured from the top of the frame; the hero's own foot is at 906.
    at 45; on Lighthouse's mobile profile that is the difference between a 1.95 s
    LCP with a score of 99 and a 1.80 s LCP with 100. No visible difference in the
    snapshot — checked at 1440 and at 390.
+5. **The hero follows the viewport above 900 px instead of stopping at the
+   reference height.** The home hero already fills the screen, and the page
+   openers should keep the same visual weight on taller displays. At the 1440 ×
+   900 reference this changes nothing; at 1440 × 1100 the hero is 1100 px rather
+   than leaving a 200 px height mismatch against the home page.
 
 ## Breakpoints
 
 | Width | What changes |
 |---|---|
-| ≥ 1440 | As drawn: 900 px tall, copy centred against a 72 px foot. |
+| ≥ 1440 | As drawn at 1440 × 900; on a taller screen the photograph keeps covering the full viewport. |
 | 768–1439 | Nothing structural. The type steps interpolate, the photograph keeps covering. |
-| < 768 | Nothing structural. The hero is `min(900px, 100svh)`, so on a phone it is the viewport and the copy still sits 72 px off its foot. |
+| < 768 | Nothing structural. The hero is the viewport and the copy still sits 72 px off its foot. |
 
-The height is `min(56.25rem, 100svh)` rather than a flat 900: at 900 on an 800 px
-viewport the copy — which lives at the foot — would open below the fold, and the
-`<h1>` is the LCP element.
+The height is `100svh`, the same viewport rule as the home hero. It resolves to
+900 px in the supplied desktop reference, shrinks with a shorter laptop or phone,
+and grows on a taller display. The copy remains anchored to a 72 px foot in every
+case, so the `<h1>` cannot open below the fold.
 
 ## States
 

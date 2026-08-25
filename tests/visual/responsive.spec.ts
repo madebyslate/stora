@@ -182,4 +182,37 @@ test.describe('Responsive layout', () => {
     expect(jumps, `\n${jumps.join('\n')}\n`).toEqual([])
     expect(sizes.at(-1)!.heading).toBeCloseTo(72, 0)
   })
+
+  test('caps the photographic card rows on an ultrawide viewport', async ({ page }) => {
+    test.skip(
+      test.info().project.name !== 'desktop-1440',
+      'viewport size is driven by the test, not by the project',
+    )
+
+    await page.setViewportSize({ width: 2560, height: 1080 })
+
+    await page.goto('/')
+    const services = await page.locator('.services__row').boundingBox()
+    const serviceCards = await page.locator('.services__cell').all()
+
+    expect(services).not.toBeNull()
+    expect(services!.width).toBe(1440)
+    expect(services!.x).toBe(560)
+    for (const card of serviceCards) {
+      await expect(card).toHaveCSS('width', '480px')
+    }
+
+    for (const path of ['/brokerage/', '/develop-to-sell/', '/develop-to-hold/']) {
+      await page.goto(path)
+      const row = await page.locator('.feature-pair__cards').boundingBox()
+      const cards = await page.locator('.feature-card').all()
+
+      expect(row, path).not.toBeNull()
+      expect(row!.width, path).toBe(1440)
+      expect(row!.x, path).toBe(560)
+      for (const card of cards) {
+        await expect(card).toHaveCSS('width', '715px')
+      }
+    }
+  })
 })

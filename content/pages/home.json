@@ -191,26 +191,18 @@
       "slides": [
         {
           "image": {
-            "src": "content/media/market/poland-1.jpg",
+            "src": "content/media/market/renewable-energy-vs-battery-storage.jpg",
             "alt": "",
-            "width": 640,
-            "height": 640
+            "width": 960,
+            "height": 960
           }
         },
         {
           "image": {
-            "src": "content/media/market/poland-2.jpg",
+            "src": "content/media/market/poland-s4.jpg",
             "alt": "",
-            "width": 640,
-            "height": 640
-          }
-        },
-        {
-          "image": {
-            "src": "content/media/market/poland-3.jpg",
-            "alt": "",
-            "width": 640,
-            "height": 640
+            "width": 960,
+            "height": 960
           }
         }
       ]

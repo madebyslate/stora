@@ -33,7 +33,7 @@ test.describe('Header', () => {
     await page.waitForLoadState('networkidle')
 
     await page.evaluate(() => window.scrollTo(0, 240))
-    await expect(page.locator('[data-site-header]')).toHaveAttribute('data-sticky', '')
+    await expect(page.locator('[data-site-header]')).toHaveAttribute('data-scrolled', '')
 
     const toggle = page.locator('[data-menu-toggle]')
     const panel = page.locator('[data-menu-panel]')
@@ -68,43 +68,35 @@ test.describe('Header', () => {
     await expect(panel).toBeHidden()
   })
 
-  test('becomes a light fixed header only after the delayed threshold', async ({ page }) => {
+  test('stays fixed and switches to the light treatment on the first scroll', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
     const header = page.locator('[data-site-header]')
 
-    const before = await page.evaluate(async () => {
-      const threshold = document.querySelector<HTMLElement>('[data-sticky-threshold]')!.offsetTop
-      window.scrollTo(0, threshold - 32)
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    const before = await page.evaluate(() => {
+      const element = document.querySelector<HTMLElement>('[data-site-header]')!
       return {
-        scrollY: window.scrollY,
-        threshold,
-        sticky: document.querySelector('[data-site-header]')!.hasAttribute('data-sticky'),
+        top: element.getBoundingClientRect().top,
+        scrolled: element.hasAttribute('data-scrolled'),
+        position: getComputedStyle(element).position,
       }
     })
 
-    expect(before.threshold).toBe(192)
-    expect(before.scrollY).toBeLessThan(before.threshold)
-    expect(before.sticky).toBe(false)
+    expect(before).toEqual({ top: 0, scrolled: false, position: 'fixed' })
 
-    const after = await page.evaluate(async () => {
-      const threshold = document.querySelector<HTMLElement>('[data-sticky-threshold]')!.offsetTop
-      window.scrollTo(0, threshold + 48)
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    const after = await page.evaluate(() => {
+      window.scrollTo(0, 1)
+      const element = document.querySelector<HTMLElement>('[data-site-header]')!
       return {
         scrollY: window.scrollY,
-        threshold,
-        sticky: document.querySelector('[data-site-header]')!.hasAttribute('data-sticky'),
+        top: element.getBoundingClientRect().top,
       }
     })
 
-    expect(after.scrollY).toBeGreaterThan(after.threshold)
-    expect(after.sticky).toBe(true)
+    expect(after).toEqual({ scrollY: 1, top: 0 })
+    await expect(header).toHaveAttribute('data-scrolled', '')
 
     await expect
       .poll(() =>

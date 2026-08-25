@@ -25,7 +25,7 @@ resting selection and any pointed-at card reveals its description.
 
 | Element | Value | How it was established |
 |---|---|---|
-| Content grid | 1360 px | existing site inner width and the supplied instruction |
+| Card row maximum | 1440 px | full-bleed at the supplied design width, then centred rather than stretched on ultrawide screens |
 | Gap between cards | 10 px | supplied directly |
 | Card row | 465 px | supplied directly by the client |
 | Bottom scrim | 275 px | supplied directly |
@@ -37,8 +37,10 @@ resting selection and any pointed-at card reveals its description.
 | Section top space | 160 px | measured from the composite after resolving its approximately 0.4 scale |
 | Heading to cards | 64 px | measured from the composite and aligned to an existing spacing step |
 
-The cards are full-bleed. Only the heading is aligned to `.container-page`, as
-specified by the client and visible in all three frames.
+The cards are full-bleed through 1440. Above the supplied design width the row is
+capped at 1440 and centred, while only the heading remains aligned to
+`.container-page`. This preserves the designed card proportion instead of turning
+the two photographs into increasingly panoramic strips on ultrawide displays.
 
 ## Deviations from the reference
 
@@ -48,7 +50,7 @@ None currently recorded.
 
 | Width | What changes |
 |---|---|
-| >= 1440 | two equal cards, 465 px row |
+| >= 1440 | two equal 715 px cards in a centred 1440 px row, 465 px tall |
 | 768-1439 | two equal cards, 465 px row |
 | < 768 | cards stack; both descriptions remain visible because hover is unavailable |
 

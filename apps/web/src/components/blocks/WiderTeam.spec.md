@@ -36,7 +36,7 @@ constraint once another populated state has design coverage.
 | Tile gap | 10 px | screenshot measures 7–10 px after raster scaling; shared team token is 10 |
 | Tile ratio | 36 / 43 | screenshot tiles measure ≈262 × 315 (0.832); shared team ratio is 0.837 |
 | Portrait rest scale | 0.5414 | same treatment as `TeamGrid`; source and tile share the same ratio |
-| Portrait resting position | 7% above centre desktop, 13% mobile | raised to keep the photograph clear of wrapping metadata; returns to centre on hover |
+| Portrait resting position | 7% above centre on desktop | raised to keep the photograph clear of wrapping metadata; returns to centre on hover |
 | Tile padding | 16 px | same treatment as `TeamGrid` and agrees with the screenshot |
 | Name → role | 4 px | same treatment as `TeamGrid` |
 
@@ -55,15 +55,17 @@ constraint once another populated state has design coverage.
 |---|---|
 | ≥ 1024 | Five equal columns. The ninth person leaves the last cell empty. |
 | 768–1023 | Three columns. |
-| < 768 | Two columns; below 390 the layout remains usable through the site gutter. |
+| < 768 | Two columns; every tile uses the expanded photographic state with its foot scrim and white metadata. Below 390 the layout remains usable through the site gutter. |
 
 ## States
 
-All tiles rest by default, with the portrait raised above centre so it does not
-collide with the metadata. On devices with a hover-capable pointer, only the tile
-under the pointer expands its portrait to fill the card, adds the shared foot
-scrim, recentres the photograph and changes its text to white. There is deliberately no default active
-tile and no keyboard state because the cards contain no action or link.
+Desktop tiles rest by default, with the portrait raised above centre so it does
+not collide with the metadata. On devices with a hover-capable pointer, only the
+tile under the pointer expands its portrait to fill the card, adds the shared
+foot scrim, recentres the photograph and changes its text to white. Below 768 px,
+every tile renders permanently in that expanded state because there is no hover
+preview on touch screens. There is deliberately no keyboard state because the
+cards contain no action or link.
 
 ## Animations
 

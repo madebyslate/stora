@@ -52,7 +52,7 @@ const ratio = `${lead.image.width} / ${lead.image.height}`
  * The copy, resolved per slide.
  *
  * A slide that states nothing of its own borrows the block's line — which is how
- * "one statement, three drawings of it" is said without repeating the sentence in
+ * "one statement, several drawings of it" is said without repeating the sentence in
  * the JSON. Split into words here rather than in the browser: each word is its
  * own little mask, and the delay is its position in the sentence, so the line
  * reads as a wave crossing it instead of a block appearing.
@@ -68,10 +68,9 @@ const say = block.slides.map((slide) => ({
 }))
 
 /**
- * The illustrations are 640 px square masters drawn at 640, so the ladder stops
- * where they do — there is nothing above it to ask for. `sizes` says 640 as soon
- * as the layout stops shrinking the picture, which is the same 680 px the fold
- * below is written against.
+ * The illustrations are drawn at 640 px from 960 px square sources, so the output
+ * ladder stops at the rendered size. `sizes` says 640 as soon as the layout stops
+ * shrinking the picture, which is the same 680 px the fold below is written against.
  */
 const SLIDE_WIDTHS = [320, 480, 640]
 const SLIDE_SIZES = '(min-width: 680px) 640px, 100vw'

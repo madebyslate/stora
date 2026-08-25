@@ -8,7 +8,7 @@ paragraph that explains the figure beside it on the right. The figure is not rea
 as text — it is the section's ground, and the sentence next to it is the content.
 
 On `brokerage`, `develop-to-sell`, `develop-to-hold` and `about-us`. About Us
-uses the same geometry with the `Crefiblity` heading and the founding team's
+uses the same geometry with the `Credibility` heading and the founding team's
 1 GW track record. Its `1 GW` is one full-size value rather than a smaller unit
 on the baseline.
 

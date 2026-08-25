@@ -52,7 +52,7 @@ test.describe('LogoWall block', () => {
     // a black box in every browser that takes the fallback.
     await page.goto('/')
 
-    const list = page.locator('.logo-wall__list')
+    const list = page.locator('.logo-wall__list:not([aria-hidden])')
     await expect(list.locator('picture source[type="image/avif"]')).toHaveCount(6)
     await expect(list.locator('img[src$=".jpg"], img[src$=".jpeg"]')).toHaveCount(0)
     await expect(list.locator('img[src$=".png"]')).toHaveCount(6)
@@ -63,11 +63,84 @@ test.describe('LogoWall block', () => {
     // as zero-height boxes and the section reflows under the visitor.
     await page.goto('/')
 
-    for (const img of await page.locator('.logo-wall__list img').all()) {
+    for (const img of await page.locator('.logo-wall__list:not([aria-hidden]) img').all()) {
       await expect(img).toHaveAttribute('width', /^\d+$/)
       await expect(img).toHaveAttribute('height', /^\d+$/)
       await expect(img).toHaveAttribute('loading', 'lazy')
       expect((await img.getAttribute('alt'))?.length).toBeGreaterThan(0)
     }
+  })
+
+  test('runs a seamless marquee with one hidden visual duplicate', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+
+    const track = page.locator('.logo-wall__track')
+    const groups = track.locator('.logo-wall__list')
+    await expect(groups).toHaveCount(2)
+    await expect(groups.nth(0)).not.toHaveAttribute('aria-hidden', 'true')
+    await expect(groups.nth(1)).toHaveAttribute('aria-hidden', 'true')
+
+    const innerGeometry = await page.locator('.logo-wall__marquee').evaluate((element) => {
+      const container = element.parentElement
+      if (!container) return null
+
+      const containerRect = container.getBoundingClientRect()
+      const marqueeRect = element.getBoundingClientRect()
+      const containerStyle = getComputedStyle(container)
+      const paddingInline = Number.parseFloat(containerStyle.paddingInlineStart)
+
+      return {
+        actualX: marqueeRect.x,
+        actualWidth: marqueeRect.width,
+        expectedX: containerRect.x + paddingInline,
+        expectedWidth: containerRect.width - 2 * paddingInline,
+      }
+    })
+
+    expect(innerGeometry).not.toBeNull()
+    expect(innerGeometry?.actualX).toBeCloseTo(innerGeometry?.expectedX ?? 0, 1)
+    expect(innerGeometry?.actualWidth).toBeCloseTo(innerGeometry?.expectedWidth ?? 0, 1)
+
+    const state = await track.evaluate((element) => {
+      const animation = element.getAnimations()[0]
+      if (!animation) return null
+
+      animation.pause()
+      animation.currentTime = 0
+      const start = element.getBoundingClientRect().x
+      const [firstGroup, duplicateGroup] = Array.from(
+        element.querySelectorAll<HTMLElement>('.logo-wall__list'),
+      )
+      const firstRect = firstGroup?.getBoundingClientRect()
+      const duplicateRect = duplicateGroup?.getBoundingClientRect()
+      animation.currentTime = 1000
+      const afterOneSecond = element.getBoundingClientRect().x
+
+      return {
+        start,
+        afterOneSecond,
+        iterations: animation.effect?.getTiming().iterations,
+        groupWidth: firstRect?.width,
+        duplicateOffset: firstRect && duplicateRect ? duplicateRect.x - firstRect.x : undefined,
+        pageOverflow: document.documentElement.scrollWidth - window.innerWidth,
+      }
+    })
+
+    expect(state).not.toBeNull()
+    expect(state?.iterations).toBe(Infinity)
+    expect(state?.afterOneSecond).toBeLessThan(state?.start ?? 0)
+    expect(state?.duplicateOffset).toBeCloseTo(state?.groupWidth ?? 0, 1)
+    expect(state?.pageOverflow).toBe(0)
+  })
+
+  test('uses the complete static grid when motion is reduced', async ({ page }) => {
+    await page.goto('/')
+
+    const track = page.locator('.logo-wall__track')
+    await expect(track.locator('.logo-wall__list[aria-hidden="true"]')).toBeHidden()
+    await expect(track).toHaveCSS('animation-name', 'none')
+    await expect(track.locator('.logo-wall__list:not([aria-hidden])')).toHaveCSS('display', 'grid')
+    await expect(track.locator('.logo-wall__list:not([aria-hidden]) img')).toHaveCount(6)
   })
 })

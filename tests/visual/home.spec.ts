@@ -32,6 +32,14 @@ test.describe('Home page', () => {
     await expect(page.locator('h1')).toHaveCount(1)
   })
 
+  test('shows exactly two slides in the Poland market section', async ({ page }) => {
+    await page.goto('/')
+    const market = page.locator('section[aria-labelledby="market-slider-heading"]')
+
+    await expect(market.locator('.market__slide')).toHaveCount(2)
+    await expect(market.locator('input[type="radio"]')).toHaveCount(2)
+  })
+
   test('exposes no private addresses in the HTML', async ({ page }) => {
     // The same condition as the deployment sign-off (xCloud standard §25).
     const html = await page.goto('/').then((response) => response!.text())
@@ -41,10 +49,15 @@ test.describe('Home page', () => {
     expect(html).not.toContain('x-static-build-token')
   })
 
-  test('ships no external JavaScript bundle', async ({ page }) => {
-    // The budget is 0 KB plus the two inline scripts justified in Hero.spec.md.
-    // A <script src> appearing here means a framework or island slipped in.
+  test('ships only the global motion bootstrap as an external entry', async ({ page }) => {
+    // Lenis is dynamically imported by this one small entry. A second external
+    // script would mean a framework or island slipped into the page unnoticed.
     await page.goto('/')
-    await expect(page.locator('script[src]')).toHaveCount(0)
+    const sources = await page.locator('script[src]').evaluateAll((scripts) =>
+      scripts.map((script) => script.getAttribute('src')),
+    )
+
+    expect(sources).toHaveLength(1)
+    expect(sources[0]).toMatch(/BaseLayout.+\.js$/)
   })
 })

@@ -434,7 +434,6 @@
   --header-padding-block: 1rem; /* 16 */
   --header-height: calc(var(--header-content-height) + 2 * var(--header-padding-block));
   --header-nav-gap: 2.5rem; /* 40 */
-  --header-sticky-threshold: 12rem; /* 192 — four 48 px spacing steps */
   --header-button-surface: var(--color-lime-dark);
   --header-button-surface-hover: var(--color-action-hover);
   --header-button-fg: var(--color-white);
@@ -526,6 +525,9 @@
    * factor, not this one.
    */
   --logo-scale: 0.7;
+  /* One full logo set crosses its own width at a calm, legible pace. */
+  --logo-marquee-duration: 32s;
+  --logo-marquee-gap: var(--space-12); /* 72 */
 
   /*
    * Service cards.
@@ -677,10 +679,9 @@
   --featured-publications-meta-gap: var(--space-1); /* 4 */
   --featured-publications-meta-color: rgb(23 46 35 / 0.6);
   --featured-publications-button-hover: var(--color-action-hover);
-  /* Resting portraits sit above centre so their lower edge clears two lines of
-     metadata. Mobile cards need the stronger lift because their text wraps more. */
+  /* Resting desktop portraits sit above centre so their lower edge clears the
+     metadata. Mobile cards render directly in the expanded state. */
   --wider-team-portrait-rest-y: -57%;
-  --wider-team-portrait-rest-y-mobile: -63%;
 
   /*
    * Growth timeline.
@@ -826,11 +827,11 @@
   --process-mark-color-faint: rgb(23 46 35 / 0.1);
   --process-mark-scale-from: 0.28;
   /*
-   * The pin. 1.6 viewports per step plus 1.6 for the mark — the component computes
-   * the height from the step count and sets it inline; this is the four-step
-   * value, and the fallback if the markup ever stops saying.
+   * The pin. 0.5 viewport per step plus one viewport for the intro — the
+   * component computes the height from the step count and sets it inline; this
+   * is the four-step value, and the fallback if the markup ever stops saying.
    */
-  --process-section-height: 560vh;
+  --process-section-height: 300vh;
 
   /*
    * Market slider.
@@ -972,6 +973,19 @@
    * second active one.
    */
   --audience-tab-hover-opacity: 0.5;
+  /*
+   * Compact navigation used below 1024. It follows the arrow-and-counter language
+   * of TechnicalDepthTabs, while keeping every destination visible at once.
+   */
+  --audience-mobile-tab-gap: var(--space-4); /* 16 */
+  --audience-mobile-arrow-gap: var(--space-3); /* 12 */
+  --audience-mobile-rule-width: 0.0625rem; /* 1 */
+  --audience-mobile-arrow-width: 1.875rem; /* 30 */
+  --audience-mobile-arrow-height: 0.8125rem; /* 13 */
+  --audience-mobile-arrow-start: -0.5rem; /* -8 */
+  /* 0.65 composites to 4.71:1 on white, so inactive controls remain readable. */
+  --audience-mobile-tab-rest-opacity: 0.65;
+  --audience-mobile-tab-hover-opacity: 0.8;
 
   /*
    * Closing call.
@@ -1079,14 +1093,13 @@
    * block are the ones the home hero has no equivalent for.
    */
   /*
-   * 900, and never more than the viewport. The photographs are drawn at exactly
-   * 1440 x 900 and the frame's white section starts 906 px down, so 900 is both
-   * the stated and the measured height. The `min()` is what keeps the copy — which
-   * lives at the foot — above the fold on a laptop: at a flat 900 an 800 px
-   * viewport opens on photography with the `<h1>` below it, and the `<h1>` is the
-   * LCP element.
+   * One full small viewport, matching the home hero. The 1440 x 900 reference
+   * still resolves to its measured 900 px, while taller screens no longer leave
+   * the subpage opener visibly shorter than the home page. `svh` keeps the copy —
+   * which lives at the foot — above mobile browser chrome without a JS resize
+   * listener.
    */
-  --page-hero-height: min(56.25rem, 100svh); /* 900 */
+  --page-hero-height: 100svh;
   /*
    * The subheading's measure. The service pages break this line by hand, so this
    * is a guard rather than a layout value: it has to sit above the longest line

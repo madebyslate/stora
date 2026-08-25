@@ -31,7 +31,7 @@ test.describe('About Us page', () => {
       'Built in Poland and ready to scale across Europe',
       'People who have builtrenewable energy at scales',
       'Deep expertise. Proven track record.',
-      'Crefiblity',
+      'Credibility',
       'How We Develop',
       'Store energy atlarge scale',
     ])
@@ -62,5 +62,85 @@ test.describe('About Us page', () => {
       inactive: 'rgb(255, 255, 255)',
       copy: 'rgba(255, 255, 255, 0.6)',
     })
+  })
+
+  test('keeps every AudienceTabs option visible and switches the active panel on mobile', async ({
+    page,
+  }) => {
+    test.skip(
+      test.info().project.name !== 'mobile-390',
+      'The compact AudienceTabs navigation only applies below 1024 px',
+    )
+
+    for (const path of ['/', '/about-us/']) {
+      await page.goto(path)
+
+      const section = page.locator('.audience')
+      const switches = section.locator('.audience__switches')
+      const rows = section.locator('.audience__tab')
+
+      await expect(rows).toHaveCount(3)
+      await expect(rows.locator('.audience__counter')).toHaveText(['01/03', '02/03', '03/03'])
+
+      const geometry = await switches.evaluate((element) => {
+        const box = element.getBoundingClientRect()
+        const rows = Array.from(element.querySelectorAll('.audience__tab'))
+
+        return {
+          hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
+          rowsInsideBox: rows.every((row) => {
+            const rect = row.getBoundingClientRect()
+            return rect.left >= box.left && rect.right <= box.right
+          }),
+        }
+      })
+
+      expect(geometry).toEqual({ hasHorizontalOverflow: false, rowsInsideBox: true })
+      await expect(rows.nth(0).locator('.audience__arrow')).toHaveCSS('opacity', '1')
+      await expect(rows.nth(1)).toHaveCSS('opacity', '0.65')
+
+      await rows.nth(1).click()
+
+      await expect(rows.nth(1).locator('.audience__pick')).toBeChecked()
+      await expect(rows.nth(1).locator('.audience__arrow')).toHaveCSS('opacity', '1')
+      await expect(section.locator('.audience__panel').nth(1)).toHaveCSS('visibility', 'visible')
+      await expect(section.locator('.audience__panel').nth(0)).toHaveCSS('visibility', 'hidden')
+    }
+  })
+
+  test('shows every wider-team portrait expanded on mobile', async ({ page }) => {
+    test.skip(
+      test.info().project.name !== 'mobile-390',
+      'The compact wider-team treatment only applies below 768 px',
+    )
+
+    await page.goto('/about-us/')
+
+    const members = page.locator('.wider-team .member')
+    await expect(members).toHaveCount(9)
+
+    const states = await members.evaluateAll((tiles) =>
+      tiles.map((tile) => {
+        const frame = tile.querySelector('.member__frame')!
+        const scrim = tile.querySelector('.member__scrim')!
+        const name = tile.querySelector('.member__name')!
+        const tileBox = tile.getBoundingClientRect()
+        const frameBox = frame.getBoundingClientRect()
+
+        return {
+          widthDifference: Math.abs(tileBox.width - frameBox.width),
+          heightDifference: Math.abs(tileBox.height - frameBox.height),
+          scrimOpacity: getComputedStyle(scrim).opacity,
+          nameColour: getComputedStyle(name).color,
+        }
+      }),
+    )
+
+    for (const state of states) {
+      expect(state.widthDifference).toBeLessThan(1)
+      expect(state.heightDifference).toBeLessThan(1)
+      expect(state.scrimOpacity).toBe('1')
+      expect(state.nameColour).toBe('rgb(255, 255, 255)')
+    }
   })
 })

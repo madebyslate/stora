@@ -65,7 +65,7 @@ const cardOrder = (index: number) => {
                 <Picture
                   image={item.image}
                   widths={[540, 720, 1086]}
-                  sizes="(max-width: 767px) 100vw, 50vw"
+                  sizes="(min-width: 1440px) 715px, (max-width: 767px) 100vw, 50vw"
                   draggable={false}
                 />
               </span>
@@ -172,6 +172,9 @@ const cardOrder = (index: number) => {
 
   .feature-pair__cards {
     display: grid;
+    inline-size: 100%;
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
     grid-template-columns: repeat(
       auto-fit,
       minmax(min(100%, var(--feature-card-min-width)), 1fr)
