@@ -118,7 +118,7 @@ const order = {
   }
 
   .page-hero[data-about-morph] {
-    z-index: var(--z-base);
+    z-index: var(--z-content);
     pointer-events: none;
     transform-origin: center;
     transform: translate3d(
@@ -138,6 +138,11 @@ const order = {
     );
     transform-origin: center;
     will-change: transform;
+  }
+
+  .page-hero[data-about-complete],
+  .page-hero[data-about-complete] .page-hero__backdrop :global(img) {
+    will-change: auto;
   }
 
   .page-hero[data-about-morph] .page-hero__scrim,

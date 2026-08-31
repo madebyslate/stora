@@ -1,7 +1,6 @@
 ---
 import type { TeamGridBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
-import LinkedIn from '@/components/ui/icons/LinkedIn.astro'
 
 interface Props {
   block: TeamGridBlock
@@ -24,11 +23,10 @@ const headingLines = [
 
 /**
  * Tile choreography. Each tile assembles rather than arriving: its ground wipes
- * up while the portrait inside stays put, then the name rises, the title follows
- * and the mark settles onto it.
+ * up while the portrait inside stays put, then the name rises and the title follows.
  *
  * The offsets are steps of `--reveal-step`, which this section shortens — four
- * tiles of four parts at the global 90 ms would still be running a second and a
+ * tiles of three parts at the global 90 ms would still be running a second and a
  * half in.
  */
 const TILE_STAGGER = 1.4
@@ -38,7 +36,6 @@ const tileOrder = (index: number) => {
     pane: base,
     name: base + 0.9,
     role: base + 1.1,
-    mark: base + 1.3,
   }
 }
 
@@ -111,41 +108,9 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
               </span>
 
               <div class="member__meta">
-                <div class="member__head">
-                  <h3 class="member__name text-caption reveal-mask" style={`--reveal-index: ${order.name}`}>
-                    <span>{member.name}</span>
-                  </h3>
-
-                  {
-                    /*
-                      A link only when there is somewhere to go. It is also the
-                      tile's only focusable element, so `:focus-within` on the tile
-                      is what gives a keyboard the state a pointer gets — and a
-                      member with no URL is pointer-only, which is a content gap
-                      recorded in the spec, not a silent one.
-                    */
-                    member.linkedin ? (
-                      <a
-                        class="member__mark reveal-pop"
-                        style={`--reveal-index: ${order.mark}`}
-                        href={member.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${member.name} on LinkedIn`}
-                      >
-                        <LinkedIn />
-                      </a>
-                    ) : (
-                      <span
-                        class="member__mark reveal-pop"
-                        style={`--reveal-index: ${order.mark}`}
-                        aria-hidden="true"
-                      >
-                        <LinkedIn />
-                      </span>
-                    )
-                  }
-                </div>
+                <h3 class="member__name text-caption reveal-mask" style={`--reveal-index: ${order.name}`}>
+                  <span>{member.name}</span>
+                </h3>
 
                 <p class="member__role text-caption reveal" style={`--reveal-index: ${order.role}`}>
                   {member.role}
@@ -163,7 +128,7 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
   .team {
     padding-block: var(--space-14);
     background-color: var(--color-bg-subtle);
-    /* Four tiles of four parts each. At the global 90 ms the last name would land
+    /* Four tiles of three parts each. At the global 90 ms the last name would land
        a second and a half after the first. */
     --reveal-step: 70ms;
   }
@@ -201,8 +166,6 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
     aspect-ratio: var(--team-tile-ratio);
     /* The aperture for the entrance wipe. Nothing overflows at rest. */
     overflow: clip;
-    /* Lime-Dark vanishes into the photography once a tile is featured. */
-    --color-focus: var(--color-on-media);
   }
 
   /* ── Portrait ─────────────────────────────────────────────────────────────── */
@@ -270,18 +233,11 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
     transition: opacity var(--duration-base) var(--ease-standard);
   }
 
-  /* ── Name, title, mark ────────────────────────────────────────────────────── */
+  /* ── Name and title ───────────────────────────────────────────────────────── */
   .member__meta {
     position: absolute;
     inset-inline: var(--team-tile-padding);
     inset-block-end: var(--team-tile-padding);
-  }
-
-  .member__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
   }
 
   .member__name {
@@ -299,13 +255,6 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
   .member__role {
     margin-block-start: var(--team-name-gap);
     color: var(--color-on-media-subtle);
-    transition: color var(--duration-base) var(--ease-standard);
-  }
-
-  .member__mark {
-    display: flex;
-    flex: none;
-    color: var(--color-on-media);
     transition: color var(--duration-base) var(--ease-standard);
   }
 
@@ -335,7 +284,7 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
    * the copy is legible without a hover it cannot perform. Same call ServiceCards
    * makes, and the same reason.
    *
-   * Everything below is the pointer-and-keyboard behaviour.
+   * Everything below is pointer behaviour; the tiles do not perform an action.
    */
   @media (hover: hover) {
     /* Resting is the default once there is a pointer to rest from. */
@@ -355,72 +304,48 @@ const PORTRAIT_WIDTHS = [180, 260, 340, 486]
       color: var(--color-fg);
     }
 
-    .member__mark {
-      color: var(--team-mark-color);
-    }
-
-    /* Featured, three ways: the tile the design shows open, the pointer, the
-       keyboard. */
+    /* Featured through the resting selection or the pointer. */
     .member--featured .member__frame,
-    .member:is(:hover, :focus-within) .member__frame {
+    .member:hover .member__frame {
       scale: 1;
     }
 
     .member--featured .member__scrim,
-    .member:is(:hover, :focus-within) .member__scrim {
+    .member:hover .member__scrim {
       opacity: 1;
     }
 
     .member--featured .member__name,
-    .member:is(:hover, :focus-within) .member__name {
+    .member:hover .member__name {
       color: var(--color-on-media);
     }
 
     .member--featured .member__role,
-    .member:is(:hover, :focus-within) .member__role {
+    .member:hover .member__role {
       color: var(--color-on-media-subtle);
     }
 
-    .member--featured .member__mark,
-    .member:is(:hover, :focus-within) .member__mark {
-      color: var(--color-on-media);
-    }
-
     /*
-     * One featured at a time. The moment the row is pointed at or tabbed into, the
+     * One featured at a time. The moment the row is pointed at, the
      * tile that was featured by default hands over — unless it is itself the one
-     * being pointed at, which is what the two `:not()`s buy. They also buy the
-     * specificity: this has to outrank the five rules above, and `:not()` counts
+     * being pointed at, which is what `:not()` buys. It also buys the
+     * specificity: this has to outrank the rules above, and `:not()` counts
      * towards it.
      */
-    .team__row:is(:hover, :focus-within)
-      .member--featured:not(:hover):not(:focus-within)
-      .member__frame {
+    .team__row:hover .member--featured:not(:hover) .member__frame {
       scale: var(--team-portrait-rest-scale);
     }
 
-    .team__row:is(:hover, :focus-within)
-      .member--featured:not(:hover):not(:focus-within)
-      .member__scrim {
+    .team__row:hover .member--featured:not(:hover) .member__scrim {
       opacity: 0;
     }
 
-    .team__row:is(:hover, :focus-within)
-      .member--featured:not(:hover):not(:focus-within)
-      .member__name {
+    .team__row:hover .member--featured:not(:hover) .member__name {
       color: var(--color-fg);
     }
 
-    .team__row:is(:hover, :focus-within)
-      .member--featured:not(:hover):not(:focus-within)
-      .member__role {
+    .team__row:hover .member--featured:not(:hover) .member__role {
       color: var(--color-fg);
-    }
-
-    .team__row:is(:hover, :focus-within)
-      .member--featured:not(:hover):not(:focus-within)
-      .member__mark {
-      color: var(--team-mark-color);
     }
   }
 </style>

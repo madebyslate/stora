@@ -525,9 +525,22 @@
    * factor, not this one.
    */
   --logo-scale: 0.7;
-  /* One full logo set crosses its own width at a calm, legible pace. */
-  --logo-marquee-duration: 32s;
-  --logo-marquee-gap: var(--space-12); /* 72 */
+  /*
+   * One loop period is one set plus one gap: 1173 exported px x 0.70 = 821 of
+   * marks, plus 64, = 885. At the previous 1360 px per 32 s the row travelled
+   * 42.5 px/s, and 885 / 42.5 = 20.8 -> 21 s keeps exactly that pace now that the
+   * period is the set's own width instead of the container's.
+   */
+  --logo-marquee-duration: 21s;
+  /*
+   * 64, not 72. The gap used to be a floor: each set was stretched to the 1360 px
+   * container with `space-between`, which opened the five inner gaps to ~108 px
+   * while the seam between two sets stayed at 0. Every gap is now this literal
+   * value, the seam included, so the row reads as one evenly spaced band -- and
+   * one step tighter than the design's ~105, which is what the marks were asked
+   * to sit at.
+   */
+  --logo-marquee-gap: var(--space-11); /* 64 */
 
   /*
    * Service cards.
@@ -1039,14 +1052,17 @@
    */
   --footer-columns: minmax(0, 1.426fr) minmax(0, 1fr) minmax(0, 2.157fr);
   /*
-   * Rule to the first cap line, and to the foot. 54 crop px above the navigation's
-   * first line at 0.768 is 70 of design, of which ~6 is the line box above the cap,
-   * so the padding is ~64 and not the 48 a first reading of the crop suggests.
-   * Checked from the other end: with 64 top and bottom the copyright — which is
-   * pinned to the column's foot — lands 497 px under the rule against the 497 the
-   * crop reads. That agreement is what the value rests on.
+   * Rule to the first cap line, and to the foot. The design's value is 64: 54 crop
+   * px above the navigation's first line at 0.768 is 70 of design, of which ~6 is
+   * the line box above the cap. Checked from the other end, with 64 top and bottom
+   * the pinned copyright lands 497 px under the rule against the crop's 497.
+   *
+   * We ship 48. The client asked for a shorter footer and this is the first place
+   * to take it from: air above the first line and under the last is height that
+   * carries no content. The 64 is recorded above so the deviation stays legible.
+   * Stacked, the block repeats three times over, so it drops again to 40.
    */
-  --footer-padding-block: var(--space-11); /* 64 */
+  --footer-padding-block: var(--space-10); /* 48 — design 64, see above */
   /* Rule to the copy beside it: 35 ± 2 crop px = 45 ± 3 of design, taken through
      the ink of "Home" and of "Warsaw Office". 48 is the step inside that bracket. */
   --footer-column-pad: var(--space-10); /* 48 */
@@ -1060,8 +1076,12 @@
    * 142 and 123 crop px apart, i.e. 184.9 and 160.1 of design, over groups of 112
    * and 88. Both readings leave the same 72.9 — and the 24.8 between them is the
    * 24 line box of the extra line, which is what says the two readings agree.
+   *
+   * Shipped at 48, for the same reason as the block padding: the contact column is
+   * the tallest of the three and its two gaps are the only height in it that is not
+   * a line of type. 48 is still twice the line box, so the groups stay separate.
    */
-  --footer-group-gap: var(--space-12); /* 72 */
+  --footer-group-gap: var(--space-10); /* 48 — design 72, see above */
   /*
    * The two contact columns are a fixed measure, not two halves of the column they
    * sit in: the design leaves ~90 px of slack at the right edge, so the pair is
@@ -1083,6 +1103,24 @@
   /* The minimum air between the tagline and the copyright pinned to the column's
      foot, for a viewport where the contact column is not the tallest one. */
   --footer-copyright-gap: var(--space-13); /* 96 */
+  /*
+   * Stacked, the footer is three blocks of padding instead of one and every gap is
+   * paid in full page height rather than absorbed by the tallest column, so the two
+   * vertical values step down once more. The stacked footer measured 1666 px on a
+   * 390 before this — nearly two screens of it.
+   */
+  --footer-padding-block-narrow: var(--space-9); /* 40 */
+  --footer-group-gap-narrow: var(--space-9); /* 40 */
+  /*
+   * Below the wide layout the two contact columns can no longer be a fixed measure:
+   * 2 × 208 + 48 needs 464 and a 390 viewport has 350 between its gutters. The
+   * tracks shrink (they are `minmax(0, …)`) and the gap comes down with them, which
+   * is what lets the pair hold two columns down to 480 instead of the 560 it used
+   * to fold at. Below that the e-mail addresses decide: `contact@storaenergy.pl`
+   * sets at 200 px with no break opportunity in it, so a narrower track overlaps
+   * its neighbour rather than wrapping.
+   */
+  --footer-contact-gap-narrow: var(--space-4); /* 16 */
 
   /*
    * Page hero.
@@ -1155,55 +1193,73 @@
   /*
    * About story.
    *
-   * The reference is a 1016 px export of a 1440 px frame. The six source files
-   * confirm that scale independently: each is drawn at exactly two thirds of its
-   * exported width. Positions below are percentages of the 1440 x 966 section so
-   * the constellation contracts with the viewport without losing its geometry.
+   * A tall natural-flow field replaces the old 100 svh pin. Its four lanes use
+   * the Waabi reference's rhythm: outer photographs travel farther than the two
+   * inner lanes, so the whole field visibly rises without stopping the page.
    */
-  --about-story-height: clamp(46rem, 67.0833vw, 60.375rem); /* 966 at 1440 */
-  --about-story-stage-height: min(var(--about-story-height), 100svh);
-  --about-story-viewport-height: 100svh;
-  --about-story-pin-distance: 100svh;
+  --about-story-height: clamp(72rem, 190svh, 96rem);
+  --about-story-stage-height: 100%;
   --about-hero-target-size: clamp(7rem, 10.8333vw, 9.75rem); /* 156 at 1440 */
-  --about-hero-target-top: 20.704%; /* 200 / 966 */
-  --about-statement-top: 42.65%; /* 412 / 966 */
+  --about-hero-target-top: 4%;
+  --about-statement-top: 35%;
+  --about-statement-entry-space: 35svh;
   --about-statement-measure: 45rem; /* 720 */
+  --about-photo-outer-width: clamp(6.5rem, 8.3333vw, 7.5rem);
+  --about-photo-inner-width: clamp(7rem, 10vw, 9rem);
+  --about-lane-outer: var(--space-6);
+  --about-lane-inner: clamp(7rem, 11.5vw, 10rem);
+  --about-row-1: 3%;
+  --about-row-2: 20%;
+  --about-row-3: 37%;
+  --about-row-4: 54%;
+  --about-row-5: 71%;
+  --about-row-6: 88%;
+  --about-photo-drift-inner: var(--space-13);
+  --about-photo-drift-outer: 22rem;
+  /*
+   * Sine in-out rather than linear. The drift is a *difference* against the
+   * page's own scroll, so easing it means a photograph joins and leaves the lane
+   * at page speed and overtakes it in the middle — the stiff constant offset the
+   * linear curve gave was the whole complaint.
+   */
+  --about-photo-drift-ease: cubic-bezier(0.37, 0, 0.63, 1);
+  /*
+   * Each frame fades and settles over its own entry, and leaves over its own
+   * exit. Both ranges run past the crossing itself — into `cover`, so a frame is
+   * still settling once it is fully on screen — and both use the symmetric
+   * S-curve. An ease-out here would have the frame at full opacity before it has
+   * finished crossing the edge, which is the pop we are getting rid of.
+   */
+  --about-photo-enter-range: entry 0% cover 14%;
+  --about-photo-leave-range: cover 86% exit 100%;
+  --about-photo-enter-lift: var(--space-11);
+  --about-photo-enter-zoom: 1.16;
+  --about-photo-leave-lift: var(--space-10);
+  --about-photo-leave-zoom: 1.08;
 
-  --about-photo-1-width: clamp(8rem, 13.4722vw, 12.125rem); /* 194 */
-  --about-photo-1-top: 23.188%;
-  --about-photo-1-left: -6.6%; /* the frame crops roughly half this image */
-  --about-photo-2-width: clamp(4.5rem, 7.3611vw, 6.625rem); /* 106 */
-  --about-photo-2-top: 12.319%;
-  --about-photo-2-left: 22.847%;
-  --about-photo-3-width: clamp(7rem, 11.1111vw, 10rem); /* 160 */
-  --about-photo-3-top: 16.253%;
-  --about-photo-3-right: 4.167%;
-  --about-photo-4-width: clamp(10rem, 17.7778vw, 16rem); /* 256 */
-  --about-photo-4-top: 61.801%;
-  --about-photo-4-right: 6.319%;
-  --about-photo-5-width: clamp(8rem, 13.4722vw, 12.125rem); /* 194 */
-  --about-photo-5-top: 70.704%;
-  --about-photo-5-left: 32.986%;
-  --about-photo-6-width: clamp(7.5rem, 12.7778vw, 11.5rem); /* 184 */
-  --about-photo-6-top: 59.006%;
-  --about-photo-6-left: 4.444%;
-
-  --about-photo-entry-scale: 0.86;
-  --about-photo-travel: var(--space-8);
-  --about-photo-reveal-speed: 4;
-  --about-photo-1-start: 0.03;
-  --about-photo-2-start: 0.08;
-  --about-photo-3-start: 0.12;
-  --about-photo-4-start: 0.18;
-  --about-photo-5-start: 0.15;
-  --about-photo-6-start: 0.1;
-
-  --about-word-resting-opacity: 0.5;
-  --about-word-reveal-start: 0.08;
-  --about-word-reveal-step: 0.03;
-  --about-word-reveal-speed: 5;
+  /*
+   * The statement runs on a timer, not on scroll position: it starts once the
+   * paragraph is in view and finishes whether the visitor scrolls on or not.
+   */
+  --about-word-resting-opacity: 0;
+  /*
+   * Transparent only while the inner lanes stay clear of the measure. They do at
+   * 1440 with 56 px to spare, and the margin closes as the viewport narrows:
+   * lane 11.5vw + frame 10vw against a fixed 720 measure cross at about 1270, so
+   * the band switches on at 1280. Below that the sentence needs a ground or the
+   * photographs run under the letters.
+   */
+  --about-statement-ground: transparent;
+  --about-word-rise: 0.5em;
+  --about-word-blur: 0.14em;
+  --about-word-duration: 900ms;
+  --about-word-lead: 420ms;
+  --about-word-step: 42ms;
+  --about-word-exit-duration: 520ms;
+  --about-word-exit-step: 16ms;
   --about-hero-handoff-start: 0.96;
   --about-hero-handoff-range: 0.04;
+  --about-hero-morph-range: 0.45;
   --about-hero-copy-fade-speed: 2;
 
   /*
@@ -1317,11 +1373,23 @@
    */
   --how-develop-padding-block: var(--space-14); /* 120 */
   --how-develop-heading-gap: var(--space-10); /* 48 */
-  --how-develop-left-width: 35rem; /* 560 */
-  --how-develop-column-gap: var(--space-14); /* 120 */
+  /* The stage column is 48 px wider than the reference's 560, and the gutter
+     gives that width back to keep the 1360 grid and the 680 px media intact:
+     "Notice to Proceed (Commercial Operation)" measures 556 px at the 30 px
+     step, and the selected row shifts it 38 px right to make room for the
+     arrow. At 560 that row wrapped; 608 keeps every stage on one line. */
+  --how-develop-left-width: 38rem; /* 608 */
+  --how-develop-column-gap: var(--space-12); /* 72 */
+  --how-develop-copy-measure: 35rem; /* 560 — the copy keeps the original measure */
   --how-develop-tab-padding-block: var(--space-5); /* 20 */
   --how-develop-tab-hover-opacity: 0.72;
-  --how-develop-label-active-shift: var(--space-1); /* 4 */
+  /* The label steps aside by the arrow's own width plus its 8 px gap, so the
+     glyph lands in the space the text vacates. Same figures as the
+     technical-depth tabs, whose arrow this row reuses. */
+  --how-develop-label-active-shift: 2.375rem; /* 30 + 8 */
+  --how-develop-arrow-width: 1.875rem; /* 30 */
+  --how-develop-arrow-height: 0.8125rem; /* 13 */
+  --how-develop-arrow-start: -0.5rem; /* -8 */
   --how-develop-rule-width: 0.0625rem; /* 1 */
   --how-develop-bullet-marker: 0.375rem; /* 6 */
   --how-develop-bullet-marker-start-scale: 0.15;
@@ -1469,6 +1537,12 @@
  * stronger. The threshold matches the layout fold in Hero.astro; the numbers behind
  * both gradients are in tests/a11y/hero-contrast.spec.ts.
  */
+@media (max-width: 1279px) {
+  :root {
+    --about-statement-ground: var(--color-bg);
+  }
+}
+
 @media (max-width: 1359px) {
   :root {
     --hero-scrim-bottom: linear-gradient(
@@ -1500,30 +1574,33 @@
   :root {
     --process-frame-width: min(28.75rem, 72vw);
 
-    /* No mobile frame was supplied. Keep the collage legible and inside 390 px. */
-    --about-story-height: 52rem;
+    /* No mobile frame was supplied. The lanes crop deliberately at both edges,
+       leaving the centre clear while keeping the upward movement visible. */
+    --about-story-height: clamp(70rem, 190svh, 84rem);
     --about-hero-target-size: 7rem;
-    --about-hero-target-top: 6.25%;
-    --about-statement-top: 32.692%;
+    --about-hero-target-top: 3%;
+    --about-statement-top: 39%;
     --about-statement-measure: calc(100% - 2 * var(--container-gutter));
-    --about-photo-1-width: 7rem;
-    --about-photo-1-top: 19.231%;
-    --about-photo-1-left: -8%;
-    --about-photo-2-width: 4.5rem;
-    --about-photo-2-top: 3.846%;
-    --about-photo-2-left: 5.128%;
-    --about-photo-3-width: 6.5rem;
-    --about-photo-3-top: 15.385%;
-    --about-photo-3-right: 3.205%;
-    --about-photo-4-width: 9rem;
-    --about-photo-4-top: 65.385%;
-    --about-photo-4-right: -8%;
-    --about-photo-5-width: 8rem;
-    --about-photo-5-top: 75%;
-    --about-photo-5-left: 34%;
-    --about-photo-6-width: 7rem;
-    --about-photo-6-top: 61.538%;
-    --about-photo-6-left: 3.205%;
+    --about-photo-outer-width: 5.5rem;
+    --about-photo-inner-width: 6.5rem;
+    /* -20 rather than -32: two thirds of an 88 px frame was reading as a sliver
+       at the edge, not as a deliberate crop. */
+    --about-lane-outer: -1.25rem;
+    --about-lane-inner: 3.5rem;
+    /* Evenly pitched. The old 29 → 61 gap left a third of the field blank while
+       the sentence sat in the middle of it. */
+    --about-row-1: 2%;
+    --about-row-2: 18%;
+    --about-row-3: 34%;
+    --about-row-4: 55%;
+    --about-row-5: 72%;
+    --about-row-6: 89%;
+    --about-photo-drift-inner: var(--space-9);
+    --about-photo-drift-outer: 13rem;
+    --about-photo-enter-lift: var(--space-9);
+    --about-photo-leave-lift: var(--space-8);
+    --about-word-rise: 0.42em;
+    --about-word-step: 34ms;
   }
 }
 

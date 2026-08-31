@@ -13,12 +13,6 @@ export const TeamMember = z.object({
   role: z.string().min(1),
   /** Cropped to the tile, never letterboxed. `alt` is empty: see the spec. */
   portrait: MediaImage,
-  /**
-   * Optional, and its absence has a visible consequence: the mark is only a link
-   * when there is somewhere to go, and that link is the tile's only focusable
-   * element. A member without one is reachable by pointer but not by keyboard.
-   */
-  linkedin: z.url().optional(),
 })
 export type TeamMember = z.infer<typeof TeamMember>
 

@@ -3,7 +3,7 @@
 ## What it is
 
 The closing call: the last thing inside `<main>` on every page. One centred column
-— the mark, a two-colour headline, one line under it, one button — on white ground.
+— the mark, a two-colour headline, an optional supporting line and one button — on white ground.
 
 It is **not a block**. It is `site.cta` in `content/globals/site.json`, rendered by
 `BaseLayout`, so the same sentence closes every page and no page can be published
@@ -21,7 +21,7 @@ Source for `SiteCta` in `packages/shared/src/site.ts`.
 |---|---|---|---|
 | `heading` | `string` | yes | the neutral half, Lime-Dark |
 | `headingAccent` | `string` | no | the half set in Green; its own line |
-| `description` | `string` | yes | one line, 20/28/500 |
+| `description` | `string` | no | optional supporting line, 20/28/500 |
 | `link` | `Link` | yes | rendered by `Button` with the arrow; `disabled` keeps the staging preview from linking to an unpublished page |
 
 ## Measured geometry
@@ -38,6 +38,9 @@ Read off the reference at 0.768 and confirmed against the built page at 1440.
 | Line | 20 / 28 / 500 | size and weight given; leading inferred — see `--text-standfirst` |
 | Line → button | 48 | 38 crop px = 49.5 |
 | Button | 40 tall, Lime-Dark ground, white label | the project's only button, inverted |
+
+When `description` is absent, the button follows the headline by the existing
+48 px action gap; no empty line or placeholder spacing is rendered.
 
 ## Deviations from Figma
 

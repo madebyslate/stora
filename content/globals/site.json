@@ -2,8 +2,8 @@
   "navigation": [
     { "label": "Home", "href": "/" },
     { "label": "About us", "href": "/about-us/" },
-    { "label": "Develop-to-Hold", "href": "/develop-to-hold/" },
-    { "label": "Develop-to-Sell", "href": "/develop-to-sell/" },
+    { "label": "IPP Portfolio", "href": "/develop-to-hold/" },
+    { "label": "Joint Ventures", "href": "/develop-to-sell/" },
     { "label": "Brokerage", "href": "/brokerage/" }
   ],
   "headerCta": {
@@ -14,7 +14,6 @@
   "cta": {
     "heading": "Interested in BESS or",
     "headingAccent": "working together?",
-    "description": "Stora Energy secures land, grid connection and permits",
     "link": {
       "label": "Partner with us",
       "href": "/contact/",
@@ -23,6 +22,13 @@
   },
   "footer": {
     "tagline": "Accelerating BESS in Poland",
+    "navigation": [
+      { "label": "Home", "href": "/" },
+      { "label": "About us", "href": "/about-us/" },
+      { "label": "IPP Pipeline", "href": "/develop-to-hold/" },
+      { "label": "Joint Ventures", "href": "/develop-to-sell/" },
+      { "label": "Brokerage", "href": "/brokerage/" }
+    ],
     "contact": [
       {
         "title": "Warsaw Office",
@@ -33,7 +39,7 @@
         ]
       },
       {
-        "title": "Company details",
+        "title": "Silesian Office",
         "lines": [
           { "text": "Stora Energy sp. z o.o." },
           { "text": "ul. Zwycięstwa 2" },

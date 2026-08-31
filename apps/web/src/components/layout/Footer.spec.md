@@ -6,9 +6,9 @@ The site footer, on every page, under the closing call. Three columns divided by
 rules that run the full height of the block: the brand and the copyright, the
 navigation, and six contact groups laid out two across.
 
-Its content is `site.footer` in `content/globals/site.json`, except the navigation,
-which is `site.navigation` — the same array the header renders. Two copies of the
-same five links is one copy that goes stale.
+Its content is `site.footer` in `content/globals/site.json`, including a dedicated
+navigation label set. The destinations mirror the header, while the client-approved
+service names may differ between header and footer.
 
 - Figma: screenshot only, 1106 px wide, drawn at **0.768** of 1440. No node link.
 - The scale is not assumed: the tagline sets at 343.2 px against the 342 the crop
@@ -22,6 +22,7 @@ Source for `SiteFooter` in `packages/shared/src/site.ts`.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `tagline` | `string` | yes | 28/36/500 under the wordmark |
+| `navigation[]` | `Link[]` | yes | footer-specific labels and shared destinations |
 | `contact[].title` | `string` | yes | group label, Lime-Dark at 0.5 |
 | `contact[].lines[].text` | `string` | yes | 16/24/500 |
 | `contact[].lines[].href` | `string` | no | `mailto:` / `tel:`; absent = plain line |
@@ -38,13 +39,13 @@ Crop readings × 1.3019, and the built page at 1440 beside them.
 | Element | Design | Built | How it was established |
 |---|---|---|---|
 | Column rules | 463 / 759 | 463.2 / 759.9 | rules at 360 / 583 of 1106; the columns stretch to the 1360 grid, so the ratio is what carries — 1.426 : 1 : 2.157 |
-| Block padding | ~64 | 64.0 / 64.0 | 54 crop px above the first line, less ~6 of line box; confirmed from the other end — the pinned copyright lands 496 under the rule against the crop's 497 |
+| Block padding | ~64 | **48** | 54 crop px above the first line, less ~6 of line box; confirmed from the other end — at 64 the pinned copyright landed 496 under the rule against the crop's 497. Shipped at 48, see deviation 6 |
 | Rule → copy | 45 ± 3 | 48 | through the ink of "Home" and of "Warsaw Office" |
 | Navigation pitch | 40 | 40 | 31 crop px; 24 line box + 16 gap |
 | Group title → lines | 16 | 16 | same 40 pitch |
-| Group → group | 72.9 | 72 | title rows 142 and 123 crop px apart over groups of 112 and 88; the two readings differ by exactly the 24 of the extra line, which is what says they agree |
+| Group → group | 72.9 | **48** | title rows 142 and 123 crop px apart over groups of 112 and 88; the two readings differ by exactly the 24 of the extra line, which is what says they agree. Shipped at 48, see deviation 6 |
 | Contact column pitch | 256.5 | 256 | 197 crop px. 208 + 48: 208 is the first step that holds the longest line (201.2) on one row |
-| Block height | ~585 | 584 | derived from the padding pair and the tallest column |
+| Block height | ~585 | **504** | derived from the padding pair and the tallest column: 112 + 88 + 112 of contact rows, 2 × 48 between them, 2 × 48 of padding |
 | Wordmark → tagline | ~33 | 36 | the design's lockup is the stacked one; ours is the header's wordmark |
 
 ## Deviations from Figma
@@ -63,14 +64,21 @@ Crop readings × 1.3019, and the built page at 1440 beside them.
    the design draws no marker, so nothing is drawn.
 5. **The rules are drawn, not bordered.** A `border` cannot be animated on the
    compositor; a 1 px box scaled on one axis can.
+6. **The block is shorter than the design's.** Client feedback, 2026-08-31: "Footer
+   is too tall, we need to thin it down height wise." The height came out of the two
+   values that are air rather than content — block padding 64 → 48, group-to-group
+   72 → 48 — and nothing else moved: type sizes, the three column tracks, the
+   navigation pitch and the 208/48 contact measure are all as drawn. Measured at
+   1440: **584 → 504 px**. Stacked, both values step down once more (40) and the
+   navigation goes two across, which takes a 390 from **1666 → 1282 px**.
 
 ## Breakpoints
 
 | Width | What changes |
 |---|---|
 | ≥ 1024 | three columns, rules standing between them |
-| < 1024 | the columns stack; each rule lies across the top of the column it belonged to. The tagline's minimum air above the copyright drops from 96 to 40 — stacked, nothing pushes the copyright down and the 96 is only a hole |
-| < 520 | the contact pair becomes one column: two 208 measures and the 48 between them stop fitting |
+| < 1024 | the columns stack; each rule lies across the top of the column it belonged to. The tagline's minimum air above the copyright drops from 96 to 40 — stacked, nothing pushes the copyright down and the 96 is only a hole. Padding and group gap drop to 40, and the navigation goes two across: five labels stacked are 184 px of mostly empty line, the same five in two columns are 104 |
+| < 480 | the contact pair becomes one column. Previously 560; the pair now holds two columns 80 px further down because its gap comes off the 48 with the tracks. What sets the limit is the e-mail addresses — `contact@storaenergy.pl` sets at 200 px with no break opportunity in it, so a track narrower than that overlaps its neighbour instead of wrapping. At 480 the tracks are 212 |
 
 ## States
 
@@ -123,7 +131,8 @@ would draw themselves at first paint, half a page before anyone sees them.
       is the same class of question `AudienceTabs` raised about its inactive
       switches, and the same answer holds: the value is part of the visual language,
       so moving it is the designer's call, not ours. Shipped as drawn.
-- [ ] The footer's own bottom padding is off the bottom of the crop; 64 is taken
-      from the top and from where the copyright lands. Confirm.
+- [ ] The footer's own bottom padding is off the bottom of the crop; the design's
+      64 was taken from the top and from where the copyright lands, and we ship 48
+      (deviation 6). Confirm both with the designer.
 - [ ] Should the two contact columns hold their 208 measure, or split the column?
       The design leaves ~90 px of slack at the right edge, which is what says fixed.

@@ -15,7 +15,7 @@
     {
       "blockType": "hero",
       "heading": "Accelerating\nBESS in Poland",
-      "subheading": "We develop, build and operate large-scale battery energy storage",
+      "subheading": "We develop, build, and operate grid-scale battery energy storage systems",
       "video": {
         "sources": [
           {
@@ -80,11 +80,11 @@
       "blockType": "serviceCards",
       "heading": "Unlocking",
       "headingAccent": "battery energy storage",
-      "headingTrail": "as your need",
+      "headingTrail": "for Poland",
       "cards": [
         {
-          "title": "Develop-to-Hold",
-          "description": "We create and maintain high-performance Battery Energy Storage Systems, ensuring reliable, sustainable energy.",
+          "title": "Independent Power Producer (IPP)",
+          "description": "We build and operate high-performance battery energy storage systems, ensuring reliable flexibility for the electric grid.",
           "image": {
             "src": "content/media/services/develop-to-hold.jpg",
             "alt": "An operating battery energy storage site laid out in rows across open farmland",
@@ -97,7 +97,7 @@
           }
         },
         {
-          "title": "Develop-to-Sell (JV)",
+          "title": "Joint Ventures",
           "description": "Partner with us to develop utility-scale BESS projects through strategic joint ventures, from planning to successful project delivery.",
           "image": {
             "src": "content/media/services/develop-to-sell.jpg",
@@ -112,7 +112,7 @@
         },
         {
           "title": "M&A Brokerage",
-          "description": "We advise clients on acquiring, selling, and structuring Battery Energy Storage assets with confidence and market expertise.",
+          "description": "We advise clients on acquiring, selling, and structuring battery energy storage systems with confidence and market expertise.",
           "image": {
             "src": "content/media/services/ma-brokerage.jpg",
             "alt": "An aerial survey of terrain with candidate storage sites highlighted",
@@ -142,7 +142,7 @@
             "width": 920,
             "height": 1080
           },
-          "description": "We analyze many data points to find locations with the best potential for BESS development."
+          "description": "We analyze multiple data sources to identify strategic locations for BESS development."
         },
         {
           "leadWord": "Proprietary",
@@ -164,7 +164,7 @@
             "width": 920,
             "height": 1080
           },
-          "description": "Strong ties with grid operators speed coordination and project progress. More text goes here using placeholder."
+          "description": "Our strong ties with grid operators facilitate enhanced coordination and expedite project execution."
         },
         {
           "leadWord": "AI",
@@ -175,13 +175,13 @@
             "width": 920,
             "height": 1080
           },
-          "description": "Strong ties with grid operators speed coordination and project progress. More text goes here using placeholder."
+          "description": "We leverage AI tools to optimize and enhance every step of our development process."
         }
       ]
     },
     {
       "blockType": "marketSlider",
-      "heading": "Poland is our first market",
+      "heading": "Poland is our core market",
       "description": "Stora Energy secures land, grid connection and permits for grid-scale battery energy storage in Poland",
       "cta": {
         "label": "Partner with us",

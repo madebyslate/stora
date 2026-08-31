@@ -77,9 +77,15 @@ test.describe('LogoWall block', () => {
 
     const track = page.locator('.logo-wall__track')
     const groups = track.locator('.logo-wall__list')
-    await expect(groups).toHaveCount(2)
+    /*
+     * Three, not two. One period is one group plus its trailing gap (885 px) and
+     * the inner container is 1360, so two groups run out of marks before the loop
+     * comes round and a hole opens at the right edge.
+     */
+    await expect(groups).toHaveCount(3)
     await expect(groups.nth(0)).not.toHaveAttribute('aria-hidden', 'true')
     await expect(groups.nth(1)).toHaveAttribute('aria-hidden', 'true')
+    await expect(groups.nth(2)).toHaveAttribute('aria-hidden', 'true')
 
     const innerGeometry = await page.locator('.logo-wall__marquee').evaluate((element) => {
       const container = element.parentElement
@@ -134,11 +140,47 @@ test.describe('LogoWall block', () => {
     expect(state?.pageOverflow).toBe(0)
   })
 
+  test('spaces every mark in the row identically, seams included', async ({ page }) => {
+    /*
+     * The regression this covers: each group used to stretch to the container with
+     * `justify-content: space-between`, which opened the five gaps inside a group
+     * to ~108 px while the gap where one group met the next stayed at 0. Once per
+     * loop a mark appeared glued to the one before it. Measuring only inside a
+     * group would have missed it, so this walks every mark in the track in order.
+     */
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/')
+    await page.locator('section:has(#logo-wall-heading)').scrollIntoViewIfNeeded()
+
+    const gaps = await page.locator('.logo-wall__track').evaluate((element) => {
+      element.getAnimations().forEach((animation) => {
+        animation.pause()
+        animation.currentTime = 0
+      })
+
+      const boxes = Array.from(
+        element.querySelectorAll<HTMLElement>('.logo-wall__item'),
+      ).map((item) => item.getBoundingClientRect())
+
+      return boxes.slice(1).map((box, index) => box.left - boxes[index].right)
+    })
+
+    // Six marks x three groups: seventeen gaps, two of which are seams.
+    expect(gaps).toHaveLength(17)
+    for (const gap of gaps) {
+      expect(gap).toBeCloseTo(64, 1)
+    }
+  })
+
   test('uses the complete static grid when motion is reduced', async ({ page }) => {
     await page.goto('/')
 
     const track = page.locator('.logo-wall__track')
-    await expect(track.locator('.logo-wall__list[aria-hidden="true"]')).toBeHidden()
+    const duplicates = track.locator('.logo-wall__list[aria-hidden="true"]')
+    await expect(duplicates).toHaveCount(2)
+    for (const duplicate of await duplicates.all()) {
+      await expect(duplicate).toBeHidden()
+    }
     await expect(track).toHaveCSS('animation-name', 'none')
     await expect(track.locator('.logo-wall__list:not([aria-hidden])')).toHaveCSS('display', 'grid')
     await expect(track.locator('.logo-wall__list:not([aria-hidden]) img')).toHaveCount(6)

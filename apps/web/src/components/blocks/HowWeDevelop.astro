@@ -1,6 +1,7 @@
 ---
 import type { HowWeDevelopBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
+import LongArrowRight from '@/components/ui/icons/LongArrowRight.astro'
 
 interface Props {
   block: HowWeDevelopBlock
@@ -39,8 +40,13 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
                 checked={index === 0}
               />
               <label class="how-develop__tab" for={optionId(index)}>
-                <span class="how-develop__tab-label reveal-mask" style={`--reveal-index: ${1 + index * 0.45}`}>
-                  <span>{item.label}</span>
+                <span class="how-develop__tab-main">
+                  <span class="how-develop__arrow">
+                    <LongArrowRight />
+                  </span>
+                  <span class="how-develop__tab-label reveal-mask" style={`--reveal-index: ${1 + index * 0.45}`}>
+                    <span>{item.label}</span>
+                  </span>
                 </span>
               </label>
               <div class="how-develop__bullets-wrap">
@@ -153,10 +159,39 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
     transition: opacity var(--duration-base) var(--ease-standard);
   }
 
+  .how-develop__tab-main {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+
   .how-develop__tab-label {
     width: fit-content;
     transform: none;
     transition: transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  /* The same affordance as the technical-depth tabs: the long arrow slides in
+     from the left of the row and the label steps aside by its width, so a stage
+     reads as a control rather than a caption. */
+  .how-develop__arrow {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    display: block;
+    width: var(--how-develop-arrow-width);
+    height: var(--how-develop-arrow-height);
+    opacity: 0;
+    transform: translate3d(var(--how-develop-arrow-start), -50%, 0);
+    transition:
+      opacity var(--duration-base) var(--ease-standard),
+      transform var(--duration-base) var(--ease-out-expo);
+  }
+
+  .how-develop__arrow :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   .how-develop__pick:checked + .how-develop__tab {
@@ -165,6 +200,11 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
 
   .how-develop__pick:checked + .how-develop__tab .how-develop__tab-label {
     transform: translate3d(var(--how-develop-label-active-shift), 0, 0);
+  }
+
+  .how-develop__pick:checked + .how-develop__tab .how-develop__arrow {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0);
   }
 
   .how-develop__pick:focus-visible + .how-develop__tab {
@@ -257,7 +297,7 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
   }
 
   .how-develop__copy-description {
-    max-width: var(--how-develop-left-width);
+    max-width: var(--how-develop-copy-measure);
     margin-top: var(--how-develop-copy-gap);
     color: var(--how-develop-copy-color);
     opacity: 0;
@@ -419,6 +459,18 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
   }
 
   @media (max-width: 767px) {
+    /* One column at 350 px cannot spare the arrow's gutter: the longest stage
+       already wraps to two lines, and the 38 px step pushed it past the edge.
+       The rows are tapped rather than hovered here, so the arrow goes and the
+       label keeps its full measure. */
+    .how-develop__arrow {
+      display: none;
+    }
+
+    .how-develop__pick:checked + .how-develop__tab .how-develop__tab-label {
+      transform: none;
+    }
+
     .how-develop__body,
     .how-develop__body--no-copy {
       grid-template-columns: minmax(0, 1fr);

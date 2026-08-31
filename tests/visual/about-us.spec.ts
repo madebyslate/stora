@@ -23,18 +23,43 @@ test.describe('About Us page', () => {
   test('renders the requested sections in order', async ({ page }) => {
     await page.goto('/about-us/')
 
-    await expect(page.locator('main section:not(.cta)')).toHaveCount(7)
+    await expect(page.locator('main section:not(.cta)')).toHaveCount(10)
     await expect(
       page.locator('main section:not(.cta) h1, main section:not(.cta) h2'),
     ).toHaveText([
       'About Stora',
-      'Built in Poland and ready to scale across Europe',
-      'People who have builtrenewable energy at scales',
+      'Built in Poland. Scaling Across Europe.',
+      'Our growth path',
+      'People who have builtrenewable energy at scale',
       'Deep expertise. Proven track record.',
       'Credibility',
+      'The wider team',
+      'Featured Publications',
       'How We Develop',
-      'Store energy atlarge scale',
+      'Storing energy atscale',
     ])
+  })
+
+  test('keeps AboutStory in natural flow and gives outer photos a faster scroll lane', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.goto('/about-us/')
+
+    const section = page.locator('.about-story')
+    const stage = section.locator('.about-story__stage')
+    const photos = section.locator('.about-story__photo')
+
+    await expect(photos).toHaveCount(12)
+    await expect(stage).toHaveCSS('position', 'relative')
+
+    const laneDistances = await photos.evaluateAll((elements) =>
+      [elements[0], elements[3]].map((element) =>
+        Number.parseFloat(getComputedStyle(element).getPropertyValue('--about-photo-drift')),
+      ),
+    )
+
+    expect(laneDistances[0]).toBeGreaterThan(laneDistances[1])
   })
 
   test('uses the dark How We Develop colour treatment', async ({ page }) => {

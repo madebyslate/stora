@@ -71,9 +71,13 @@ const order = {
       }
     </h2>
 
-    <p class="cta__lead text-standfirst reveal" style={`--reveal-index: ${order.lead}`}>
-      {cta.description}
-    </p>
+    {
+      cta.description && (
+        <p class="cta__lead text-standfirst reveal" style={`--reveal-index: ${order.lead}`}>
+          {cta.description}
+        </p>
+      )
+    }
 
     <div class="cta__action reveal" style={`--reveal-index: ${order.action}`}>
       <Button link={cta.link} withArrow />

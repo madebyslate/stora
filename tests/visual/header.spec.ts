@@ -3,8 +3,16 @@ import { test, expect } from '@playwright/test'
 const expectedNavigation = [
   { label: 'Home', href: '/' },
   { label: 'About us', href: '/about-us/' },
-  { label: 'Develop-to-Hold', href: '/develop-to-hold/' },
-  { label: 'Develop-to-Sell', href: '/develop-to-sell/' },
+  { label: 'IPP Portfolio', href: '/develop-to-hold/' },
+  { label: 'Joint Ventures', href: '/develop-to-sell/' },
+  { label: 'Brokerage', href: '/brokerage/' },
+]
+
+const expectedFooterNavigation = [
+  { label: 'Home', href: '/' },
+  { label: 'About us', href: '/about-us/' },
+  { label: 'IPP Pipeline', href: '/develop-to-hold/' },
+  { label: 'Joint Ventures', href: '/develop-to-sell/' },
   { label: 'Brokerage', href: '/brokerage/' },
 ]
 
@@ -24,6 +32,14 @@ test.describe('Header', () => {
 
     await expect.poll(() => readLinks('.header__nav a')).toEqual(expectedNavigation)
     await expect.poll(() => readLinks('[data-menu-panel] nav a')).toEqual(expectedNavigation)
+    await expect.poll(() => readLinks('.footer__nav a')).toEqual(expectedFooterNavigation)
+  })
+
+  test('omits removed global CTA copy and team social marks', async ({ page }) => {
+    await page.goto('/')
+
+    await expect(page.locator('.cta__lead')).toHaveCount(0)
+    await expect(page.locator('.team .member__mark')).toHaveCount(0)
   })
 
   test('keeps an explicit close control above the compact menu', async ({ page }) => {

@@ -21,8 +21,8 @@ export const SiteCta = z.object({
   heading: z.string().min(1),
   /** The half set in Green. Optional — a one-colour headline stays valid. */
   headingAccent: z.string().optional(),
-  /** One line under the headline. */
-  description: z.string().min(1),
+  /** Optional supporting line under the headline. */
+  description: z.string().min(1).optional(),
   link: Link,
 })
 export type SiteCta = z.infer<typeof SiteCta>
@@ -45,6 +45,8 @@ export type FooterContactGroup = z.infer<typeof FooterContactGroup>
 export const SiteFooter = z.object({
   /** The line under the wordmark. */
   tagline: z.string().min(1),
+  /** Footer-specific labels for the same destination set as the main navigation. */
+  navigation: z.array(Link).min(1),
   /**
    * The contact groups, in reading order. The footer lays them out two across,
    * so an even count fills the grid; an odd one leaves the last cell empty.
@@ -61,7 +63,7 @@ export const SiteFooter = z.object({
 export type SiteFooter = z.infer<typeof SiteFooter>
 
 export const SiteSettings = z.object({
-  /** Main navigation, in the order it is rendered. Header and footer share it. */
+  /** Main navigation, in the order it is rendered in the header. */
   navigation: z.array(Link).min(1),
   /** The header's call to action. Optional so a bare navigation stays valid. */
   headerCta: Link.optional(),

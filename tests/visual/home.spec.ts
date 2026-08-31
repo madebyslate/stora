@@ -49,15 +49,16 @@ test.describe('Home page', () => {
     expect(html).not.toContain('x-static-build-token')
   })
 
-  test('ships only the global motion bootstrap as an external entry', async ({ page }) => {
-    // Lenis is dynamically imported by this one small entry. A second external
-    // script would mean a framework or island slipped into the page unnoticed.
+  test('ships only the approved external scripts', async ({ page }) => {
+    // Lenis is dynamically imported by the local bootstrap. Userback is the
+    // only approved third-party script; anything else should remain visible.
     await page.goto('/')
     const sources = await page.locator('script[src]').evaluateAll((scripts) =>
       scripts.map((script) => script.getAttribute('src')),
     )
 
-    expect(sources).toHaveLength(1)
-    expect(sources[0]).toMatch(/BaseLayout.+\.js$/)
+    expect(sources).toHaveLength(2)
+    expect(sources).toContain('https://static.userback.io/widget/v1.js')
+    expect(sources.some((source) => /BaseLayout.+\.js$/.test(source ?? ''))).toBe(true)
   })
 })

@@ -5,7 +5,7 @@ The static content the site builds from while `CONTENT_SOURCE=fixtures`.
 ```
 content/
 ├── pages/<slug>.json   the page's block list, validated by zod at build time
-├── globals/site.json   site-wide content: navigation and the header CTA
+├── globals/site.json   site-wide content: header/footer navigation, CTA and contacts
 └── media/              content images, processed by astro:assets
 ```
 

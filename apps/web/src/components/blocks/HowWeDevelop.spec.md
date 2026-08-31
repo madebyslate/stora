@@ -17,7 +17,7 @@ supplied landscape photograph.
 |---|---|---|---|
 | `blockType` | `'howWeDevelop'` | yes | union discriminator |
 | `heading` | `string` | yes | `<h2>` |
-| `theme` | `'light' \| 'dark'` | yes, defaults to light | About Us uses the dark treatment; the content and interaction stay shared |
+| `theme` | `'light' \| 'dark'` | yes, defaults to light | both pages use the light treatment; the dark one stays available |
 | `items` | array of exactly 3 items | yes | the supplied flow has three stages |
 | `items[].label` | `string` | yes | tab label and radio accessible name |
 | `items[].bullets` | array of strings | no | omitted until final copy is supplied |
@@ -32,7 +32,7 @@ supplied landscape photograph.
 | Section padding | 120 px top and bottom | corrected by the user after the first implementation |
 | Heading | 56/64/500, Lime-Dark | supplied directly; existing `text-title` step |
 | Heading to body | 48 px | measured from the light reference |
-| Desktop columns | 560 / 120 / 680 px | derived from the established 1360 px container and the reference proportions |
+| Desktop columns | 608 / 72 / 680 px | the reference's 560 / 120 widened for the arrow gutter, taken out of the gap so the 1360 grid and the 680 px media are untouched; measured: the longest stage is 556 px and shifts 38 px when selected |
 | Tab title | 30/36/500 | size and weight supplied; 36 leading follows Aeonik's existing display rhythm |
 | Active tab | Green | supplied directly |
 | Inactive tab | Lime-Dark | supplied directly |
@@ -56,8 +56,13 @@ supplied landscape photograph.
 
 - The active label uses the complete stage name instead of the arrow-separated
   alternate shown in the dark reference, following the requested labels.
-- The original Dev-to-Sell reference remains the light variant. The dark About
-  Us treatment changes colour tokens only; its geometry and behaviour are 1:1.
+- Both pages render the light variant: the dark About Us treatment was dropped
+  by the user in favour of one shared appearance. The dark tokens remain, and
+  change colour only — geometry and behaviour are 1:1.
+- The selected row shows the 30 x 13 long arrow to the left of its label, which
+  the reference does not have. Without it the stages read as a caption list
+  rather than controls. It is the same glyph, offset and label shift as the
+  technical-depth tabs, so the two tab sections behave identically.
 - Every photograph extends 1 px beyond the clipped stage on the right to remove
   the fractional-pixel seam visible after Figma-derived transforms.
 
@@ -67,13 +72,16 @@ supplied landscape photograph.
 |---|---|
 | >= 1440 | 560 px left column, 120 px gap, 680 px right column |
 | 768-1439 | the two columns and gap shrink fluidly |
-| < 768 | one column: tabs, optional copy and selected photograph |
+| < 768 | one column: tabs, optional copy and selected photograph; the arrow and its label shift are dropped, the 350 px column has no room for a gutter |
 
 ## States
 
 - Active tab: Green title; its bullets, optional right-side copy and photograph are visible.
 - Inactive tab: Lime-Dark title; supporting content is hidden.
 - Hover: inactive title shifts to the accessible muted foreground colour.
+- Arrow: hidden and offset 8 px left at rest; on the selected row it fades in and
+  settles at the label's left edge, while the label steps 38 px right. Below
+  768 px there is no arrow and no shift.
 - Focus: native radio focus is drawn on its visible label.
 - First stage is selected on initial load.
 

@@ -11,8 +11,8 @@ import Logo from '@/components/ui/Logo.astro'
  * rule is then a column's own edge and reaches the top border and the foot by
  * construction — no pair of numbers to keep matched.
  *
- * The navigation is `site.navigation`, the same array the header renders. Two
- * copies of the same five links is one copy that goes stale.
+ * The navigation is `site.footer.navigation`: destinations stay aligned with the
+ * header while labels may describe the same services differently in the footer.
  *
  * Visual spec: apps/web/src/components/layout/Footer.spec.md
  */
@@ -75,7 +75,7 @@ const order = {
       <nav class="footer__col footer__col--nav" aria-label="Footer">
         <ul class="footer__nav" role="list">
           {
-            site.navigation.map((item, index) => (
+            footer.navigation.map((item, index) => (
               <li class="reveal" style={`--reveal-index: ${order.nav + index * order.navStep}`}>
                 <a
                   class="footer__link text-detail"
@@ -334,9 +334,42 @@ const order = {
     .footer__tagline {
       margin-block-end: var(--space-9);
     }
+
+    /* Three blocks of padding instead of one, and every gap paid in page height:
+       the two vertical values step down once more here. */
+    .footer__col {
+      padding-block: var(--footer-padding-block-narrow);
+    }
+
+    /*
+     * The contact pair keeps its two columns as far down as the content allows.
+     * The fixed 208 measure cannot hold below the wide layout — the tracks are
+     * `minmax(0, …)` and shrink — so the gap comes down with them.
+     */
+    .footer__groups {
+      gap: var(--footer-group-gap-narrow) var(--footer-contact-gap-narrow);
+    }
+
+    /*
+     * The navigation goes two across once it is a block of its own rather than a
+     * column beside two others. Five labels stacked are 184 px of mostly empty
+     * line; the same five in two columns are 104 and read no worse.
+     */
+    .footer__nav {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--footer-contact-gap-narrow);
+    }
   }
 
-  @media (max-width: 559px) {
+  /*
+   * 480, not the 560 this breakpoint used to sit at: the pair now has a 16 px gap
+   * instead of 48, so it holds two columns 80 px further down. Below it the limit
+   * is the e-mail addresses — `contact@storaenergy.pl` sets at 200 px and has no
+   * break opportunity in it, so a track narrower than that is an overlap, not a
+   * wrap. At 480 the tracks are 212.
+   */
+  @media (max-width: 479px) {
     .footer__groups {
       grid-template-columns: minmax(0, 1fr);
     }

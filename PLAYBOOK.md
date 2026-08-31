@@ -494,6 +494,27 @@ buildera. Plus komunikat błędu z obiema przyczynami w `media.ts` i wszędzie, 
 eager glob rzuca na brak wpisu; komunikat zostaje jako siatka bezpieczeństwa na
 wypadek konfiguracji bez wtyczki.
 
+### P-022 — `minmax(0, X)` plus nierozrywalny łańcuch znaków = ciche nachodzenie kolumn
+**Objaw.** Dwukolumnowa siatka danych kontaktowych na wąskim ekranie: adresy e-mail
+z lewej kolumny wchodzą pod tekst prawej. Nic się nie „psuje" — pudełka mają
+poprawne rozmiary, `scrollWidth === clientWidth`, snapshot pełnej strony przechodzi,
+bo różnica mieści się w progu. Widać to dopiero okiem, na zrzucie.
+**Przyczyna.** Tor `minmax(0, 208px)` nie ma dolnej granicy, więc przy zwężaniu
+schodzi poniżej najdłuższego słowa w środku. Adres e-mail to jedno słowo bez miejsca
+na złamanie: `contact@storaenergy.pl` składa się na 200 px i albo dostanie 200 px,
+albo wyleje się poza swój tor. Zwykły tekst w tej sytuacji się zawija i problem sam
+znika — dlatego łapie się to tylko tam, gdzie treścią są maile, URL-e albo numery.
+**Fix.** Punkt złamania siatki liczony z najdłuższego nierozrywalnego łańcucha,
+nie z „mniej więcej połowy ekranu". Tutaj: 480, bo przy nim tory mają 212 px przy
+wymaganych 200. Nie `overflow-wrap: anywhere` — łamie adres w losowym miejscu.
+**Wyłapuje.** `tests/visual/footer.spec.ts`, „never lets a contact line run into the
+column beside it": przemiatanie szerokości z porównaniem prawej krawędzi każdej
+linii z krawędzią jej grupy. Zweryfikowane kontrolą — przesunięcie punktu złamania
+na 360 wywraca test na 360 px. Snapshot tego nie łapie i nie ma jak: ta różnica
+schodzi poniżej `maxDiffPixelRatio`.
+**Do startera.** Sam test przemiatający, dla każdej siatki o stałej mierze, w której
+treścią bywają maile, URL-e albo numery.
+
 ---
 
 ## 3. Otwarte wątki — do rozstrzygnięcia zanim powstanie starter
@@ -1032,3 +1053,137 @@ pełnego stagingowego Compose.
 **Do startera.** Oba pliki stagingowe i krótka instrukcja przejścia na pełny
 stack. Staging etapu 1 i produkcja etapu 2 mają wspólny Dockerfile, ale osobne
 grafy usług.
+
+
+### P-037 — dwie animacje scroll-driven na jednym elemencie kasują się nawzajem
+
+**Objaw.** Element ma osobne wejście i wyjście na `view()` — jedno wygasa, drugie
+nie wchodzi. Albo wejście w ogóle nie gra: przez cały czas widać stan początkowy
+animacji wyjścia. Każda z nich osobno jest poprawna.
+
+**Przyczyna.** Dwie rzeczy naraz. Po pierwsze, animacje **nie komponują**
+`transform`: kilka animacji ruszających tę samą własność rozstrzyga się przez
+kolejność, ostatnia wygrywa całość — nie sumują się jak w oprogramowaniu do
+montażu. Po drugie, `animation-fill-mode: both` na animacji wyjścia oznacza
+wypełnienie **wstecz**: poza swoim zakresem, czyli przez całe wejście, trzyma
+własną klatkę `from` i nadpisuje to, co robi wejście.
+
+**Fix.** Jedna własność na animację: `transform` dla jednej, `translate` (oraz
+`rotate`, `scale`) dla drugiej — to osobne własności i mnożą się w podanej
+kolejności, więc mogą pracować równolegle. Kiedy to nie wystarcza, rozbij ruch na
+dwa elementy (ramka i jej `<img>`) zamiast układać wszystko na jednym. Do tego
+`animation-fill-mode: both, forwards` — wejście wypełnia w obie strony, wyjście
+wyłącznie w przód.
+
+**Wyłapuje.** Nic automatycznego; różnica jest czysto wizualna. Objaw jest za to
+charakterystyczny: własność animowana przez dwie reguły stoi na wartości tej
+zapisanej **później** w `animation-name`.
+
+**Do startera.** Notatka przy wzorcu scroll-driven. Reguła kciuka: policz
+własności, nie animacje — jeśli dwie animacje trafiają w tę samą własność,
+jedna z nich jest do przepisania.
+
+
+### P-038 — `inset-inline-start: 50%` na `position: sticky` centruje tylko przypadkiem
+
+**Objaw.** Wyśrodkowany element jest na środku na desktopie i wyjeżdża poza lewą
+krawędź na telefonie — o kilkadziesiąt do stu kilkudziesięciu pikseli, bez
+poziomego scrolla, przy poprawnej szerokości elementu. Żaden breakpoint nie tłumaczy
+przesunięcia, bo żaden go nie wprowadza.
+
+**Przyczyna.** Klasyczna para `left: 50%` + `translate(-50%)` jest wzorcem dla
+`position: absolute`, gdzie inset ustawia pozycję. Dla `sticky` inset jest
+**ograniczeniem przyklejenia** i przesunięcie, o które prosi, jest przycinane do
+krawędzi bloku zawierającego — element nigdy nie wyjeżdża poza swojego rodzica.
+Dopóki element jest wąski względem rodzica, limit nie dotyka i wygląda to na
+poprawne centrowanie. Gdy element rośnie do prawie pełnej szerokości rodzica,
+limit obcina przesunięcie prawie do zera, a `translate(-50%)` i tak odejmuje pełne
+pół szerokości. Im węższy ekran, tym większy błąd — czyli dokładnie odwrotnie niż
+podpowiada intuicja „zepsuło się na mobile".
+
+**Fix.** `margin-inline: auto` do centrowania w poziomie, inset tylko na tej osi,
+na której faktycznie ma się kleić (`inset-block-start`), i `translate` wyłącznie
+z częścią pionową. Jeśli element naprawdę potrzebuje inline-owego insetu, nie
+może być `sticky` — potrzebuje `absolute` w warstwie wewnętrznej.
+
+**Wyłapuje.** Nic — jeszcze. Właściwym nośnikiem jest asercja geometrii, nie
+snapshot: `getBoundingClientRect().left` elementu vs `(viewport - width) / 2` na
+najwęższym breakpoincie. Snapshot łapie to dopiero wtedy, gdy ktoś na niego
+popatrzy, a diff jest zielony tak długo, jak zepsuty stan jest tym
+zaakceptowanym — a właśnie tak ta usterka przeżyła cały poprzedni przebieg.
+
+**Do startera.** Reguła kciuka: `left/right` przy `sticky` czytaj jak
+`min-width` — to podłoga, nie współrzędna.
+
+
+### P-039 — marquee z `space-between`: pięć odstępów równych, szósty zerowy
+
+**Objaw.** Nieskończenie przewijający się pas logotypów wygląda równo przez
+większość cyklu, ale raz na obieg jedno logo przykleja się do poprzedniego bez
+odstępu, podczas gdy reszta stoi daleko od siebie. Nic w kodzie nie mówi „zero" —
+wszystkie odstępy pochodzą z jednego tokenu.
+
+**Przyczyna.** Wzorzec marquee to N identycznych grup w jednym `flex`-owym torze
+przesuwanym o `translateX`. Jeśli grupa dostaje `min-inline-size: 100%` +
+`justify-content: space-between`, żeby trafić w rozstaw z projektu, to
+`space-between` rozdziela nadmiar **tylko wewnątrz grupy** — a szew między
+ostatnim elementem grupy A i pierwszym grupy B nie jest odstępem elementów, tylko
+stykiem dwóch flex-itemów toru. Wewnątrz: pięć odstępów po ~108 px. Na szwie:
+zero. Pomiar wykonany na jednej grupie pokazuje idealną równość i niczego nie
+wykrywa.
+
+Drugi, pokrewny błąd tej samej rodziny: `gap` na torze naprawia szew, ale psuje
+pętlę. Tor ma wtedy szerokość `N*W + (N-1)*g`, a okres pętli to `W + g` — te dwie
+liczby nie są już swoimi wielokrotnościami i `translateX(-100%/N)` zaczyna
+dryfować.
+
+**Fix.** Rozstaw w pasie, który się powtarza, musi być **wartością**, a nie
+resztą z podziału. Grupy o szerokości `max-content`, jeden literalny token na
+`gap`, a odstęp szwu jako `padding-inline-end` **grupy** — wtedy grupa ma
+dokładnie szerokość okresu, tor ma `N × okres` i `translateX(calc(-100% / N))`
+jest dokładnie jednym okresem. Liczba grup wynika z geometrii, nie z nawyku:
+potrzeba `N ≥ 1 + szerokość_kontenera / okres`, bo przy dwóch grupach i okresie
+węższym od kontenera w połowie cyklu otwiera się dziura przy prawej krawędzi.
+Prędkość jest w px/s, więc po zmianie okresu czas trwania trzeba przeliczyć —
+inaczej pas nagle przyspiesza.
+
+**Wyłapuje.** `tests/visual/logo-wall.spec.ts`, „spaces every mark in the row
+identically, seams included": zatrzymuje animację, przechodzi po **wszystkich**
+elementach toru po kolei i sprawdza każdą przerwę `left - poprzedni.right`, więc
+szwy są w pomiarze na równi z odstępami wewnętrznymi. Liczba przerw jest
+asercją samą w sobie — wypada z liczby grup.
+
+**Do startera.** Reguła kciuka dla każdego pasa, który się zapętla: mierz odstępy
+przez szew, nigdy w obrębie jednej grupy. I nie używaj `space-between` tam, gdzie
+treść się powtarza — rozkład reszty jest lokalny, a pętla jest globalna.
+
+---
+
+### P-054 — `astro dev` serwuje stary scoped CSS komponentu, HTML jest już nowy
+
+**Objaw.** Zmieniasz `<style>` w komponencie `.astro`, przeładowujesz stronę
+i nic. Nowy **markup** jest na stronie, nowe reguły też są w źródle strony
+(`curl | grep` je znajduje), ale przeglądarka ich nie stosuje: element ma
+`data-astro-cid-…`, reguła ma ten sam `data-astro-cid-…`, a `getComputedStyle`
+zwraca wartości sprzed zmiany. `el.matches(r.selectorText)` po wszystkich
+`document.styleSheets` nie daje **żadnego** trafienia — arkusza z tymi regułami
+po prostu nie ma w dokumencie.
+
+**Przyczyna.** W dev Astro nie wstawia scoped CSS-u inline. Wstrzykuje go moduł
+`/src/…/Komponent.astro?astro&type=style&index=0&lang.css`, a ten potrafi
+zostać w cache'u transformacji Vite'a i nie unieważnić się przy edycji stylu.
+Zapytanie o ten adres wprost pokazuje starą treść — i to jest test rozstrzygający.
+Mylące jest to, że tokeny z `packages/tokens/tokens.css` **aktualizują się**
+normalnie, bo to zwykły globalny arkusz: część efektu zmiany widać (bo przeszła
+przez token), a część nie, więc wygląda to jak błąd w CSS-ie komponentu.
+
+**Fix.** Restart dev servera. Zanim zaczniesz debugować własny selektor:
+`curl -s "http://localhost:PORT/src/components/…/X.astro?astro&type=style&index=0&lang.css" | grep NOWA_KLASA`
+— pusto znaczy, że problem jest w serwerze, nie w kodzie.
+
+**Wyłapuje.** Nic automatycznego. Miarodajny jest build: `pnpm build` inline'uje
+scoped CSS do HTML-a, więc pomiar na `dist/` (Playwright na statycznym serwerze)
+pokazuje prawdę. Reguła: **geometrię mierzysz na zbudowanej stronie, nie na dev
+serverze.**
+
+**Do startera.** Skrypt pomiarowy celujący w `dist/`, nie w `:4321`.

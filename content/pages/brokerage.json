@@ -30,7 +30,7 @@
       "items": [
         {
           "title": "For Sellers",
-          "description": "We can buy, or buy with our partner. We assess the opportunity, structure the transaction and connect it with the right buyer.",
+          "description": "We find you the right projects and manage the transaction process for you to ensure you close successfully.",
           "image": {
             "src": "content/media/pages/boxes/for-sellers.jpg",
             "alt": "",
@@ -40,7 +40,7 @@
         },
         {
           "title": "For Buyers",
-          "description": "We sell our own projects — or find you the right opportunity on the market.",
+          "description": "If we don't have the right project for you from our portfolio, we will find it for you leveraging our database of hundreds of BESS projects on the market.",
           "image": {
             "src": "content/media/pages/boxes/for-buyers.jpg",
             "alt": "",
@@ -211,8 +211,7 @@
         "description": "Start with the full scope and decide what works best for your transaction.",
         "link": {
           "label": "Chat with our CEO",
-          "href": "/contact/",
-          "disabled": true
+          "href": "https://calendly.com/shannonoconnell/ceo-1on1"
         }
       }
     },

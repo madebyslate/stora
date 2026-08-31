@@ -11,26 +11,56 @@ const { block } = Astro.props
 const headingId = 'about-story-heading'
 const statementLines = block.statement.split('\n').map((line) => line.trim().split(/\s+/))
 const statementLabel = statementLines.flat().join(' ')
+const statementHeading = statementLines[0]?.join(' ') ?? statementLabel
+const statementWordCount = statementLines.flat().length
 let wordIndex = 0
-const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 3), photo.width])
+
+/**
+ * The supplied six photographs are the content set. Repeated placements are
+ * decorative crops of that same set, which gives the scroll field enough depth
+ * without inventing new CMS content or making a visitor hear every image twice.
+ */
+const photoInstances = [
+  { sourceIndex: 0, slot: 1 },
+  { sourceIndex: 1, slot: 2 },
+  { sourceIndex: 2, slot: 3 },
+  { sourceIndex: 3, slot: 4 },
+  { sourceIndex: 4, slot: 5 },
+  { sourceIndex: 5, slot: 6 },
+  { sourceIndex: 1, slot: 7 },
+  { sourceIndex: 2, slot: 8 },
+  { sourceIndex: 3, slot: 9 },
+  { sourceIndex: 4, slot: 10 },
+  { sourceIndex: 5, slot: 11 },
+  { sourceIndex: 0, slot: 12 },
+] as const
 ---
 
 <section class="about-story" aria-labelledby={headingId} data-about-story>
-  <h2 class="sr-only" id={headingId}>Built in Poland and ready to scale across Europe</h2>
+  <h2 class="sr-only" id={headingId}>{statementHeading}</h2>
 
   <div class="about-story__stage">
     <div class="about-story__scene">
       {
-        block.photos.map((photo, index) => (
-          <div class={`about-story__photo about-story__photo--${index + 1}`}>
-            <Picture
-              image={photo}
-              widths={photoWidths[index]}
-              sizes={ABOUT_STORY_SIZES}
-              draggable={false}
-            />
-          </div>
-        ))
+        photoInstances.map(({ sourceIndex, slot }, index) => {
+          const photo = block.photos[sourceIndex]
+          const repeated = index >= block.photos.length
+          const image = repeated ? { ...photo, alt: '' } : photo
+
+          return (
+            <div
+              class={`about-story__photo about-story__photo--${slot}`}
+              aria-hidden={repeated ? 'true' : undefined}
+            >
+              <Picture
+                image={image}
+                widths={[Math.round((photo.width * 2) / 3), photo.width]}
+                sizes={ABOUT_STORY_SIZES}
+                draggable={false}
+              />
+            </div>
+          )
+        })
       }
 
       <div class="about-story__hero-target" data-about-hero-target aria-hidden="true">
@@ -41,69 +71,68 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
           draggable={false}
         />
       </div>
+    </div>
 
-      <p class="about-story__statement text-heading" aria-label={statementLabel}>
-        {
-          statementLines.map((line, lineIndex) => (
-            <>
-              {line.map((word, lineWordIndex) => {
-                const index = wordIndex++
-                return (
+    <p
+      class="about-story__statement text-heading"
+      aria-label={statementLabel}
+      style={`--about-word-count: ${statementWordCount}`}
+      data-about-statement
+    >
+      {
+        statementLines.map((line, lineIndex) => (
+          <>
+            {line.map((word, lineWordIndex) => {
+              const index = wordIndex++
+              return (
+                <>
                   <span
                     class="about-story__word"
                     aria-hidden="true"
                     style={`--about-word-index: ${index}`}
                   >
                     {word}
-                    {lineWordIndex < line.length - 1 ? ' ' : ''}
                   </span>
-                )
-              })}
-              {lineIndex < statementLines.length - 1 && <br />}
-            </>
-          ))
-        }
-      </p>
-    </div>
+                  {/* The space lives outside the span: an inline-block swallows its
+                      own trailing whitespace, and the words would run together. */}
+                  {lineWordIndex < line.length - 1 ? ' ' : ''}
+                </>
+              )
+            })}
+            {lineIndex < statementLines.length - 1 && <br />}
+          </>
+        ))
+      }
+    </p>
   </div>
 </section>
 
 <style>
   .about-story {
-    --about-progress: 1;
-    --about-text-progress: 1;
     --about-hero-target-opacity: 1;
     position: relative;
     z-index: var(--z-scrim);
     block-size: var(--about-story-height);
     overflow: clip;
     background-color: transparent;
+    view-timeline-name: --about-story-scroll;
+    view-timeline-axis: block;
   }
 
   .about-story__stage {
     position: relative;
     inline-size: 100%;
     block-size: 100%;
-    display: grid;
-    place-items: center;
+    padding-block-start: var(--about-statement-entry-space);
   }
 
   .about-story__scene {
-    position: relative;
+    position: absolute;
+    inset: 0;
     inline-size: 100%;
     max-inline-size: var(--container-max);
     block-size: var(--about-story-stage-height);
     margin-inline: auto;
-  }
-
-  :global(html.js) .about-story {
-    block-size: calc(var(--about-story-viewport-height) + var(--about-story-pin-distance));
-  }
-
-  :global(html.js) .about-story__stage {
-    position: sticky;
-    inset-block-start: 0;
-    block-size: var(--about-story-viewport-height);
   }
 
   .about-story__photo,
@@ -113,27 +142,100 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
   }
 
   .about-story__photo {
-    --about-photo-progress: clamp(
-      0,
-      calc(
-        (var(--about-progress) - var(--about-photo-start)) * var(--about-photo-reveal-speed)
-      ),
-      1
-    );
-    opacity: var(--about-photo-progress);
-    transform: translate3d(
-        0,
-        calc((1 - var(--about-photo-progress)) * var(--about-photo-travel)),
-        0
-      )
-      scale(
-        calc(
-          var(--about-photo-entry-scale) + var(--about-photo-progress) *
-            (1 - var(--about-photo-entry-scale))
-        )
-      );
-    transform-origin: center;
-    will-change: transform, opacity;
+    --about-photo-drift: var(--about-photo-drift-inner);
+    aspect-ratio: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @supports (animation-timeline: view()) {
+    /*
+     * Three animations on one frame, and they only coexist because each owns a
+     * different property: the lane drift takes `transform`, arrival and
+     * departure take `translate` and `opacity`. Stacking them all on `transform`
+     * would mean the last one in the list simply wins.
+     *
+     * The drift is measured against the whole section, so the four lanes keep
+     * one shared clock and stay in formation. Arrival and departure are per
+     * frame — each photograph runs on its own `view()` timeline, settling as
+     * *it* crosses the bottom edge and letting go as *it* leaves at the top.
+     *
+     * Fill modes are the load-bearing part. `both` on the entrance holds a frame
+     * at its "from" state until it enters; `forwards` on the exit means it
+     * contributes nothing before its own range, which is what stops it from
+     * overwriting the entrance underneath it.
+     */
+    .about-story__photo {
+      animation:
+        about-photo-drift var(--about-photo-drift-ease),
+        about-photo-enter var(--ease-in-out),
+        about-photo-leave var(--ease-in-out);
+      animation-timeline: --about-story-scroll, view(), view();
+      animation-range:
+        entry 0% exit 100%,
+        var(--about-photo-enter-range),
+        var(--about-photo-leave-range);
+      animation-fill-mode: both, both, forwards;
+      will-change: transform, translate, opacity;
+    }
+
+    /* The zoom sits on the image, where the frame's `overflow: clip` crops it —
+       on the frame it would just make the photograph collide with its lane. */
+    .about-story__photo :global(img) {
+      animation:
+        about-photo-zoom-in var(--ease-in-out) both,
+        about-photo-zoom-out var(--ease-in-out) forwards;
+      animation-timeline: view(), view();
+      animation-range: var(--about-photo-enter-range), var(--about-photo-leave-range);
+    }
+  }
+
+  @keyframes about-photo-drift {
+    from {
+      transform: translate3d(0, var(--about-photo-drift), 0);
+    }
+    to {
+      transform: translate3d(0, calc(-1 * var(--about-photo-drift)), 0);
+    }
+  }
+
+  @keyframes about-photo-enter {
+    from {
+      opacity: 0;
+      translate: 0 var(--about-photo-enter-lift);
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes about-photo-leave {
+    from {
+      opacity: 1;
+      translate: 0 0;
+    }
+    to {
+      opacity: 0;
+      translate: 0 calc(-1 * var(--about-photo-leave-lift));
+    }
+  }
+
+  @keyframes about-photo-zoom-in {
+    from {
+      transform: scale(var(--about-photo-enter-zoom));
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes about-photo-zoom-out {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(var(--about-photo-leave-zoom));
+    }
   }
 
   .about-story__photo :global(img),
@@ -144,52 +246,77 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
     -webkit-user-drag: none;
   }
 
-  .about-story__photo--1 {
-    inset-block-start: var(--about-photo-1-top);
-    inset-inline-start: var(--about-photo-1-left);
-    inline-size: var(--about-photo-1-width);
-    aspect-ratio: 291 / 285;
-    --about-photo-start: var(--about-photo-1-start);
+  .about-story__photo--1,
+  .about-story__photo--2,
+  .about-story__photo--3,
+  .about-story__photo--10,
+  .about-story__photo--11,
+  .about-story__photo--12 {
+    --about-photo-drift: var(--about-photo-drift-outer);
+    inline-size: var(--about-photo-outer-width);
   }
 
-  .about-story__photo--2 {
-    inset-block-start: var(--about-photo-2-top);
-    inset-inline-start: var(--about-photo-2-left);
-    inline-size: var(--about-photo-2-width);
-    aspect-ratio: 159 / 156;
-    --about-photo-start: var(--about-photo-2-start);
+  .about-story__photo--4,
+  .about-story__photo--5,
+  .about-story__photo--6,
+  .about-story__photo--7,
+  .about-story__photo--8,
+  .about-story__photo--9 {
+    inline-size: var(--about-photo-inner-width);
   }
 
+  .about-story__photo--1,
+  .about-story__photo--2,
   .about-story__photo--3 {
-    inset-block-start: var(--about-photo-3-top);
-    inset-inline-end: var(--about-photo-3-right);
-    inline-size: var(--about-photo-3-width);
-    aspect-ratio: 240 / 234;
-    --about-photo-start: var(--about-photo-3-start);
+    inset-inline-start: var(--about-lane-outer);
   }
 
-  .about-story__photo--4 {
-    inset-block-start: var(--about-photo-4-top);
-    inset-inline-end: var(--about-photo-4-right);
-    inline-size: var(--about-photo-4-width);
-    aspect-ratio: 1;
-    --about-photo-start: var(--about-photo-4-start);
-  }
-
-  .about-story__photo--5 {
-    inset-block-start: var(--about-photo-5-top);
-    inset-inline-start: var(--about-photo-5-left);
-    inline-size: var(--about-photo-5-width);
-    aspect-ratio: 291 / 285;
-    --about-photo-start: var(--about-photo-5-start);
-  }
-
+  .about-story__photo--4,
+  .about-story__photo--5,
   .about-story__photo--6 {
-    inset-block-start: var(--about-photo-6-top);
-    inset-inline-start: var(--about-photo-6-left);
-    inline-size: var(--about-photo-6-width);
-    aspect-ratio: 276 / 270;
-    --about-photo-start: var(--about-photo-6-start);
+    inset-inline-start: var(--about-lane-inner);
+  }
+
+  .about-story__photo--7,
+  .about-story__photo--8,
+  .about-story__photo--9 {
+    inset-inline-end: var(--about-lane-inner);
+  }
+
+  .about-story__photo--10,
+  .about-story__photo--11,
+  .about-story__photo--12 {
+    inset-inline-end: var(--about-lane-outer);
+  }
+
+  .about-story__photo--1,
+  .about-story__photo--7 {
+    inset-block-start: var(--about-row-1);
+  }
+
+  .about-story__photo--4,
+  .about-story__photo--10 {
+    inset-block-start: var(--about-row-2);
+  }
+
+  .about-story__photo--2,
+  .about-story__photo--8 {
+    inset-block-start: var(--about-row-3);
+  }
+
+  .about-story__photo--5,
+  .about-story__photo--11 {
+    inset-block-start: var(--about-row-4);
+  }
+
+  .about-story__photo--3,
+  .about-story__photo--9 {
+    inset-block-start: var(--about-row-5);
+  }
+
+  .about-story__photo--6,
+  .about-story__photo--12 {
+    inset-block-start: var(--about-row-6);
   }
 
   .about-story__hero-target {
@@ -199,54 +326,120 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
     block-size: var(--about-hero-target-size);
     translate: -50% 0;
     opacity: var(--about-hero-target-opacity);
+    z-index: var(--z-content);
   }
 
   .about-story__statement {
-    position: absolute;
-    inset-block-start: var(--about-statement-top);
-    inset-inline-start: 50%;
+    /*
+     * Centred by `margin-inline: auto`, NOT by `inset-inline-start: 50%` — on a
+     * sticky box an inline inset is a stickiness *constraint*, and the shift it
+     * asks for is capped at the containing block's edge. At 1440 the paragraph
+     * is half the stage wide, the cap never bites and the 50% + `-50%` translate
+     * lands centred by luck. At 390 the paragraph is nearly the full stage, the
+     * shift is capped at ~40 px instead of the 195 it asked for, and the
+     * translate then drags the sentence 135 px off the left edge. Only the
+     * vertical half of the translate is real work.
+     */
+    position: sticky;
+    inset-block-start: 50svh;
+    z-index: var(--z-content);
     inline-size: min(var(--about-statement-measure), calc(100% - 2 * var(--container-gutter)));
-    margin: 0;
-    translate: -50% 0;
+    margin-block: 0;
+    margin-inline: auto;
+    padding-block: var(--space-4);
+    translate: 0 -50%;
     color: var(--color-fg);
+    /*
+     * Transparent at 1440 — the lanes never reach the measure, so there is
+     * nothing to mask and the sentence sits on the page's own ground. At 390 the
+     * four lanes span the whole screen, every frame passes under the letters,
+     * and the paragraph needs a solid band. The token carries which is which.
+     */
+    background-color: var(--about-statement-ground);
     text-align: center;
     text-wrap: pretty;
   }
 
+  /*
+   * The statement runs on a timer, not on scroll offset: the observer marks the
+   * paragraph as in view and the transition plays itself out, so a visitor who
+   * stops scrolling still gets the whole sentence.
+   *
+   * Transitions rather than keyframes, because this has to run in both
+   * directions — out on the way past, in again on the way back — and a
+   * transition reverses for free where an animation would need re-triggering.
+   */
   .about-story__word {
-    --about-word-start: calc(
-      var(--about-word-reveal-start) + var(--about-word-index) * var(--about-word-reveal-step)
+    display: inline-block;
+    /* Its own compositing layer, or the blur would resample the paragraph's
+       white ground on every frame. */
+    will-change: opacity, filter, translate;
+    transition:
+      opacity var(--about-word-exit-duration) var(--ease-in-out) var(--about-word-delay),
+      filter var(--about-word-exit-duration) var(--ease-in-out) var(--about-word-delay),
+      translate var(--about-word-exit-duration) var(--ease-in-out) var(--about-word-delay);
+  }
+
+  /* Held only where JS can release it — without the observer the sentence has to
+     be readable, not permanently blurred out. */
+  :global(html.js) .about-story:not([data-statement-in]) .about-story__word {
+    /* Reversed stagger on the way out: the sentence leaves from its tail, which
+       reads as one gesture rather than the entrance played backwards. */
+    --about-word-delay: calc(
+      (var(--about-word-count) - 1 - var(--about-word-index)) * var(--about-word-exit-step)
     );
-    opacity: clamp(
-      var(--about-word-resting-opacity),
-      calc(
-        var(--about-word-resting-opacity) +
-        (var(--about-text-progress) - var(--about-word-start)) *
-          var(--about-word-reveal-speed)
-      ),
-      1
+    opacity: var(--about-word-resting-opacity);
+    filter: blur(var(--about-word-blur));
+    translate: 0 var(--about-word-rise);
+  }
+
+  .about-story[data-statement-in] .about-story__word {
+    --about-word-delay: calc(
+      var(--about-word-lead) + var(--about-word-index) * var(--about-word-step)
     );
+    opacity: 1;
+    filter: blur(0);
+    translate: 0 0;
+    transition:
+      opacity var(--about-word-duration) var(--ease-out-expo) var(--about-word-delay),
+      filter var(--about-word-duration) var(--ease-out-expo) var(--about-word-delay),
+      translate var(--about-word-duration) var(--ease-out-expo) var(--about-word-delay);
   }
 
   @media (prefers-reduced-motion: reduce) {
     :global(html.js) .about-story {
-      --about-progress: 1 !important;
-      --about-text-progress: 1 !important;
       --about-hero-target-opacity: 1 !important;
-      block-size: var(--about-story-height);
     }
 
-    :global(html.js) .about-story__stage {
-      position: relative;
-      block-size: 100%;
-    }
-
-    .about-story__scene {
-      block-size: 100%;
-    }
-
-    .about-story__photo {
+    :global(html.js) .about-story:not([data-statement-in]) .about-story__word,
+    .about-story__word {
+      opacity: 1;
+      filter: none;
+      translate: none;
+      transition: none;
       will-change: auto;
+    }
+
+    .about-story__photo,
+    .about-story__photo :global(img) {
+      animation: none;
+      opacity: 1;
+      translate: none;
+      transform: none;
+      will-change: auto;
+    }
+
+    .about-story__stage {
+      padding-block-start: 0;
+    }
+
+
+    .about-story__statement {
+      position: absolute;
+      inset-block-start: var(--about-statement-top);
+      inset-inline-start: 50%;
+      padding-block: 0;
+      translate: -50% 0;
     }
   }
 </style>
@@ -254,11 +447,10 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
 <script>
   const section = document.querySelector<HTMLElement>('[data-about-story]')
   const hero = document.querySelector<HTMLElement>('[data-page-hero]')
-  const stage = section?.querySelector<HTMLElement>('.about-story__stage')
   const target = section?.querySelector<HTMLElement>('[data-about-hero-target]')
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
-  if (section && hero && stage && target) {
+  if (section && hero && target) {
     let frame = 0
     const clamp = (value: number) => Math.min(1, Math.max(0, value))
     const rootStyles = getComputedStyle(document.documentElement)
@@ -266,14 +458,18 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
     const handoffStart = token('--about-hero-handoff-start')
     const handoffRange = token('--about-hero-handoff-range')
     const copyFadeSpeed = token('--about-hero-copy-fade-speed')
+    const morphRange = token('--about-hero-morph-range')
+    /* Smoothstep. The morph is driven by raw scroll offset, so without it the
+       photograph starts and stops travelling at full speed — the "stiff" edge on
+       both the way in and the way back. */
+    const smooth = (value: number) => value * value * (3 - 2 * value)
 
     const render = () => {
       frame = 0
 
       if (reducedMotion.matches) {
-        section.style.setProperty('--about-progress', '1')
-        section.style.setProperty('--about-text-progress', '1')
         section.style.setProperty('--about-hero-target-opacity', '1')
+        section.setAttribute('data-statement-in', '')
         hero.removeAttribute('data-about-morph')
         return
       }
@@ -281,9 +477,8 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
       const sectionTop = section.getBoundingClientRect().top
       const heroWidth = hero.offsetWidth
       const heroHeight = hero.offsetHeight
-      const progress = clamp(1 - sectionTop / heroHeight)
-      const pinDistance = section.offsetHeight - stage.offsetHeight
-      const pinProgress = clamp(-sectionTop / pinDistance)
+      const scrollProgress = clamp(1 - sectionTop / heroHeight)
+      const progress = smooth(clamp(scrollProgress / morphRange))
       const targetRect = target.getBoundingClientRect()
       const targetScaleX = targetRect.width / heroWidth
       const targetScaleY = targetRect.height / heroHeight
@@ -297,8 +492,6 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
       const handoff = clamp((progress - handoffStart) / handoffRange)
 
       hero.setAttribute('data-about-morph', '')
-      section.style.setProperty('--about-progress', pinProgress.toFixed(4))
-      section.style.setProperty('--about-text-progress', pinProgress.toFixed(4))
       section.style.setProperty('--about-hero-target-opacity', handoff.toFixed(4))
       hero.style.setProperty('--about-hero-translate-x', `${translateX.toFixed(2)}px`)
       hero.style.setProperty('--about-hero-translate-y', `${translateY.toFixed(2)}px`)
@@ -311,6 +504,7 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
         clamp(1 - progress * copyFadeSpeed).toFixed(4),
       )
       hero.style.setProperty('--about-hero-opacity', (1 - handoff).toFixed(4))
+      hero.toggleAttribute('data-about-complete', handoff === 1)
     }
 
     const schedule = () => {
@@ -322,5 +516,29 @@ const photoWidths = block.photos.map((photo) => [Math.round((photo.width * 2) / 
     window.addEventListener('scroll', schedule, { passive: true })
     window.addEventListener('resize', schedule)
     reducedMotion.addEventListener('change', schedule)
+
+    /*
+     * The statement plays on a timer once it is in view, and plays back out when
+     * it leaves — so it replays on the way back up instead of standing there
+     * already finished. Deliberately not the page's shared `data-reveal-group`
+     * observer: that one fires once and disconnects.
+     *
+     * `-22%` on both edges holds the start until the paragraph is properly in
+     * the frame rather than the instant its first pixel clears the fold.
+     */
+    const statement = section.querySelector<HTMLElement>('[data-about-statement]')
+
+    if (statement && 'IntersectionObserver' in window) {
+      const statementObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry) return
+          section.toggleAttribute('data-statement-in', entry.isIntersecting)
+        },
+        { rootMargin: '-22% 0px -22% 0px' },
+      )
+      statementObserver.observe(statement)
+    } else {
+      section.setAttribute('data-statement-in', '')
+    }
   }
 </script>

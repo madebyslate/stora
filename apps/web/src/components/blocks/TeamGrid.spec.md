@@ -26,7 +26,6 @@ one person being introduced.
 | `members[].name` | `string` | yes | `<h3>` |
 | `members[].role` | `string` | yes | job title |
 | `members[].portrait` | `MediaImage` | yes | cropped, never letterboxed |
-| `members[].linkedin` | `string` (url) | no | when present the mark is a link, and that link is the block's only keyboard entry point — see A11y |
 
 `members` is capped at 4: the row is four columns at the design width and a fifth
 tile either starts a ragged second row or takes all five under the width at which
@@ -55,7 +54,6 @@ section is the arithmetic that resolves them. They are, as given:
 | Tile padding | 16 px | given |
 | Name → role | 4 px | given |
 | Name / role | 14 px, weight 400 | given |
-| LinkedIn mark | 16 × 16, trailing edge, centred on the name's line | given |
 | Foot scrim | 120 px, `rgba(23,46,35,0) → rgba(23,46,35,0.80)` | given |
 
 ### Why the tile carries the portrait's aspect ratio
@@ -111,16 +109,15 @@ Everything below is gated on `@media (hover: hover)`. A device with no pointer
 gets **every tile featured** — which is the only state in which the copy is
 legible without a hover it cannot perform, and the same call `ServiceCards` makes.
 
-| | Resting | Featured / hover / focus |
+| | Resting | Featured / hover |
 |---|---|---|
 | Portrait | `scale(0.5414)`, centred | `scale(1)`, fills the tile |
 | Foot scrim | `opacity: 0` | `opacity: 1` |
 | Name | `--color-fg` | `--color-on-media` |
 | Role | `--color-fg` | `--color-on-media-subtle` |
-| LinkedIn mark | `--team-mark-colour` (`#ABAD9E`) | `--color-on-media` |
 
 The first tile is featured at rest and stays featured after the pointer leaves
-the row. As soon as the row is hovered or focused, it yields to whichever tile is
+the row. As soon as the row is hovered, it yields to whichever tile is
 being pointed at — unless that is itself the first one. Same mechanism as
 `ServiceCards`, same two `:not()`s carrying both the meaning and the specificity.
 
@@ -132,7 +129,7 @@ the block in the accessibility tree to save a repaint that does not cost anythin
 ## Animations
 
 `--reveal-step` is 70 ms in this section rather than the global 90: the row is
-four tiles deep and each assembles from four parts, so at 90 the last name would
+four tiles deep and each assembles from three parts, so at 90 the last name would
 land 1.5 s in.
 
 | What | When | Duration | Easing | `reduce` |
@@ -142,9 +139,8 @@ land 1.5 s in.
 | Portrait, held against the wipe | with its tile | 900 ms | `--ease-out-expo` | as above |
 | Name, rises under a mask | tile +0.9 | 900 ms | `--ease-out-expo` | as above |
 | Role, rises and fades | tile +1.1 | 900 ms | `--ease-out-expo` | as above |
-| LinkedIn mark, settles | tile +1.3 | 900 ms | `--ease-out-expo` | as above |
-| Portrait, rest ⇄ featured | hover / focus | 450 ms | `--ease-out-expo` | collapsed to 0 |
-| Scrim and text colour | hover / focus | 250 ms | `--ease-standard` | collapsed to 0 |
+| Portrait, rest ⇄ featured | hover | 450 ms | `--ease-out-expo` | collapsed to 0 |
+| Scrim and text colour | hover | 250 ms | `--ease-standard` | collapsed to 0 |
 
 The tile entrance is the shared curtain (`reveal-curtain` + `reveal-curtain-hold`):
 the ground wipes up from the tile's bottom edge while the portrait inside it does
@@ -166,23 +162,16 @@ scaled element resolves in scaled space and would no longer cancel the wipe.
 - `<section aria-labelledby>` → the `<h2>`; each person is an `<h3>` inside a
   `<ul>`. The heading's two lines are two spans inside the one `<h2>`, so the
   accessible name is the whole sentence.
-- Keyboard: the LinkedIn mark is the only interactive element, and focusing it
-  features its tile through `:focus-within` — a keyboard reaches exactly the
-  state a pointer does. **A member with no `linkedin` URL has no focusable
-  element**, and its tile is then pointer-only. That is a content gap, not a
-  design one: the four URLs are outstanding.
+- Keyboard: the tiles contain no controls and perform no action, so they do not
+  enter the tab order. The client-requested LinkedIn marks are not rendered.
 - Contrast: not measured. Deferred at the client's instruction; the one value
   known to be marginal is logged under Deviations.
 - `alt` is empty on every portrait. The name and the role sit in text immediately
   below each picture, so alt text would be the third reading of the same name in
-  the same tile. The LinkedIn link carries `aria-label="<name> on LinkedIn"`,
-  which is the one place the name has to be repeated — a link labelled by a mark
-  alone says nothing.
+  the same tile.
 
 ## Open questions
 
-- [ ] LinkedIn URLs for all four people. Without them the section is
-      pointer-only — see A11y.
 - [ ] Leading of the 56 px heading. Set to 64, the same as `--text-headline`, on
       the grounds that both are section openers; the frame reads ≈ 65.
 - [ ] The tile height, 397 vs 390 — confirm the row is meant to sit on the site

@@ -5,6 +5,74 @@ Dopisujesz każdą decyzję niestandardową (AGENT-RULES §9.7).
 
 ---
 
+## 2026-08-31 — Pas logotypów ma jeden stały odstęp 64 px zamiast rozstawu z ramki
+
+**Kontekst.** Ramka rozstawia sześć znaków ręcznie: pięć przerw mierzy 98,1 /
+103,0 / 94,4 / 101,7 / 95,7 px. Blok odtwarzał ten rozkład rozciągając zestaw do
+1360 px kontenera przez `justify-content: space-between`. To działa dla jednego
+zestawu, ale marquee powtarza zestaw, a szew między dwoma zestawami nie jest
+przerwą między elementami — jest stykiem dwóch flex-itemów toru i miał zero px.
+Raz na obieg jedno logo przyklejało się do poprzedniego, reszta stała ~108 px od
+siebie.
+
+**Decyzja.** Zestawy mają szerokość własnej treści, a każda przerwa w pasie —
+łącznie ze szwem — to literalne `--logo-marquee-gap: var(--space-11)`, czyli
+64 px. Odstęp szwu niesie `padding-inline-end` zestawu, dzięki czemu szerokość
+toru i okres pętli są tą samą liczbą z konstrukcji. Zestawy są trzy, nie dwa, bo
+okres (885 px) jest węższy od kontenera. Czas trwania spada z 32 s na 21 s, co
+utrzymuje dotychczasowe 42,5 px/s.
+
+**Powód.** Klient poprosił o ciaśniejszy pas i o naprawę nierównego przewijania.
+Rozstaw w pasie, który się zapętla, musi być wartością, a nie resztą z podziału —
+`space-between` rozdziela nadmiar lokalnie, w obrębie jednego zestawu, a pętla
+jest globalna. 64 px to jednocześnie krok w dół od średniej z ramki, o który
+klient prosił.
+
+**Konsekwencja.** Odstęp nie jest już zgodny z ramką co do piksela i wymaga
+potwierdzenia grafika (otwarte pytanie w `LogoWall.spec.md`). Regresja jest
+pilnowana przez test mierzący **wszystkie** przerwy toru po kolei, szwy włącznie
+— pomiar wewnątrz jednego zestawu przepuściłby ją. Mechanizm i reguła kciuka
+trafiły do `PLAYBOOK.md` P-039.
+
+## 2026-08-31 — Header i stopka mają osobne etykiety tej samej nawigacji
+
+**Decyzja.** `site.navigation` pozostaje źródłem etykiet nagłówka, a
+`site.footer.navigation` przechowuje osobne etykiety stopki. Obie listy prowadzą
+do tych samych pięciu adresów, ale klient zatwierdził `IPP Portfolio` w nagłówku
+i `IPP Pipeline` w stopce dla `/develop-to-hold/`.
+
+**Powód.** Jedna współdzielona tablica nie jest w stanie wiernie odwzorować dwóch
+zaakceptowanych nazw bez ukrytego mapowania tekstu w komponencie. Jawne pola
+utrzymują treść w `content/globals/site.json` i pozwalają przyszłemu CMS-owi
+walidować oba miejsca tym samym typem `Link`.
+
+**Koszt.** Edycja celu nawigacji wymaga zmiany w dwóch listach. Ich zgodność
+adresowa jest sprawdzana przez test nagłówka i build; etykiety celowo mogą się
+różnić.
+
+## 2026-08-31 — `AboutStory` płynie w czterech torach bez pinowania
+
+**Decyzja.** Po morfowaniu `PageHero` sekcja nie przechodzi już w przypiętą
+scenę. Ma naturalną wysokość około 190 svh i dwanaście rozmieszczeń z sześciu
+dostarczonych fotografii. Zewnętrzne tory dostają większą transformację sterowaną
+natywną `view-timeline` niż wewnętrzne, więc kadry wyraźnie jadą do góry wraz ze
+stroną. Drugie użycie każdego źródła jest dekoracyjne i ma pusty `alt`.
+
+**Powód.** Klient odrzucił odczuwalne zatrzymanie drugiej sekcji i wskazał Waabi
+jako referencję: tam gęste pionowe tory zdjęć przechodzą przez viewport w różnym
+tempie, ale tekst i dokument pozostają w naturalnym przepływie. Powtórzenia
+istniejących źródeł dają podobny rytm bez nowych assetów i bez zmiany modelu CMS.
+
+**Fallback.** Bez obsługi scroll-driven animations wszystkie zdjęcia nadal są
+widoczne i przewijają się naturalnie. Przy `prefers-reduced-motion: reduce`
+dodatkowa różnica prędkości oraz morfowanie hero są wyłączone.
+
+**Korekta po review.** Sam tekst jest przytrzymany na środku viewportu, ale nie
+tworzy dodatkowego dystansu scrolla i nie zatrzymuje zdjęć. Dostaje białą
+powierzchnię w kolorze tła, która niewidocznie maskuje kadry przechodzące pod
+literami. Hero kończy morfowanie już po 45% pierwszego ekranu scrolla i zarówno
+ono, jak i statyczny kadr docelowy, są rysowane nad pozostałymi fotografiami.
+
 ## 2026-08-25 — Userback działa globalnie na wszystkich stronach stagingu
 
 **Decyzja.** `BaseLayout` ładuje asynchronicznie publiczny widget Userback na
@@ -17,7 +85,9 @@ dowolnej podstronie bez powielania integracji w blokach ani fixtures.
 **Koszt i odwracalność.** Jest to zewnętrzny skrypt ładowany po stronie klienta,
 więc jego transfer i dostępność nie są kontrolowane przez aplikację. Loader jest
 asynchroniczny i nie blokuje renderowania; usunięcie jednego bloku z
-`BaseLayout` całkowicie wyłącza integrację.
+`BaseLayout` całkowicie wyłącza integrację. Budżet skryptów Lighthouse wynosi
+180 KiB: obejmuje dotychczasowe 150 KiB aplikacji oraz zmierzony koszt widgetu,
+z niewielkim marginesem, ale nie otwiera budżetu na kolejne integracje.
 
 ## 2026-08-25 — Drugi staging ma osobny stack, port i wolumen
 
@@ -1128,3 +1198,27 @@ Nie ukrywamy odchylenia przez semantyczny alias: tabela ma lokalny token
 wrócić po decyzję grafika: podnieść alfę tabeli do wartości przechodzącej 4,5 : 1
 i użyć ciemnego opisu w CTA albo ciemniejszego wariantu Green. Nagłówek CTA 40/500
 przechodzi jako duży tekst przy progu 3 : 1.
+
+## 2026-08-31 — Stopka jest niższa niż w Figmie: 584 → 504 px
+
+**Kontekst.** Feedback klienta: „Footer is too tall, we need to thin it down height
+wise". Zmierzona stopka miała 584 px na 1440 i **1666 px na 390** — prawie dwa
+ekrany telefonu na blok, który jest nawigacją zapasową i sześcioma grupami danych
+kontaktowych.
+
+**Decyzja.** Wysokość schodzi wyłącznie z wartości, które są powietrzem, nie
+treścią: padding bloku 64 → 48 i odstęp między grupami kontaktu 72 → 48. Nic poza
+tym się nie rusza — stopnie typograficzne, trzy tory kolumn, rytm nawigacji 40 i
+miara kontaktu 208 + 48 zostają jak narysowane. W układzie zwiniętym (< 1024) obie
+wartości schodzą jeszcze raz, do 40, a nawigacja idzie na dwie kolumny; para
+kontaktowa trzyma dwie kolumny do 480 zamiast do 560, bo razem z torami zwęża się
+też jej przerwa.
+
+**Powód.** Odchylenie od Figmy jest tu tańsze niż alternatywy. Zmiana stopni
+typograficznych ruszyłaby skalę używaną w całej witrynie, a przerzucenie kontaktu
+na trzy kolumny nie mieści miary 208, przy której najdłuższa linia adresu
+(201,2 px) stoi w jednym wierszu.
+
+**Konsekwencja.** Zmierzone: 1440 — 584 → 504, 390 — 1666 → 1282. Odchylenie jest
+opisane jako punkt 6 w `Footer.spec.md` i wymaga potwierdzenia u grafika, tak samo
+jak stojące tam wcześniej pytanie o dolny padding, którego crop nie obejmuje.

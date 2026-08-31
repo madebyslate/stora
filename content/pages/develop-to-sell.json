@@ -19,7 +19,7 @@
     },
     {
       "blockType": "metricStatement",
-      "heading": "Leader, not broker",
+      "heading": "A local partner you can trust",
       "value": "700",
       "unit": "MW",
       "description": "Our JV pipeline spans projects from early stages to RTB, developed for JV partners looking to enter the Polish BESS market."
@@ -52,9 +52,6 @@
     },
     {
       "blockRef": "developmentStages"
-    },
-    {
-      "blockRef": "featuredPublications"
     },
     {
       "blockType": "processBehindAsset",

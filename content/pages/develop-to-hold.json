@@ -9,7 +9,7 @@
     {
       "blockType": "pageHero",
       "heading": "IPP Portfolio: Dev-to-Hold",
-      "subheading": "We develop own BESS projects in Poland with IPPs, funds and utilities,\ndelivering ready-to-build assets for acquisition or partnership.",
+      "subheading": "We develop and deliver into operation BESS projects in Poland as an Independent Power Producer.",
       "image": {
         "src": "content/media/pages/develop-to-hold-hero.jpg",
         "alt": "An operating battery storage site in open grassland, containers in long parallel rows",
@@ -19,17 +19,17 @@
     },
     {
       "blockType": "metricStatement",
-      "heading": "Leader, not broker",
+      "heading": "Leader in BESS development",
       "value": "+500",
       "unit": "MW",
-      "description": "We develop, build and operate our own large-scale BESS assets as a long-term owner, with M&A and JV providing the pipeline for future growth."
+      "description": "We develop, build, and operate grid-scale BESS assets as an Independent Power Producer (IPP)."
     },
     {
       "blockType": "featurePair",
-      "heading": "Our own pipeline",
+      "heading": "Our IPP pipeline",
       "items": [
         {
-          "title": "Own Pipeline",
+          "title": "IPP Pipeline",
           "description": "Long-term ownership of a 500+ MW BESS pipeline across Poland.",
           "image": {
             "src": "content/media/pages/boxes/own-pipeline.jpg",
@@ -52,7 +52,7 @@
     },
     {
       "blockType": "technicalDepthTabs",
-      "heading": "Three ways BESS\ncreates value",
+      "heading": "BESS revenue streams\nin Poland",
       "items": [
         {
           "label": "Ancillary services",
@@ -110,7 +110,7 @@
         {
           "value": "500",
           "unit": "MW",
-          "label": "Own BESS pipeline"
+          "label": "IPP pipeline"
         },
         {
           "value": "~130",

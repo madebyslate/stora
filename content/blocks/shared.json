@@ -3,7 +3,7 @@
     "blockType": "logoWall",
     "heading": "Deep expertise.",
     "headingAccent": "Proven track record.",
-    "subheading": "Utility-scale energy storage is a relatively new technology, present",
+    "subheading": "Our team has delivered >2GW of renewable energy projects internationally.",
     "logos": [
       {
         "src": "content/media/logos/nextera-energy.png",
@@ -45,7 +45,7 @@
   },
   "foundingTeam": {
     "blockType": "teamGrid",
-    "heading": "Meet visionaries",
+    "heading": "Meet the visionaries",
     "headingMuted": "behind every project",
     "members": [
       {
@@ -60,7 +60,7 @@
       },
       {
         "name": "Charles Gilmour",
-        "role": "Chief Technology Officer & Co-founder",
+        "role": "Chief Technology Officer",
         "portrait": {
           "src": "content/media/team/charles-gilmour.jpg",
           "alt": "",
@@ -220,7 +220,7 @@
   },
   "largeScaleContacts": {
     "blockType": "audienceTabs",
-    "heading": "Store energy at\nlarge scale",
+    "heading": "Storing energy at\nscale",
     "options": [
       {
         "label": "Have Land?",

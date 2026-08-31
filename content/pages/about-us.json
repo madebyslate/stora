@@ -19,7 +19,7 @@
     },
     {
       "blockType": "aboutStory",
-      "statement": "Built in Poland. Ready to Scale Across Europe,\nDeveloping Renewable Energy Infrastructure from\nEarly Stage Site Identification Through\nConstruction and Operation.",
+      "statement": "Built in Poland. Scaling Across Europe.\nDelivering Renewable Energy Infrastructure from\nGreenfield Development to Operation.",
       "heroImage": {
         "src": "content/media/pages/about-us-hero.jpg",
         "alt": "",
@@ -76,15 +76,15 @@
           "icon": "poland"
         },
         {
-          "title": "100MW IPP",
-          "period": "2024–2025",
-          "description": "Building our first generation of operating assets.",
+          "title": "Development",
+          "period": "2024-2025",
+          "description": "Developing our first generation of assets.",
           "icon": "bolt"
         },
         {
-          "title": "+1 GW",
-          "period": "2026+",
-          "description": "Scaling our development platform.",
+          "title": "100 MW IPP",
+          "period": "2026-2027",
+          "description": "Constructing assets and scaling our platform.",
           "icon": "arrow"
         },
         {
@@ -99,7 +99,7 @@
       "blockRef": "foundingTeam",
       "overrides": {
         "heading": "People who have built",
-        "headingMuted": "renewable energy at scales"
+        "headingMuted": "renewable energy at scale"
       }
     },
     {
@@ -108,7 +108,7 @@
     {
       "blockType": "metricStatement",
       "heading": "Credibility",
-      "value": "1 GW",
+      "value": "2 GW",
       "description": "Renewable energy built by our founding team across North America and Europe."
     },
     {
@@ -211,10 +211,7 @@
       "blockRef": "featuredPublications"
     },
     {
-      "blockRef": "developmentStages",
-      "overrides": {
-        "theme": "dark"
-      }
+      "blockRef": "developmentStages"
     },
     {
       "blockRef": "largeScaleContacts"

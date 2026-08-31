@@ -24,7 +24,13 @@ const order = {
   logoStep: 0.5,
 }
 
-const marqueeGroups = [false, true]
+/*
+ * Three identical groups, not two. The loop's period is one group plus one gap
+ * (see the keyframe), and that period — six marks at ~821 px plus 64 — is
+ * narrower than the 1360 px inner container. Two groups would leave a hole at the
+ * right edge halfway through the cycle; three cover the container at every offset.
+ */
+const marqueeGroups = [false, true, true]
 ---
 
 <section class="logo-wall" aria-labelledby={headingId} data-reveal-group>
@@ -147,12 +153,16 @@ const marqueeGroups = [false, true]
     display: flex;
     flex: none;
     align-items: center;
-    justify-content: space-between;
     gap: var(--logo-marquee-gap);
     inline-size: max-content;
-    min-inline-size: 100%;
     list-style: none;
-    padding: 0;
+    /*
+     * The trailing gap belongs to the group, not to the track. A gap on the track
+     * would sit between groups but not after the last one, so the loop's period and
+     * the track's width would disagree; as padding it makes every group exactly one
+     * period wide and the seam gap identical to the five inside it.
+     */
+    padding: 0 var(--logo-marquee-gap) 0 0;
   }
 
   .logo-wall__item {
@@ -174,9 +184,15 @@ const marqueeGroups = [false, true]
     block-size: auto;
   }
 
+  /*
+   * One period is one group including its trailing gap, i.e. a third of the track.
+   * The group that lands where the first one started is identical to it, so the
+   * loop has no jump — and because the marks no longer stretch to fill the
+   * container, every gap in the row is the same one.
+   */
   @keyframes logo-wall-marquee {
     to {
-      transform: translateX(-50%);
+      transform: translateX(calc(-100% / 3));
     }
   }
 
