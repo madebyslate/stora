@@ -1,6 +1,7 @@
 ---
 import type { FeaturePairBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
+import { getRetinaWidths } from '@/lib/images'
 
 interface Props {
   block: FeaturePairBlock
@@ -64,7 +65,7 @@ const cardOrder = (index: number) => {
               >
                 <Picture
                   image={item.image}
-                  widths={[540, 720, 1086]}
+                  widths={getRetinaWidths([540, 720], item.image.width)}
                   sizes="(min-width: 1440px) 715px, (max-width: 767px) 100vw, 50vw"
                   draggable={false}
                 />

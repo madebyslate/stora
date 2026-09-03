@@ -7,7 +7,7 @@ reusable fixture so its copy and marks cannot drift between the pages.
 
 The first section under the hero: a two-tone claim — "Deep expertise." in
 Lime-Dark, "Proven track record." in Green — a one-line standfirst, and a
-continuously scrolling row of six organisation marks that back the claim up.
+continuously scrolling row of fifteen organisation marks that back the claim up.
 
 - Figma: frame supplied as a screenshot, 1189 × 376 px, no node link.
 - Variants in Figma: none.
@@ -20,7 +20,7 @@ continuously scrolling row of six organisation marks that back the claim up.
 | `heading` | `string` | yes | neutral half, `--color-fg` |
 | `headingAccent` | `string` | no | emphasised half, `--color-fg-accent` |
 | `subheading` | `string` | no | standfirst |
-| `logos` | `MediaImage[]` (1–8) | yes | `alt` is the organisation name; the marks carry meaning, so none of them is decorative |
+| `logos` | `MediaImage[]` (1–15) | yes | `alt` is the organisation name; the marks carry meaning, so none of them is decorative |
 
 The colour break is two fields rather than a marker inside one string: which
 clause is the *claim* is a design decision, and a marker would hand it to an
@@ -38,8 +38,9 @@ it was pinned three ways, and all three agree on 1.2111:
 - **Padding.** At 1.2111 the heading's line box starts 120.4 px below the top of
   the frame — the 120 px padding the designer stated, to within half a pixel. At
   1.18 it would land at 115.
-- **Logos.** At 1.2111 all six marks come out at 0.667 ± 0.01 of their exported
-  PNG dimensions, i.e. a clean 1.5× export drawn at two thirds.
+- **Original logos (superseded).** At 1.2111 the six marks in the reference frame
+  came out at 0.667 ± 0.01 of their exported PNG dimensions. The final fifteen
+  SVGs do not share that export scale and use the visual ceiling below.
 
 | Element | Value | How it was established |
 |---|---|---|
@@ -51,9 +52,9 @@ it was pinned three ways, and all three agree on 1.2111:
 | Standfirst colour | Lime-Dark at 0.65 | stated as 0.6 — **deviation below** |
 | Heading → standfirst | 16 px (`--space-4`) | box edges 17.6 px apart in the frame; nearest step on the 4 px scale |
 | Standfirst → logos | 72 px (`--space-12`) | box edges 73.3 px apart |
-| Logo scale | 0.70 × exported px | measured 0.667, **deviation below** |
-| Logo track | marquee clipped to the shared inner container; three identical sets at their max-content width, marks centred on one baseline, one literal 64 px gap between every pair | the supplied still measures 98.1 / 103.0 / 94.4 / 101.7 / 95.7 — a hand-set distribution that no rule reproduces. Chosen one even value a step under it, see deviation 5 |
-| Section height | 438 px built vs ~439 px measured in the frame | |
+| Logo ceiling | 196 × 52 px (`--logo-mark-width` × `--logo-mark-height`) | the fifteen SVG exports have unrelated viewBox dimensions; every mark is contained without distortion |
+| Logo track | marquee clipped to the shared inner container; two identical max-content sets, marks centred on one baseline, one literal 64 px gap between every pair | one measured ~3106 px set is wider than the 1360 px container, so one duplicate covers the loop |
+| Section height | ~460 px with motion at 1440; reduced-motion grid is content-height | the tighter ceiling brings the section back near the original 459 px reference height |
 
 ## Deviations from Figma
 
@@ -62,10 +63,10 @@ it was pinned three ways, and all three agree on 1.2111:
    measures **4.71:1** on the real composited pixels. 0.65 is the smallest step
    off the design that passes, and it is the value `--color-fg-muted` already
    held for the same reason.
-2. **Logos at 0.70 of the export, not the measured 0.667.** The design's logo row
-   spans 1270 px inside a 1440 frame; the site grid gives this section 1360. The
-   marks are stretched by the same ~3% the row is, so a mark keeps its share of
-   the row rather than staying at its drawn size inside a wider one.
+2. **The replacement SVGs use a shared 196 × 52 ceiling, not one export scale.**
+   Their canvases range from 118 × 130 to 1248 × 300 and do not share an export
+   scale. `max-inline-size` and `max-block-size` preserve every intrinsic ratio;
+   no mark gets an individual visual multiplier.
 3. **Left edge at 40 px, not the frame's ~56 px.** Every section on the site sits
    on one container (`--container-gutter`, 40 px at 1440), and the hero was signed
    off against Figma at that value. Either the screenshot is a crop that carries
@@ -98,8 +99,9 @@ mark is ever shrunk and no gap ever changes — a narrow viewport sees fewer mar
 at a time, not smaller ones.
 
 `prefers-reduced-motion: reduce` restores the previous complete static layout:
-six columns from 1280, 3 × 2 from 768, and 2 × 3 below 768. Both duplicate sets
-are removed from layout in that mode.
+five columns from 1280, 3 × 5 from 768, and 2 × 8 below 768. The duplicate set is
+removed from layout in that mode, and marks additionally shrink to their grid
+cell on narrow screens.
 
 ## States
 
@@ -113,28 +115,27 @@ adding href to the schema before that decision is made would be inventing one.
 | Heading, both halves | section 15% into view | 900 ms | `--ease-out-expo` | end frame at once |
 | Standfirst | + 180 ms | 900 ms | `--ease-out-expo` | end frame at once |
 | Logos, staggered 45 ms apart | + 270 ms | 900 ms | `--ease-out-expo` | end frame at once |
-| Complete logo track | continuously after paint | 21 s per set + gap (42.5 px/s) | linear | animation removed; complete responsive grid shown |
+| Complete logo track | continuously after paint | 75 s per set + gap (~41.4 px/s) | linear | animation removed; complete responsive grid shown |
 
 Same choreography as the hero, only the clock starts later: the group holds every
 animation at its first frame (`animation-play-state: paused`) until one shared
 IntersectionObserver marks it `data-inview`. No second set of keyframes and no
 per-element state — see "In view" in `global.css`.
 
-The marquee is a CSS-only run of three identical flex groups. One loop period is
-one group plus its trailing gap — 821 px of marks at `--logo-scale` plus 64 —
-which is a third of the track, so translating the track by `-100% / 3` replaces
-each group with an identical one at the same position and the loop has no jump.
+The marquee is a CSS-only run of two identical flex groups. One loop period is
+one group plus its trailing gap — about 3106 px — which is half of the
+track, so translating the track by `-50%` replaces the first group with an
+identical one at the same position and the loop has no jump.
 The trailing gap is padding on the group rather than a gap on the track, so that
 the track's width and the loop's period are the same number by construction.
 
-Three groups, not two: a period of 885 px is narrower than the 1360 px inner
-container, so two groups would run out of marks and open a hole at the right edge
-halfway through each cycle. The first group is the real semantic list; the other
-two are `aria-hidden` and exist only to close the visual loop.
+Two groups, not three: the measured ~3106 px period is wider than the 1360 px inner
+container, so one duplicate covers the viewport throughout the cycle. The first
+group is the real semantic list; the second is `aria-hidden` and exists only to
+close the visual loop.
 
-21 s per period, not 32: the old 32 s carried a 1360 px period, i.e. 42.5 px/s,
-and 885 / 42.5 = 20.8. The pace on screen is unchanged; only what one iteration
-means has.
+75 s per period keeps roughly 41.4 px/s, matching the accepted previous pace.
+The longer duration reflects the longer list, not a slower movement on screen.
 
 Only `transform` and `opacity` are animated. The two halves of the heading are
 separate steps, so the accent lands a beat after the claim it qualifies; the marks
@@ -155,9 +156,9 @@ Two failure modes the mechanism creates, and what covers them:
 | Item | Budget | Actual |
 |---|---|---|
 | JavaScript | 0 KB external | 352 B inline / 243 B gz — the shared observer, in `BaseLayout` |
-| Requests | 6 unique assets | eighteen image nodes reuse six AVIF URLs; the browser cache prevents duplicate transfers |
-| Largest asset | — | 2 951 B (`nextera-energy.avif`) |
-| All six marks | — | 12.9 KB AVIF, from 44 KB of source PNG |
+| Requests | 15 unique assets | thirty image nodes reuse fifteen SVG URLs; the browser cache prevents duplicate transfers |
+| Largest asset | — | 16.0 KB gzip (`university-of-cambridge.svg`) |
+| All fifteen marks | — | 54.0 KB gzip / 145.2 KB raw after one-off `svgo --multipass` optimisation |
 | Page CSS | < 50 KB | 5.67 KB gz (23.9 KB raw), up from 5.5 KB gz |
 
 The observer is page-level, not per block: every section added later reuses it at
@@ -171,7 +172,7 @@ no extra cost.
 - The continuously moving duplicate is `aria-hidden`; assistive technology reads
   each organisation once, from the first list.
 - Reduced motion removes the marquee rather than merely accelerating it, and
-  displays all six marks in the static responsive grid.
+  displays all fifteen marks in the static responsive grid.
 - Contrast, measured on rendered pixels (`tests/a11y`-style sampling, values above):
   heading 14.47:1, accent 3.09:1 (large text, threshold 3:1), standfirst 4.71:1.
 - `alt` is the organisation name, from the fixture. The marks say who the partners
@@ -186,10 +187,10 @@ no extra cost.
 - [ ] Standfirst copy stops mid-sentence: "…a relatively new technology, present".
       Kept verbatim rather than invented. Needs the real sentence.
 - [ ] Marquee speed and direction have no motion reference. Implemented leftward
-      at 42.5 px/s (21 s per period) as a calm baseline; confirm against the
+      at roughly 41.4 px/s (75 s per period) as a calm baseline; confirm against the
       motion design.
 - [ ] Logo gap. The frame's five gaps are hand-set between 94 and 103 px and the
       row repeats, which needs one value. Built on 64 px, a step tighter than the
       frame's average, at the client's request; confirm.
-- [ ] The marks are PNG. When they come as SVG the `--logo-scale` reasoning goes
-      away with them — a vector mark is sized from the design, not from an export.
+- [x] The final marks arrived as SVG. The obsolete shared export scale was
+      replaced by one ratio-preserving visual ceiling; see the 2026-09-03 decision.

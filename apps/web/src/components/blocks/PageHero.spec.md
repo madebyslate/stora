@@ -62,11 +62,16 @@ measured from the top of the frame; the hero's own foot is at 906.
    the glyphs, and those are measured, not taken from the file. The home hero's
    pair does not survive these four photographs — the measurements are in
    **A11y**, and the two tokens carry the sweep that produced the replacements.
-4. **The photographs are encoded at quality 45, not the shared default.** The
-   1280 px candidate of the Dev-to-Sell shot is 118 KB at the default and 96 KB
-   at 45; on Lighthouse's mobile profile that is the difference between a 1.95 s
-   LCP with a score of 99 and a 1.80 s LCP with 100. No visible difference in the
-   snapshot — checked at 1440 and at 390.
+4. **The hero has no encoder quality of its own.** It used to carry 65, chosen in
+   the belief that it sat *below* a shared default; it did not — an unset quality
+   is sharp's own, which is 50 for AVIF, so the 65 was the only image on the site
+   encoded above q50 (PLAYBOOK P-056). Now every photograph, hero included, uses
+   `DEFAULT_IMAGE_QUALITY` (72), and `preload.ts` reads the same constant so the
+   LCP preload keeps matching the rendered srcset. The ladder still follows each
+   source's native width, so 3360 px masters retain dense-display candidates
+   without ever upscaling the smaller 1536 and 1680 px files — and on a display
+   wider than ~1536 CSS px the brokerage and about-us heroes are resampled up,
+   which is a master-resolution limit, not an encoder one.
 5. **The hero follows the viewport above 900 px instead of stopping at the
    reference height.** The home hero already fills the screen, and the page
    openers should keep the same visual weight on taller displays. At the 1440 ×
@@ -127,14 +132,13 @@ what that query is for.
 |---|---|---|
 | JavaScript | 0 KB | **0 B** |
 | Requests | 1 | 1 — the photograph, preloaded as the LCP element |
-| Largest asset | ≤ 250 KB | 131 KB — the 1440 px AVIF of the Dev-to-Sell shot, at quality 45 |
+| Largest asset | ≤ 850 KB | 802 KB — native-width 3360 px AVIF for Dev-to-Sell; its 1440 px candidate is 142 KB. |
 | LCP (Lighthouse mobile) | ≤ 2.5 s | 1.50 / 1.80 / 1.80 / 1.80 s across the four pages |
 
-The masters are 1440 × 900, which covers a 1440 px viewport at 1× and nothing
-more. On a 2× screen, and on any viewport wider than 1440, the photograph is
-upscaled — `widths` is capped at the native width because asking sharp for 2880
-would interpolate rather than sharpen. Masters at 2880 would fix it with no code
-change. Same note `ServiceCards` and `TeamGrid` already carry.
+The masters now range from 1536 to 3360 px wide. The responsive ladder ends at
+each individual file's native width: About and Dev-to-Sell can serve a true dense
+desktop candidate, while Brokerage and Dev-to-Hold stop at 1536 and 1680 rather
+than being interpolated beyond the supplied detail.
 
 ## A11y
 
@@ -149,6 +153,11 @@ change. Same note `ServiceCards` and `TeamGrid` already carry.
   | headline | 3.0 | **2.91** (About us, 1024) | 3.39 (Dev-to-Sell, 1024) |
   | standfirst | 4.5 | **3.56** (Dev-to-Sell, 768) | 5.08 (Dev-to-Sell, 768) |
   | navigation | 4.5 | **4.28** (Dev-to-Sell, 1440) | 5.08 (Dev-to-Sell, 1440) |
+
+  The 2026-09-03 replacement set passed 19 of 20 page/viewport combinations on
+  the existing scrim. Dev-to-Sell at 390 px measured 2.97:1 for the headline;
+  raising the shallow bottom stop from 0.36 to 0.37 is the smallest whole-percent
+  correction and is covered by the same test grid.
 
   The middle column is why this block has its own scrim tokens: three of the four
   photographs are fine on the home hero's values and the fourth is not, and the

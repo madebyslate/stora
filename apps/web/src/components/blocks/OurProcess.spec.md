@@ -44,7 +44,7 @@ whether an offset is constant across the four steps.
 | Element | Value | How it was established |
 |---|---|---|
 | Photograph | 460 × 540 | given |
-| Masters | 920 × 1080 | exactly 2 × the drawn size — no upscaling, sharp at 2 dpr |
+| Masters | 920–960 × 1080–1200 | replacement files remain at least 2 × the drawn width |
 | Number badge | 36 × 36 | given |
 | Badge gap | 8 px, to the left of the photo, tops aligned | given |
 | Badge number | 16 px / 400 | given |
@@ -372,7 +372,7 @@ wrong answer first:
 |---|---|---|
 | JavaScript | 0 KB local | **0 B local** — the pin and sequencing remain CSS scroll-driven; global wheel smoothing is owned by `BaseLayout` |
 | Requests | 4 | four photographs, lazy |
-| Largest asset | — | 920 × 1080 masters, served as AVIF/WebP through `Picture` |
+| Largest asset | — | 920–960 px wide masters, served as AVIF/WebP through `Picture` |
 
 ## Interaction
 

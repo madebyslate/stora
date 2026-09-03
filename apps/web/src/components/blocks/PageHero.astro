@@ -1,6 +1,6 @@
 ---
 import type { PageHeroBlock } from '@repo/shared'
-import { PAGE_HERO_QUALITY, PAGE_HERO_SIZES, PAGE_HERO_WIDTHS } from '@/lib/images'
+import { getPageHeroWidths, PAGE_HERO_SIZES } from '@/lib/images'
 import Picture from '@/components/ui/Picture.astro'
 
 interface Props {
@@ -40,9 +40,8 @@ const order = {
   <div class="page-hero__backdrop">
     <Picture
       image={block.image}
-      widths={PAGE_HERO_WIDTHS}
+      widths={getPageHeroWidths(block.image.width)}
       sizes={PAGE_HERO_SIZES}
-      quality={PAGE_HERO_QUALITY}
       priority
     />
   </div>

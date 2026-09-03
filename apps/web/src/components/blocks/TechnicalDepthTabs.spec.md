@@ -110,7 +110,7 @@ stationary and the new shot is unmasked over the stage.
 |---|---|---|
 | JavaScript | 0 KB | 0 B |
 | Requests | 2–3 lazy media assets | only the media belonging to the block |
-| Largest asset | 590 × 590 SVG or 560 × 560 photograph | photographs are generated responsively; SVG stays vector |
+| Largest asset | 590 × 590 SVG or up to 1456 × 1024 photograph | photographs are generated responsively; SVG stays vector |
 
 ## A11y
 

@@ -6,40 +6,94 @@
     "subheading": "Our team has delivered >2GW of renewable energy projects internationally.",
     "logos": [
       {
-        "src": "content/media/logos/nextera-energy.png",
+        "src": "content/media/logos/sgh.svg",
+        "alt": "SGH Warsaw School of Economics",
+        "width": 163,
+        "height": 64
+      },
+      {
+        "src": "content/media/logos/greenway.svg",
+        "alt": "GreenWay",
+        "width": 1185,
+        "height": 243
+      },
+      {
+        "src": "content/media/logos/bcg.svg",
+        "alt": "Boston Consulting Group",
+        "width": 261,
+        "height": 112
+      },
+      {
+        "src": "content/media/logos/first-abu-dhabi-bank.svg",
+        "alt": "First Abu Dhabi Bank",
+        "width": 267,
+        "height": 159
+      },
+      {
+        "src": "content/media/logos/nextera-energy.svg",
         "alt": "NextEra Energy",
-        "width": 164,
-        "height": 72
+        "width": 186,
+        "height": 82
       },
       {
-        "src": "content/media/logos/terra-one.png",
-        "alt": "TERRA ONE",
-        "width": 213,
-        "height": 21
-      },
-      {
-        "src": "content/media/logos/rpower.png",
+        "src": "content/media/logos/rpower-renewables.svg",
         "alt": "R.Power Renewables",
-        "width": 207,
-        "height": 57
+        "width": 212,
+        "height": 60
       },
       {
-        "src": "content/media/logos/university-of-cambridge.png",
-        "alt": "University of Cambridge",
-        "width": 200,
-        "height": 42
+        "src": "content/media/logos/mckinsey-and-company.svg",
+        "alt": "McKinsey & Company",
+        "width": 140,
+        "height": 43
       },
       {
-        "src": "content/media/logos/baywa-re.png",
-        "alt": "BayWa r.e.",
-        "width": 194,
-        "height": 47
-      },
-      {
-        "src": "content/media/logos/mit.png",
+        "src": "content/media/logos/mit.svg",
         "alt": "Massachusetts Institute of Technology",
-        "width": 195,
+        "width": 868,
+        "height": 200
+      },
+      {
+        "src": "content/media/logos/harvard-business-school.svg",
+        "alt": "Harvard Business School",
+        "width": 403,
+        "height": 175
+      },
+      {
+        "src": "content/media/logos/baywa-re.svg",
+        "alt": "BayWa r.e.",
+        "width": 1248,
+        "height": 300
+      },
+      {
+        "src": "content/media/logos/bain-and-company.svg",
+        "alt": "Bain & Company",
+        "width": 894,
+        "height": 302
+      },
+      {
+        "src": "content/media/logos/terra-one.svg",
+        "alt": "TERRA ONE",
+        "width": 500,
         "height": 48
+      },
+      {
+        "src": "content/media/logos/deutsche-bank.svg",
+        "alt": "Deutsche Bank",
+        "width": 500,
+        "height": 416
+      },
+      {
+        "src": "content/media/logos/university-of-cambridge.svg",
+        "alt": "University of Cambridge",
+        "width": 567,
+        "height": 118
+      },
+      {
+        "src": "content/media/logos/unilever.svg",
+        "alt": "Unilever",
+        "width": 118,
+        "height": 130
       }
     ]
   },
@@ -149,72 +203,54 @@
     "heading": "Featured Publications",
     "items": [
       {
-        "publication": "Forbes",
+        "publication": "Forbes Polska",
         "logo": {
           "src": "content/media/publications/forbes.svg",
           "alt": "",
           "width": 118,
           "height": 42
         },
-        "description": "Stora expands renewable energy development pipeline across Poland",
-        "category": "Forbes",
-        "publishedAt": "2026-06-17",
+        "description": "Only execution-ready, investment-grade BESS projects will survive Poland’s next phase",
+        "category": "Forbes Polska"
+      },
+      {
+        "publication": "Gazeta Finansowa",
+        "logo": {
+          "src": "content/media/publications/gazeta-finansowa.png",
+          "alt": "",
+          "width": 111,
+          "height": 64
+        },
+        "description": "Poland’s storage market shifts from speculative development to finance-ready projects",
+        "category": "Gazeta Finansowa",
+        "publishedAt": "2026-02-20",
         "link": {
           "label": "Read Article",
-          "href": "/industry-insights/",
-          "disabled": true
+          "href": "https://gf24.pl/46963/energia-pod-kontrola/",
+          "external": true
         }
       },
       {
-        "publication": "Forbes",
+        "publication": "Solarplaza Summit Poland",
         "logo": {
-          "src": "content/media/publications/forbes.svg",
+          "src": "content/media/publications/solarplaza-summit.png",
           "alt": "",
-          "width": 118,
-          "height": 42
+          "width": 237,
+          "height": 64
         },
-        "description": "Stora expands renewable energy development pipeline across Poland",
-        "category": "Forbes",
-        "publishedAt": "2026-06-17",
-        "link": {
-          "label": "Read Article",
-          "href": "/industry-insights/",
-          "disabled": true
-        }
+        "description": "Investor appetite is strong, but Poland’s BESS market now rewards early execution",
+        "category": "Solarplaza Summit Poland"
       },
       {
-        "publication": "Forbes",
+        "publication": "Energy Storage Summit",
         "logo": {
-          "src": "content/media/publications/forbes.svg",
+          "src": "content/media/publications/energy-storage-summit.png",
           "alt": "",
-          "width": 118,
-          "height": 42
+          "width": 146,
+          "height": 64
         },
-        "description": "Stora expands renewable energy development pipeline across Poland",
-        "category": "Forbes",
-        "publishedAt": "2026-06-17",
-        "link": {
-          "label": "Read Article",
-          "href": "/industry-insights/",
-          "disabled": true
-        }
-      },
-      {
-        "publication": "Forbes",
-        "logo": {
-          "src": "content/media/publications/forbes.svg",
-          "alt": "",
-          "width": 118,
-          "height": 42
-        },
-        "description": "Stora expands renewable energy development pipeline across Poland",
-        "category": "Forbes",
-        "publishedAt": "2026-06-17",
-        "link": {
-          "label": "Read Article",
-          "href": "/industry-insights/",
-          "disabled": true
-        }
+        "description": "Poland moves from early-stage speculation to executable grid-scale storage",
+        "category": "Energy Storage Summit"
       }
     ]
   },

@@ -136,7 +136,18 @@ Both are bracketed by where the design breaks a line rather than stated by it.
    copy at 0.70 with the plateau at 0.61 (4.54:1). Neither leaves much headroom,
    which is why the split was taken instead.
 
-4. **Nothing else.** The toggle, the panel height, the padding, the scrim's height
+4. **The M&A panel shows `pages/brokerage-hero.jpg`, not `services/ma-brokerage.jpg`.**
+   The card is the door to `/brokerage/`, and the terrain-map export it carried
+   reads as a different subject from the page behind it. Reusing the page's own
+   photograph makes the link continuous, and the file is 1536 px wide against the
+   612 px of the other two masters — the only card whose source can feed a 2x
+   panel.
+5. **The variant ladder comes from `getRetinaWidths`, not a fixed list.** The old
+   `[400, 640, 960, 1280]` asked sharp to upscale a 612 px master to 1280 px:
+   more bytes, no detail, and a visibly softer panel — the mechanism behind the
+   2026-09-03 quality entry in `DECISIONS.md`. Encoder quality is the shared
+   `DEFAULT_IMAGE_QUALITY`; the cards claim no exception.
+6. **Nothing else.** The toggle, the panel height, the padding, the scrim's height
    and shape, and the two type steps that were given are used verbatim.
 
 ## Breakpoints
@@ -230,7 +241,7 @@ beats a transition on the same property for good.
 |---|---|---|
 | JavaScript | 0 KB | **0 B** — no script of any kind; the observer that starts the entrance is `BaseLayout`'s, already on the page |
 | Requests | — | 3 (one image per panel) |
-| Largest asset | — | 43 KB (`develop-to-hold`, AVIF at 612 w) |
+| Largest asset | — | Re-measured after the 2026-09-03 replacement set. |
 
 ## A11y
 
@@ -268,12 +279,10 @@ beats a transition on the same property for good.
 
 ## Open questions
 
-- [ ] **Resolution.** The supplied files are 612 × 600, 612 × 600 and 528 × 600.
-      The panel is 480 × 600 CSS px, so they cover it at 1× and Astro's ladder tops
-      out at the source width — on a 2× display the photography is soft. Masters at
-      960 px or wider would fix it with no code change: same names, drop them in,
-      rebuild. Nothing about the crop needs to change; two of the three are wider
-      than 4:5 and `object-fit: cover` takes the middle.
+- [x] **Resolution.** Closed by the 2026-09-03 replacement set: the supplied
+      files are 3360 × 1440, 3360 × 1440 and 1536 × 768. All exceed the 960 px
+      width needed for the 480 px panels at 2×; `object-fit: cover` keeps the
+      existing composition.
 - [ ] Left edge of the section: 40 px (page grid) or ~56 px (as measured here and
       in `LogoWall`)? Same question, both sections, one answer needed.
 - [ ] Is the first panel meant to be open on arrival, or is that the frame showing

@@ -1,6 +1,7 @@
 ---
 import type { ServiceCardsBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
+import { getRetinaWidths, SERVICE_CARD_CSS_WIDTHS } from '@/lib/images'
 import Button from '@/components/ui/Button.astro'
 
 interface Props {
@@ -59,7 +60,6 @@ const cardOrder = (index: number) => {
 }
 
 const CARD_SIZES = '(min-width: 1440px) 480px, (min-width: 1024px) 33.34vw, 100vw'
-const CARD_WIDTHS = [400, 640, 960, 1280]
 ---
 
 <section class="services" aria-labelledby={headingId} data-reveal-group>
@@ -118,7 +118,11 @@ const CARD_WIDTHS = [400, 640, 960, 1280]
             >
               <span class="card__pane reveal-curtain" style={`--reveal-index: ${order.media}`}>
                 <span class="card__media reveal-curtain-hold" style={`--reveal-index: ${order.media}`}>
-                  <Picture image={card.image} widths={CARD_WIDTHS} sizes={CARD_SIZES} />
+                  <Picture
+                    image={card.image}
+                    widths={getRetinaWidths(SERVICE_CARD_CSS_WIDTHS, card.image.width)}
+                    sizes={CARD_SIZES}
+                  />
                 </span>
 
                 <span class="card__scrim card__scrim--title" />

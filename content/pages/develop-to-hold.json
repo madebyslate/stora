@@ -12,9 +12,9 @@
       "subheading": "We develop and deliver into operation BESS projects in Poland as an Independent Power Producer.",
       "image": {
         "src": "content/media/pages/develop-to-hold-hero.jpg",
-        "alt": "An operating battery storage site in open grassland, containers in long parallel rows",
-        "width": 1440,
-        "height": 900
+        "alt": "A battery storage facility surrounded by open farmland at sunset",
+        "width": 1680,
+        "height": 720
       }
     },
     {
@@ -82,26 +82,55 @@
       "blockType": "marketFlexibility",
       "heading": "A market built\nfor flexibility",
       "description": "Poland's energy mix has rapidly shifted to renewables — driving an urgent need for flexible capacity, with BESS the only feasible option.",
-      "items": [
-        {
-          "heading": "Poland's installed capacity, 2025–2040 (GW)",
-          "graphic": {
-            "src": "content/media/pages/a-market-built-for-flexibility/installed-capacity.svg",
-            "alt": "Stacked bar chart showing Poland's installed electricity capacity rising from 71 GW in 2025 to 127 GW in 2040, with renewable capacity growing from 50% to 69%.",
-            "width": 497,
-            "height": 541
-          }
-        },
-        {
-          "heading": "Poland's energy mix — why BESS is the only path to 2040",
-          "graphic": {
-            "src": "content/media/pages/a-market-built-for-flexibility/energy-mix.svg",
-            "alt": "Diagram explaining that gas carries political risk, nuclear arrives too late and coal is forced to exit, leaving renewables as the scalable path supported by battery energy storage.",
-            "width": 618,
-            "height": 554
-          }
+      "capacity": {
+        "heading": "Poland's installed capacity, 2025–2040 (GW)",
+        "graphic": {
+          "src": "content/media/pages/a-market-built-for-flexibility/installed-capacity.svg",
+          "alt": "Stacked bar chart showing Poland's installed electricity capacity rising from 71 GW in 2025 to 127 GW in 2040, with renewable capacity growing from 50% to 69%.",
+          "width": 497,
+          "height": 541
         }
-      ]
+      },
+      "energyMix": {
+        "heading": "Poland's energy mix — why BESS is the only path to 2040",
+        "rows": [
+          {
+            "icon": "gas",
+            "name": "Gas",
+            "note": "political risk",
+            "description": "Exposed to geopolitical and import risk, with CO₂ costs making it significantly less profitable by the mid-2030s.",
+            "verdict": "ruled-out"
+          },
+          {
+            "icon": "nuclear",
+            "name": "Nuclear",
+            "note": "arrives too late",
+            "description": "Nuclear arrives after 2035, so it doesn't contribute to the supply gap that must be solved this decade.",
+            "verdict": "ruled-out"
+          },
+          {
+            "icon": "coal",
+            "name": "Coal",
+            "note": "regulatory forced exit",
+            "description": "EU ETS carbon prices make coal increasingly uneconomical, with a phase-out intended by 2040.",
+            "verdict": "ruled-out"
+          },
+          {
+            "icon": "renewables",
+            "name": "Renewables",
+            "note": "the only scalable path",
+            "description": "Domestic, deployable now, cost-competitive — but intermittent at scale without storage.",
+            "verdict": "viable"
+          },
+          {
+            "icon": "bess",
+            "name": "BESS",
+            "note": "required to support it",
+            "description": "Supports renewable buildout, ensuring stable capacity regardless of short-term production spikes.",
+            "verdict": "viable"
+          }
+        ]
+      }
     },
     {
       "blockType": "proofPoints",

@@ -12,9 +12,9 @@
       "subheading": "For parties looking to buy or sell BESS projects in Poland.",
       "image": {
         "src": "content/media/pages/brokerage-hero.jpg",
-        "alt": "An aerial view of farmland and forest with a watercourse picked out in green",
-        "width": 1440,
-        "height": 900
+        "alt": "An aerial view of farmland with candidate battery storage sites outlined",
+        "width": 1536,
+        "height": 768
       }
     },
     {
@@ -34,8 +34,8 @@
           "image": {
             "src": "content/media/pages/boxes/for-sellers.jpg",
             "alt": "",
-            "width": 1074,
-            "height": 698
+            "width": 1370,
+            "height": 874
           }
         },
         {
@@ -61,8 +61,8 @@
           "image": {
             "src": "content/media/pages/technical-depth/off-market-opportunities.jpg",
             "alt": "",
-            "width": 560,
-            "height": 560
+            "width": 1024,
+            "height": 1024
           }
         },
         {
@@ -72,8 +72,8 @@
           "image": {
             "src": "content/media/pages/technical-depth/deep-technical-knowledge.jpg",
             "alt": "",
-            "width": 560,
-            "height": 560
+            "width": 1024,
+            "height": 1024
           }
         },
         {
@@ -83,8 +83,8 @@
           "image": {
             "src": "content/media/pages/technical-depth/negotiation-leader.jpg",
             "alt": "",
-            "width": 560,
-            "height": 560
+            "width": 1456,
+            "height": 816
           }
         }
       ]

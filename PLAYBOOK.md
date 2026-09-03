@@ -1213,3 +1213,37 @@ prawdy leżące poza pakietami musi być tam wymienione — dotyczy tak samo
 
 **Do startera.** `globalDependencies` w `turbo.json` od pierwszego commita,
 z komentarzem, że lista jest sprzężona z każdym katalogiem treści poza pakietami.
+
+### P-056 — `quality` nieustawione to nie „domyślne", tylko AVIF q50 od sharpa
+**Objaw.** Zdjęcia na podstronach wyglądają miękko i mydlano — bez artefaktów
+blokowych, więc nie wygląda to na kompresję, tylko na złe pliki źródłowe. Hero,
+który jako jedyny miał jawne `quality`, wygląda przy nich lepiej. W `srcset`
+zdjęć niehero URL-e `/_image/` w ogóle nie mają parametru `q=`.
+
+**Przyczyna.** `<Picture quality={undefined}>` nie znaczy „weź wspólną wartość
+domyślną" — znaczy „nie przekazuj nic sharpowi", a sharp ma **własne** wartości
+per format: JPEG 80, WebP 80, **AVIF 50**. Ponieważ AVIF jest pierwszy w drabince
+formatów, dostaje go ~94% ruchu — czyli praktycznie cała strona jechała na q50,
+podczas gdy komentarz w komponencie mówił o „wspólnym domyślnym". Jawne
+`quality={65}` na hero robiło jeszcze gorszą rzecz: wyglądało jak *obniżenie*
+poniżej domyślnej, a było **podniesieniem** o 15 punktów.
+
+**Fix.** Nazwana stała (`DEFAULT_IMAGE_QUALITY`) przekazywana zawsze i jawnie —
+jako domyślna wartość propa, nie jako `undefined`. Wtedy każdy URL `/_image/`
+ma `q=`, a wyjątek per blok jest widoczny jako różnica od stałej, nie jako różnica
+od nieznanej wartości biblioteki. Poziom dobiera się pomiarem na własnych
+masterach, nie z głowy: dla tego zestawu q50 → q72 to ~2,5× bajtów (57 → 143 kB
+przy 1024 px), a powyżej 72 krzywa rośnie bez zysku na oko.
+
+**Uwaga na drugą stronę kontraktu.** Zmiana domyślnej jakości dotyka preloadu LCP
+(P-032): `preload.ts` musi importować tę samą stałą, inaczej wracają dwa komplety
+plików.
+
+**Wyłapuje.** Kontrola, nie test — w zbudowanym `dist/` nazwa pliku jest hashem
+i `q` z niej nie wynika. Przy działającym dev serverze:
+`curl -s http://localhost:PORT/STRONA/ | grep -o '_image/[^"]*avif' | grep -cv 'q='`
+— `0` znaczy, że żadne zdjęcie nie leci na domyślnej sharpa.
+
+**Do startera.** Stała jakości od pierwszego commita, razem z tabelką pomiaru
+w komentarzu. Każda biblioteka obrazów ma taką pułapkę — „nieustawione" nigdy
+nie znaczy „rozsądne".

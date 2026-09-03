@@ -4,9 +4,9 @@ import { resolveImage, isRemote } from './media'
 import {
   HERO_POSTER_SIZES,
   HERO_POSTER_WIDTHS,
-  PAGE_HERO_QUALITY,
+  getPageHeroWidths,
+  DEFAULT_IMAGE_QUALITY,
   PAGE_HERO_SIZES,
-  PAGE_HERO_WIDTHS,
 } from './images'
 
 export interface LcpPreload {
@@ -36,9 +36,9 @@ export async function getLcpPreload(blocks: Block[]): Promise<LcpPreload | null>
   /*
    * Two blocks open a page and both put an image behind the `<h1>`: `hero` with
    * the poster its video starts from, `pageHero` with a still. Each brings its own
-   * ladder and its own encoder quality — they are capped at different native
-   * widths and one of them is compressed harder — so those travel with the image
-   * rather than being decided here.
+   * ladder — they are capped at different native widths — so that travels with the
+   * image rather than being decided here. Quality no longer does: both encode at
+   * `DEFAULT_IMAGE_QUALITY`, the same constant `<Picture>` applies.
    *
    * Every one of them has to match what the block passes to <Picture>, exactly.
    * `quality` is part of the cache key Astro hashes the filename from, so a
@@ -53,14 +53,12 @@ export async function getLcpPreload(blocks: Block[]): Promise<LcpPreload | null>
           image: first.video.poster,
           widths: HERO_POSTER_WIDTHS,
           sizes: HERO_POSTER_SIZES,
-          quality: undefined,
         }
       : first.blockType === 'pageHero'
         ? {
             image: first.image,
-            widths: PAGE_HERO_WIDTHS,
+            widths: getPageHeroWidths(first.image.width),
             sizes: PAGE_HERO_SIZES,
-            quality: PAGE_HERO_QUALITY,
           }
         : null
   if (!lcp) return null
@@ -75,7 +73,7 @@ export async function getLcpPreload(blocks: Block[]): Promise<LcpPreload | null>
     format: 'avif',
     widths: lcp.widths,
     sizes: lcp.sizes,
-    quality: lcp.quality,
+    quality: DEFAULT_IMAGE_QUALITY,
   })
 
   return {

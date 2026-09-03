@@ -12,9 +12,9 @@
       "subheading": "Stora develops renewable energy infrastructure across Europe — combining local market expertise with the experience to deliver projects at scale.",
       "image": {
         "src": "content/media/pages/about-us-hero.jpg",
-        "alt": "A wooded valley seen from the air, with a river running through it",
-        "width": 1376,
-        "height": 864
+        "alt": "A grid-scale battery storage facility surrounded by green farmland",
+        "width": 3360,
+        "height": 1440
       }
     },
     {
@@ -23,8 +23,8 @@
       "heroImage": {
         "src": "content/media/pages/about-us-hero.jpg",
         "alt": "",
-        "width": 1376,
-        "height": 864
+        "width": 3360,
+        "height": 1440
       },
       "photos": [
         {
@@ -42,8 +42,8 @@
         {
           "src": "content/media/process/dso-dno-relationship.jpg",
           "alt": "A substation and transmission towers standing in a field at dusk",
-          "width": 920,
-          "height": 1080
+          "width": 1008,
+          "height": 1184
         },
         {
           "src": "content/media/services/develop-to-hold.jpg",
@@ -53,15 +53,15 @@
         },
         {
           "src": "content/media/pages/technical-depth/off-market-opportunities.jpg",
-          "alt": "An engineer inspecting the racks inside an open battery enclosure",
-          "width": 560,
-          "height": 560
+          "alt": "A planned battery storage site visualised across fields beside the power grid",
+          "width": 1024,
+          "height": 1024
         },
         {
           "src": "content/media/process/data-heavy-screening.jpg",
           "alt": "Patchwork farmland seen straight down from the air",
-          "width": 920,
-          "height": 1080
+          "width": 960,
+          "height": 1200
         },
         {
           "src": "content/media/pages/boxes/grid-progress.jpg",

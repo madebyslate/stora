@@ -5,6 +5,110 @@ Dopisujesz każdą decyzję niestandardową (AGENT-RULES §9.7).
 
 ---
 
+## 2026-09-03 — Karta M&A bierze zdjęcie strony `/brokerage/`, drabinka kart bez powiększania
+
+**Problem.** Po przebudowie panele `ServiceCards` wyglądały gorzej niż pliki
+źródłowe. `widths` było listą stałą `[400, 640, 960, 1280]`, a mastery kart mają
+612 i 528 px — sharp interpolował je w górę do 1280 px. Wariant powiększony waży
+więcej i wygląda gorzej niż oryginał; to ta sama klasa błędu co drabinki opisane
+wyżej, tylko w bloku, którego tamta zmiana nie objęła.
+
+**Decyzja.** `ServiceCards` używa `getRetinaWidths(SERVICE_CARD_CSS_WIDTHS, …)`,
+czyli 400 / 480 / 640 CSS plus krok 2×, przycięte do natywnej szerokości pliku.
+Bez własnej stałej jakości — obowiązuje `DEFAULT_IMAGE_QUALITY`.
+
+**Druga zmiana.** Karta „M&A Brokerage" pokazuje `pages/brokerage-hero.jpg`
+zamiast `services/ma-brokerage.jpg`. Powód rzeczowy: karta prowadzi na
+`/brokerage/`, a mapa terenu z dotychczasowego eksportu pokazywała inny temat niż
+strona docelowa. Powód techniczny: to jedyny master kart szerszy niż panel
+(1536 px), więc jako jedyny karmi ekran 2×.
+
+**Czego to nie naprawia.** IPP i Joint Ventures nadal jadą z plików 612 × 600 na
+panelu 480 × 600 CSS — na retinie nie będą ostre, dopóki nie dostaniemy większych
+masterów. To prośba o pliki, nie usterka kodu.
+
+---
+
+## 2026-09-03 — Nowe mastery hero zachowują natywną rozdzielczość i jakość 65
+
+**Kontekst.** Klient wymienił fotografie hero podstron, wskazując miękkość
+dotychczasowych plików i prosząc, żeby nowych materiałów nie kompresować mocno.
+Nowy zestaw nie ma jednego wymiaru: mastery mają 1536, 1680 albo 3360 px
+szerokości. Wspólny sufit 1440 px wyrzucałby dostarczony detal z dwóch plików,
+a wspólny sufit 3360 px interpolowałby dwa mniejsze.
+
+**Decyzja.** Mastery JPEG trafiają do repo bez ponownego kodowania. `PageHero`
+i jego preload budują tę samą drabinę kandydatów zakończoną natywną szerokością
+konkretnego pliku, a jakość wariantów rośnie z 45 do 65. Na zwykłym desktopie
+Dev-to-Sell pobiera AVIF 1440 px ważący 142 KB; pełny kandydat 3360 px waży
+802 KB i jest dostępny dla gęstego ekranu zamiast powiększania 1440 px.
+
+**Kontrast.** Dziewiętnaście z dwudziestu kombinacji czterech stron i pięciu
+szerokości przeszło na dotychczasowym scrimie. Dev-to-Sell przy 390 px osiągnął
+2,97 : 1 dla nagłówka przy progu 3 : 1, więc płytki stop dolnego gradientu rośnie
+o najmniejszy pełny krok: 0,36 → 0,37. Pozostałe stopnie się nie zmieniają.
+
+**Koszt.** Profil mobilny nadal wybiera kandydat około 1280 px, nie master.
+Większy transfer dotyczy ekranów, które faktycznie potrafią pokazać dodatkowy
+detal; cena za brak miękkości na 2× jest jawna w budżecie `PageHero.spec.md`.
+
+---
+
+## 2026-09-03 — Prawa kolumna sekcji rynkowej przestaje być SVG; `verdict` jest jej jedynym przełącznikiem
+
+**Kontekst.** Druga kolumna „A market built for flexibility" była płaskim
+eksportem ramki Figmy (`2008:144`) — 350 KB SVG, w którym cała treść (pięć
+technologii, pięć opisów, wyroki i znaki między wierszami) siedziała jako
+ścieżki. Klient poprosił o normalnie wdrożoną sekcję.
+
+**Decyzja.** Kolumna jest zbudowana: `items[2]` w schemacie ustępuje nazwanym
+`capacity` i `energyMix`, a `energyMix.rows[]` to pięć wierszy
+`{ icon, name, note, description, verdict }`. Ramka jest rysowana 1 : 1 przy
+618 px, więc wszystkie współrzędne wchodzą do tokenów bez przeliczania.
+
+`verdict` (`ruled-out` / `viable`) jest jedynym przełącznikiem bloku i decyduje
+o czterech rzeczach: o znaczku (krzyżyk albo ptaszek), o kolorze nazwy
+(Lime-Dark albo Green), o sile wejścia znaczka oraz — w porównaniu z wierszem
+powyżej — o znaku na kresce. Zmiana wyroku to wniosek (dwie kreski, znak
+równości), brak zmiany to kolejny krok tego samego wywodu (szewron).
+
+**Powód.** Znak na kresce **wynika** z wyroków, których stoi pomiędzy, zamiast
+być trzecim polem, które da się z nimi rozjechać. Ta sama zasada zdejmuje
+warunek z animacji: wniosek składa się z dwóch stron, szewron spada na kreskę,
+a ptaszek wchodzi z popem 0,5 tam, gdzie krzyżyk tylko się wyłania — jedna klasa
+i jeden token różnicy, bo `scale(1)` to po prostu brak skali.
+
+**Koszt.** Cztery odstępy między wierszami ramka mierzy jako 44 / 45 / 53 / 49
+przy identycznie zbudowanych wierszach. Trzy zostały znormalizowane do 45; 53
+zostaje, bo to jedyne miejsce, w którym wyrok się zmienia, i jest leadem
+wniosku. Ostatni wiersz siedzi przez to 5 px wyżej niż w ramce — pytanie do
+grafika jest w spec-u. Zysk: 350 KB assetu mniej, treść w `content/`, jeden
+request zamiast dwóch, nadal 0 B JS.
+
+---
+
+## 2026-09-03 — Piętnaście niezależnych eksportów logo ma wspólny sufit 196 × 52
+
+**Kontekst.** Nowy komplet zastępuje sześć PNG piętnastoma SVG, ale pliki nie
+pochodzą ze wspólnej ramki: ich viewBoxy mają od 118 × 130 do 1248 × 300. Skala
+oparta na natywnych wymiarach, poprawna dla starego eksportu, narysowałaby część
+znaków niemal dziesięć razy większą od pozostałych.
+
+**Decyzja.** Każdy znak zachowuje proporcje i mieści się w polu maksymalnie
+196 × 52 px. Szerokie wordmarki zatrzymuje szerokość, zwarte i pionowe — wysokość.
+Piętnaście znaków tworzy zmierzony okres około 3106 px, więc do bezszwowej pętli wystarczą dwa
+zestawy; czas 75 s utrzymuje wcześniejsze tempo około 41,4 px/s. Statyczny wariant
+bez ruchu ma 5 × 3 kolumny na desktopie, 3 × 5 na tablecie i 2 × 8 na telefonie.
+
+**Powód.** Wspólny sufit normalizuje wielkość optyczną bez ręcznych mnożników dla
+każdej marki i bez deformowania plików. Zmiana liczby kopii wynika z geometrii:
+jeden okres jest już ponad dwa razy szerszy od kontenera 1360 px.
+
+**Koszt.** Piętnaście SVG waży 54,0 KB gzip po jednorazowej optymalizacji `svgo`
+poza drzewem zależności. Kolory z dostarczonych plików pozostają bez zmian.
+
+---
+
 ## 2026-09-03 — `MarketSlider` znika; `MarketSnapshot` pokazuje obie ilustracje naraz
 
 **Kontekst.** Sekcja „Poland is our core market" była sliderem: dwie ilustracje,
@@ -1390,3 +1494,34 @@ etykieta 12 px na Green (3,09 : 1) i zielony tekst 18/500 na 10 % Green
 (3,6 : 1). Wpis z 2026-08-21 dotyczy bloku, którego już nie ma; jego trzecia
 wartość — biały opis 16/400 na Green w CTA — obowiązuje dalej, bo CTA przeszło
 bez zmian.
+
+## 2026-09-03 — Jakość zdjęć: jedna stała 72 dla całej strony, drabinki 2×
+
+**Problem.** Zdjęcia na `/brokerage/` są miękkie. Dwie niezależne przyczyny,
+obie w kodzie, żadna w plikach źródłowych.
+
+**Pierwsza — enkoder.** `<Picture>` przekazywał `quality` tylko wtedy, gdy blok
+je podał, a podawał je jeden blok (`PageHero`, 65). Cała reszta strony jechała
+na domyślnej sharpa, czyli **AVIF q50** — mechanizm opisany w PLAYBOOK P-056.
+
+**Decyzja.** `DEFAULT_IMAGE_QUALITY = 72` w `apps/web/src/lib/images.ts`,
+przekazywane zawsze i jawnie, dla każdego zdjęcia łącznie z hero. Wartość jest
+pomierzona na masterach tego projektu (tabelka w komentarzu przy stałej): q50 →
+q72 to 57 → 143 kB przy 1024 px, a q78 dokłada kolejne 10 % bajtów bez różnicy
+na oko. `PAGE_HERO_QUALITY` znika — wyjątek dla hero powstał względem domyślnej,
+której nie było, więc nie ma czego bronić. `preload.ts` importuje tę samą stałą
+(P-032).
+
+**Druga — drabinki.** `FeaturePair`, `TechnicalDepthTabs` i `ProcessIntroduction`
+kończyły `widths` na szerokości CSS kadru (odpowiednio 1086, 560, 870). Na ekranie
+2× przeglądarka potrzebuje dwa razy tyle, nie znajduje nic wyżej i skaluje w górę
+największy kandydat. Wchodzi `getRetinaWidths(cssWidths, sourceWidth)` — drabinka
+plus jej krok 2×, przycięta do natywnej szerokości pliku, z natywną szerokością
+dorzuconą, gdy krok 2× ją przekracza.
+
+**Czego to nie naprawia.** Część masterów jest po prostu za mała na duży ekran:
+`brokerage-hero.jpg` ma 1536 px przy kadrze pełnoekranowym, `for-buyers.jpg`
+1086 px przy kadrze do 715 px CSS, trzy zdjęcia w `technical-depth/` mają
+1024 px przy kadrze 560 px CSS. Na monitorze szerszym niż ~1536 px hero jest
+rozciągany i żadna zmiana enkodera tego nie cofnie — to prośba o nowe pliki,
+nie usterka kodu.

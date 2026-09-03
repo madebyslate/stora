@@ -114,10 +114,10 @@
           "title": "M&A Brokerage",
           "description": "We advise clients on acquiring, selling, and structuring battery energy storage systems with confidence and market expertise.",
           "image": {
-            "src": "content/media/services/ma-brokerage.jpg",
-            "alt": "An aerial survey of terrain with candidate storage sites highlighted",
-            "width": 528,
-            "height": 600
+            "src": "content/media/pages/brokerage-hero.jpg",
+            "alt": "Two battery storage sites laid out across Polish farmland at golden hour",
+            "width": 1536,
+            "height": 768
           },
           "cta": {
             "label": "Partner with us",
@@ -139,8 +139,8 @@
           "image": {
             "src": "content/media/process/data-heavy-screening.jpg",
             "alt": "",
-            "width": 920,
-            "height": 1080
+            "width": 960,
+            "height": 1200
           },
           "description": "We analyze multiple data sources to identify strategic locations for BESS development."
         },
@@ -150,8 +150,8 @@
           "image": {
             "src": "content/media/process/proprietary-knowledge.jpg",
             "alt": "",
-            "width": 920,
-            "height": 1080
+            "width": 1008,
+            "height": 1184
           },
           "description": "Our proprietary insights and market expertise enable faster, more informed development decisions."
         },

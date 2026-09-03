@@ -1,5 +1,5 @@
 ---
-import type { MarketFlexibilityBlock } from '@repo/shared'
+import type { EnergyMixRow, MarketFlexibilityBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
 
 interface Props {
@@ -9,6 +9,21 @@ interface Props {
 const { block } = Astro.props
 const headingId = `market-flexibility-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
 const headingLines = block.heading.split('\n')
+
+/* The two columns start where the header sequence ends. */
+const capacityOrder = headingLines.length + 2
+const mixOrder = capacityOrder + 1
+
+/*
+ * What joins a row to the one above it. A change of verdict is a conclusion —
+ * two bars, an equals sign — and an unchanged verdict is one more step of the
+ * same argument, so a chevron. Derived rather than authored: the mark can then
+ * never contradict the badges it sits between.
+ */
+const linkFor = (row: EnergyMixRow, previous: EnergyMixRow | undefined) => {
+  if (!previous) return null
+  return previous.verdict === row.verdict ? 'chevron' : 'conclusion'
+}
 ---
 
 <section class="market-flexibility" aria-labelledby={headingId} data-reveal-group>
@@ -35,38 +50,204 @@ const headingLines = block.heading.split('\n')
       class="market-flexibility__panel reveal-fade"
       style={`--reveal-index: ${headingLines.length + 1}`}
     >
-      {
-        block.items.map((item, index) => {
-          const itemOrder = headingLines.length + 2 + index
-          return (
-            <figure
-              class:list={[
-                'market-flexibility__figure',
-                index === 1 && 'market-flexibility__figure--second',
-              ]}
+      <figure class="market-flexibility__figure">
+        <h3 class="market-flexibility__figure-heading text-chart-heading">
+          <span class="reveal-mask" style={`--reveal-index: ${capacityOrder}`}>
+            <span>{block.capacity.heading}</span>
+          </span>
+        </h3>
+        <div class="market-flexibility__graphic">
+          <span
+            class="market-flexibility__graphic-pane reveal-curtain"
+            style={`--reveal-index: ${capacityOrder + 1}`}
+          >
+            <span
+              class="market-flexibility__graphic-hold reveal-curtain-hold"
+              style={`--reveal-index: ${capacityOrder + 1}`}
             >
-              <h3 class="market-flexibility__figure-heading text-chart-heading">
-                <span class="reveal-mask" style={`--reveal-index: ${itemOrder}`}>
-                  <span>{item.heading}</span>
-                </span>
-              </h3>
-              <div class="market-flexibility__graphic">
-                <span
-                  class="market-flexibility__graphic-pane reveal-curtain"
-                  style={`--reveal-index: ${itemOrder + 1}`}
-                >
+              <Picture image={block.capacity.graphic} draggable={false} />
+            </span>
+          </span>
+        </div>
+      </figure>
+
+      <figure class="market-flexibility__figure market-flexibility__figure--second">
+        <h3 class="market-flexibility__figure-heading text-chart-heading">
+          <span class="reveal-mask" style={`--reveal-index: ${mixOrder}`}>
+            <span>{block.energyMix.heading}</span>
+          </span>
+        </h3>
+
+        <ol class="energy-mix">
+          {
+            block.energyMix.rows.map((row, index) => {
+              const link = linkFor(row, block.energyMix.rows[index - 1])
+              const order = mixOrder + 1 + index * 0.8
+              return (
+                <li class="energy-mix__row" data-verdict={row.verdict}>
+                  {link && (
+                    <div
+                      class="energy-mix__link"
+                      data-link={link}
+                      aria-hidden="true"
+                      style={`--reveal-index: ${order}`}
+                    >
+                      <span class="energy-mix__rule-clip">
+                        <span class="energy-mix__rule energy-mix__rule--start reveal-curtain" />
+                      </span>
+                      {link === 'chevron' ? (
+                        <span class="energy-mix__chevron reveal">
+                          <svg width="12" height="6" viewBox="0 0 12 6" fill="none">
+                            <path d="M0.5 0.5L6 5.5L11.5 0.5" stroke="currentColor" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span class="energy-mix__conclusion">
+                          <span class="energy-mix__bar-clip">
+                            <span class="energy-mix__bar reveal-curtain" />
+                          </span>
+                          <span class="energy-mix__bar-clip">
+                            <span class="energy-mix__bar reveal-curtain" />
+                          </span>
+                        </span>
+                      )}
+                      <span class="energy-mix__rule-clip">
+                        <span class="energy-mix__rule energy-mix__rule--end reveal-curtain" />
+                      </span>
+                    </div>
+                  )}
+
                   <span
-                    class="market-flexibility__graphic-hold reveal-curtain-hold"
-                    style={`--reveal-index: ${itemOrder + 1}`}
+                    class="energy-mix__icon reveal-pop"
+                    data-icon={row.icon}
+                    aria-hidden="true"
+                    style={`--reveal-index: ${order + 0.2}`}
                   >
-                    <Picture image={item.graphic} draggable={false} />
+                    {row.icon === 'gas' && (
+                      <svg
+                        width="39"
+                        height="43"
+                        viewBox="0 0 39 43"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M8.11596 15.625C-6.02754 27.883 3.61596 40.375 13.741 41.5C11.491 37 10.366 31.375 19.366 25.75C21.616 32.5 26.116 31.375 23.866 41.5C33.991 40.375 37.366 34.75 37.366 26.875C37.366 20.125 31.741 12.25 28.366 8.875C27.241 11.125 27.241 13.375 24.991 14.5C24.991 10 22.741 4.375 17.116 1C15.991 7.75 10.609 13.465 8.11596 15.625Z" />
+                      </svg>
+                    )}
+                    {row.icon === 'nuclear' && (
+                      <svg
+                        width="40"
+                        height="40"
+                        viewBox="0 0 40 40"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M36.5168 2.98315C41.1469 7.61314 37.3936 18.8732 28.1335 28.1333C18.8736 37.3932 7.6135 41.1466 2.98351 36.5166C-1.64647 31.8865 2.10687 20.6266 11.3669 11.3665C20.6267 2.10651 31.8869 -1.64685 36.5168 2.98315ZM2.98315 2.98341C-1.64685 7.61341 2.10649 18.8734 11.3665 28.1335C20.6264 37.3936 31.8865 41.1469 36.5164 36.5168C41.1466 31.8869 37.3932 20.6267 28.1331 11.3668C18.8733 2.10677 7.61312 -1.64659 2.98315 2.98341Z" />
+                      </svg>
+                    )}
+                    {row.icon === 'coal' && (
+                      <svg
+                        width="51"
+                        height="43"
+                        viewBox="0 0 51 43"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M5.16992 33.0872L11.7337 18.4207L32.2513 10.8652L49.1693 21.6587L44.4899 40.0077L14.2534 41.0871L5.16992 32.1983" />
+                        <path d="M14.5024 41.0913L19.8356 27.2993L12.7246 17.9805" />
+                        <path d="M19.8359 27.7537L33.1691 24.2755V11.7539" />
+                        <path d="M32.7246 24.6406L44.7245 39.3071" />
+                        <path d="M9.16982 23.3118L1.16992 14.5687L5.91872 3.27561L23.4527 1.08984L27.8362 12.383" />
+                        <path d="M9.6141 23.3112L10.9474 10.4389L6.05859 3.75586" />
+                        <path d="M10.9473 10.8675H17.5354L23.3915 1.08984" />
+                      </svg>
+                    )}
+                    {row.icon === 'renewables' && (
+                      <svg
+                        width="48"
+                        height="48"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M41 16C38.216 9.642 31.354 6 23.956 6C14.598 6 6.906 13.104 6 22.2" />
+                        <path d="M32.978 16.8008H40.918C41.06 16.801 41.2007 16.7733 41.3319 16.7191C41.4632 16.665 41.5825 16.5855 41.683 16.4852C41.7835 16.3848 41.8632 16.2657 41.9176 16.1345C41.972 16.0034 42 15.8628 42 15.7208V7.80078M7 32.0008C9.784 38.3588 16.646 42.0008 24.044 42.0008C33.402 42.0008 41.094 34.8968 42 25.8008" />
+                        <path d="M15.022 31.1992H7.082C6.94 31.199 6.79935 31.2267 6.66809 31.2809C6.53682 31.335 6.41753 31.4145 6.31703 31.5148C6.21653 31.6152 6.1368 31.7343 6.0824 31.8655C6.028 31.9966 6 32.1372 6 32.2792V40.1992" />
+                      </svg>
+                    )}
+                    {row.icon === 'bess' && (
+                      <svg
+                        width="60"
+                        height="60"
+                        viewBox="0 0 60 60"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M24 6H36M19.5 54C18.7044 54 17.9413 53.6839 17.3787 53.1213C16.8161 52.5587 16.5 51.7956 16.5 51V15C16.5 14.2044 16.8161 13.4413 17.3787 12.8787C17.9413 12.3161 18.7044 12 19.5 12H40.5C41.2956 12 42.0587 12.3161 42.6213 12.8787C43.1839 13.4413 43.5 14.2044 43.5 15V51C43.5 51.7956 43.1839 52.5587 42.6213 53.1213C42.0587 53.6839 41.2956 54 40.5 54H19.5Z"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path d="M27.7023 44.7466L35.5938 31.0177L25.4243 33.7548L31.3815 23.3906" />
+                      </svg>
+                    )}
                   </span>
-                </span>
-              </div>
-            </figure>
-          )
-        })
-      }
+
+                  <div class="energy-mix__copy">
+                    <p class="energy-mix__label text-mix-label">
+                      <span
+                        class="energy-mix__badge reveal-pop"
+                        style={`--reveal-index: ${order + 0.3}`}
+                      >
+                        <span class="sr-only">
+                          {row.verdict === 'viable' ? 'Viable:' : 'Ruled out:'}
+                        </span>
+                        {row.verdict === 'viable' ? (
+                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                            <path
+                              fill-rule="evenodd"
+                              clip-rule="evenodd"
+                              d="M9 18C10.1819 18 11.3522 17.7672 12.4442 17.3149C13.5361 16.8626 14.5282 16.1997 15.364 15.364C16.1997 14.5282 16.8626 13.5361 17.3149 12.4442C17.7672 11.3522 18 10.1819 18 9C18 7.8181 17.7672 6.64778 17.3149 5.55585C16.8626 4.46392 16.1997 3.47177 15.364 2.63604C14.5282 1.80031 13.5361 1.13738 12.4442 0.685084C11.3522 0.232792 10.1819 -1.76116e-08 9 0C6.61305 3.55683e-08 4.32387 0.948211 2.63604 2.63604C0.948212 4.32387 0 6.61305 0 9C0 11.3869 0.948212 13.6761 2.63604 15.364C4.32387 17.0518 6.61305 18 9 18ZM8.768 12.64L13.768 6.64L12.232 5.36L7.932 10.519L5.707 8.293L4.293 9.707L7.293 12.707L8.067 13.481L8.768 12.64Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                            <path
+                              d="M9 1.125C4.6125 1.125 1.125 4.6125 1.125 9C1.125 13.3875 4.6125 16.875 9 16.875C13.3875 16.875 16.875 13.3875 16.875 9C16.875 4.6125 13.3875 1.125 9 1.125ZM12.0375 12.9375L9 9.9L5.9625 12.9375L5.0625 12.0375L8.1 9L5.0625 5.9625L5.9625 5.0625L9 8.1L12.0375 5.0625L12.9375 5.9625L9.9 9L12.9375 12.0375L12.0375 12.9375Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        )}
+                      </span>
+                      <span class="reveal-mask" style={`--reveal-index: ${order + 0.3}`}>
+                        <span>
+                          <span class="energy-mix__name">{row.name} —</span>{' '}
+                          <span class="energy-mix__note">{row.note}</span>
+                        </span>
+                      </span>
+                    </p>
+                    <p
+                      class="energy-mix__description text-body reveal"
+                      style={`--reveal-index: ${order + 0.45}`}
+                    >
+                      {row.description}
+                    </p>
+                  </div>
+                </li>
+              )
+            })
+          }
+        </ol>
+      </figure>
     </div>
   </div>
 </section>
@@ -145,10 +326,6 @@ const headingLines = block.heading.split('\n')
     overflow: clip;
   }
 
-  .market-flexibility__figure--second .market-flexibility__graphic-pane {
-    --reveal-curtain-x: calc(-1 * var(--market-flex-reveal-x));
-  }
-
   .market-flexibility__graphic :global(img) {
     display: block;
     width: 100%;
@@ -158,8 +335,178 @@ const headingLines = block.heading.split('\n')
     user-select: none;
   }
 
-  .market-flexibility__figure--second .market-flexibility__graphic :global(img) {
-    max-width: var(--market-flex-right-graphic-width);
+  /* ── The energy-mix ladder ─────────────────────────────────────────────────
+   * One grid per row: the glyph column, then the copy. The rule that separates
+   * two rows belongs to the lower one and spans both columns, so the break in
+   * it — and the mark sitting in that break — is positioned by the same grid
+   * that positions the text, with no absolute offsets to keep in sync.
+   */
+  .energy-mix {
+    width: 100%;
+    max-width: var(--market-flex-mix-measure);
+    margin: 0;
+    margin-block-start: var(--market-flex-mix-heading-gap);
+    padding: 0;
+    list-style: none;
+  }
+
+  .energy-mix__row {
+    display: grid;
+    grid-template-columns: var(--market-flex-mix-icon-column) minmax(0, 1fr);
+    column-gap: var(--market-flex-mix-icon-gap);
+    align-items: center;
+    padding-block-end: var(--market-flex-mix-row-trail);
+  }
+
+  .energy-mix__row:last-child {
+    padding-block-end: 0;
+  }
+
+  .energy-mix__link {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) var(--market-flex-mix-link-gap) minmax(0, 1fr);
+    align-items: center;
+    margin-block-end: var(--market-flex-mix-row-lead);
+  }
+
+  /* The verdict flips here, and the reference gives that boundary more air. */
+  .energy-mix__link[data-link='conclusion'] {
+    margin-block-end: var(--market-flex-mix-conclusion-lead);
+  }
+
+  /* The rule is drawn outward from the break, so the mark reads as the reason
+     the two rows are separated rather than as decoration dropped on a line. */
+  .energy-mix__rule-clip {
+    display: block;
+    overflow: clip;
+  }
+
+  .energy-mix__rule {
+    display: block;
+    --reveal-curtain-y: 0%;
+    height: var(--market-flex-divider-width);
+    background-color: var(--color-rule-soft);
+  }
+
+  .energy-mix__rule--start {
+    --reveal-curtain-x: 100%;
+  }
+
+  .energy-mix__rule--end {
+    --reveal-curtain-x: -100%;
+  }
+
+  /* Zero-height, so the mark overlays the rule instead of pushing the two rows
+     apart: the boundary between two rows is the 1 px rule and nothing else. */
+  .energy-mix__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+    height: 0;
+    /* Negative: it arrives from above and settles onto the rule it points at. */
+    --reveal-distance: var(--market-flex-mix-chevron-drop);
+    color: var(--color-green);
+  }
+
+  .energy-mix__chevron svg {
+    display: block;
+    width: var(--market-flex-mix-chevron-width);
+    height: auto;
+  }
+
+  .energy-mix__conclusion {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-self: center;
+    height: 0;
+    row-gap: var(--market-flex-mix-bar-gap);
+  }
+
+  .energy-mix__bar-clip {
+    display: block;
+    width: var(--market-flex-mix-bar-width);
+    overflow: clip;
+  }
+
+  .energy-mix__bar {
+    display: block;
+    --reveal-curtain-y: 0%;
+    height: var(--market-flex-divider-width);
+    background-color: var(--color-green);
+  }
+
+  /* The two halves of the mark close in from opposite sides. */
+  .energy-mix__bar-clip:first-child .energy-mix__bar {
+    --reveal-curtain-x: -100%;
+  }
+
+  .energy-mix__bar-clip:last-child .energy-mix__bar {
+    --reveal-curtain-x: 100%;
+  }
+
+  .energy-mix__icon {
+    display: block;
+    justify-self: center;
+    color: var(--color-green);
+  }
+
+  .energy-mix__icon svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .energy-mix__label {
+    display: flex;
+    align-items: flex-start;
+    column-gap: var(--market-flex-mix-badge-gap);
+    color: var(--color-fg);
+  }
+
+  .energy-mix__badge {
+    flex: none;
+    /* Puts the 18 px badge's centre on the centre of the label's first line. */
+    margin-block-start: var(--market-flex-mix-badge-offset);
+  }
+
+  .energy-mix__badge svg {
+    display: block;
+    width: var(--market-flex-mix-badge-size);
+    height: var(--market-flex-mix-badge-size);
+  }
+
+  /* A ruled-out row fades in; a viable one arrives with a pop. Same class, one
+     token apart — `scale(1)` is simply no scale. */
+  .energy-mix__row[data-verdict='ruled-out'] .energy-mix__badge {
+    --reveal-pop-from: 1;
+    color: var(--color-fg);
+  }
+
+  .energy-mix__row[data-verdict='viable'] .energy-mix__badge {
+    --reveal-pop-from: 0.5;
+    color: var(--color-fg-accent);
+  }
+
+  .energy-mix__name {
+    font-weight: var(--font-weight-medium);
+  }
+
+  .energy-mix__row[data-verdict='viable'] .energy-mix__name {
+    color: var(--color-fg-accent);
+  }
+
+  .energy-mix__note {
+    color: var(--market-flex-copy-color);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .energy-mix__description {
+    max-width: var(--market-flex-mix-copy-measure);
+    margin-block-start: var(--market-flex-mix-copy-gap);
+    color: var(--market-flex-copy-color);
   }
 
   @media (max-width: 63.9375rem) {

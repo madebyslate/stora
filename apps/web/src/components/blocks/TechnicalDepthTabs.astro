@@ -1,6 +1,7 @@
 ---
 import type { TechnicalDepthTabsBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
+import { getRetinaWidths } from '@/lib/images'
 import LongArrowRight from '@/components/ui/icons/LongArrowRight.astro'
 
 interface Props {
@@ -80,7 +81,7 @@ const headingLines = block.heading.split('\n')
                 <span class="technical__hold">
                   <Picture
                     image={item.image}
-                    widths={[360, 480, 560]}
+                    widths={getRetinaWidths([360, 480, 560], item.image.width)}
                     sizes="(max-width: 1199px) min(100vw, 560px), 560px"
                     draggable={false}
                   />

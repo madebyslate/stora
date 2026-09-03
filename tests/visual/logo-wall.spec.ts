@@ -47,19 +47,43 @@ test.describe('LogoWall block', () => {
     expect(opacity).toBe('1')
   })
 
-  test('serves the logos as AVIF with a PNG fallback, never JPEG', async ({ page }) => {
-    // A logo has an alpha channel; flattened into a JPEG it arrives as a mark on
-    // a black box in every browser that takes the fallback.
+  test('serves all supplied logos directly as SVG', async ({ page }) => {
     await page.goto('/')
 
     const list = page.locator('.logo-wall__list:not([aria-hidden])')
-    await expect(list.locator('picture source[type="image/avif"]')).toHaveCount(6)
-    await expect(list.locator('img[src$=".jpg"], img[src$=".jpeg"]')).toHaveCount(0)
-    await expect(list.locator('img[src$=".png"]')).toHaveCount(6)
+    await expect(list.locator('img[src$=".svg"]')).toHaveCount(15)
+    await expect(list.locator('picture')).toHaveCount(0)
+  })
+
+  test('normalises unrelated SVG canvases without distorting their ratios', async ({ page }) => {
+    await page.goto('/')
+
+    const boxes = await page
+      .locator('.logo-wall__list:not([aria-hidden]) img')
+      .evaluateAll((images) =>
+        images.map((image) => {
+          const element = image as HTMLImageElement
+          const box = element.getBoundingClientRect()
+          return {
+            width: box.width,
+            height: box.height,
+            renderedRatio: box.width / box.height,
+            intrinsicRatio:
+              Number(element.getAttribute('width')) / Number(element.getAttribute('height')),
+          }
+        }),
+      )
+
+    expect(boxes).toHaveLength(15)
+    for (const box of boxes) {
+      expect(box.width).toBeLessThanOrEqual(196.1)
+      expect(box.height).toBeLessThanOrEqual(52.1)
+      expect(box.renderedRatio).toBeCloseTo(box.intrinsicRatio, 1)
+    }
   })
 
   test('reserves space for every logo before it loads', async ({ page }) => {
-    // Six lazy images below the fold: without width/height on the tag they land
+    // Fifteen lazy images below the fold: without width/height on the tag they land
     // as zero-height boxes and the section reflows under the visitor.
     await page.goto('/')
 
@@ -78,14 +102,12 @@ test.describe('LogoWall block', () => {
     const track = page.locator('.logo-wall__track')
     const groups = track.locator('.logo-wall__list')
     /*
-     * Three, not two. One period is one group plus its trailing gap (885 px) and
-     * the inner container is 1360, so two groups run out of marks before the loop
-     * comes round and a hole opens at the right edge.
+     * One fifteen-mark period is wider than the inner container, so one hidden
+     * duplicate is sufficient to keep the viewport covered through the loop.
      */
-    await expect(groups).toHaveCount(3)
+    await expect(groups).toHaveCount(2)
     await expect(groups.nth(0)).not.toHaveAttribute('aria-hidden', 'true')
     await expect(groups.nth(1)).toHaveAttribute('aria-hidden', 'true')
-    await expect(groups.nth(2)).toHaveAttribute('aria-hidden', 'true')
 
     const innerGeometry = await page.locator('.logo-wall__marquee').evaluate((element) => {
       const container = element.parentElement
@@ -165,8 +187,8 @@ test.describe('LogoWall block', () => {
       return boxes.slice(1).map((box, index) => box.left - boxes[index].right)
     })
 
-    // Six marks x three groups: seventeen gaps, two of which are seams.
-    expect(gaps).toHaveLength(17)
+    // Fifteen marks x two groups: twenty-nine gaps, including the seam.
+    expect(gaps).toHaveLength(29)
     for (const gap of gaps) {
       expect(gap).toBeCloseTo(64, 1)
     }
@@ -177,12 +199,12 @@ test.describe('LogoWall block', () => {
 
     const track = page.locator('.logo-wall__track')
     const duplicates = track.locator('.logo-wall__list[aria-hidden="true"]')
-    await expect(duplicates).toHaveCount(2)
+    await expect(duplicates).toHaveCount(1)
     for (const duplicate of await duplicates.all()) {
       await expect(duplicate).toBeHidden()
     }
     await expect(track).toHaveCSS('animation-name', 'none')
     await expect(track.locator('.logo-wall__list:not([aria-hidden])')).toHaveCSS('display', 'grid')
-    await expect(track.locator('.logo-wall__list:not([aria-hidden]) img')).toHaveCount(6)
+    await expect(track.locator('.logo-wall__list:not([aria-hidden]) img')).toHaveCount(15)
   })
 })

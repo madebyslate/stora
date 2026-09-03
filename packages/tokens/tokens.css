@@ -253,6 +253,22 @@
   --text-chart-heading--letter-spacing: -0.02em;
   --text-chart-heading--font-weight: 500;
 
+  /*
+   * 18 / 24 / -2% / 500 — the label on a row of the energy-mix ladder.
+   *
+   * Its own step rather than `--text-tab`, which is the same size and weight
+   * with no tracking: the tab is a control, this is a sentence set in two
+   * weights ("Gas — political risk"), and the -0.36 px tracking is given in the
+   * reference. The 24 leading is not given — the reference draws single lines in
+   * 21 px boxes at Aeonik's natural leading; 24 keeps the family's own 18 px
+   * step and puts the badge's centre exactly on the first line's, which the
+   * reference also does. Flagged in `MarketFlexibility.spec.md`.
+   */
+  --text-mix-label: 1.125rem;
+  --text-mix-label--line-height: calc(24 / 18);
+  --text-mix-label--letter-spacing: -0.02em;
+  --text-mix-label--font-weight: 500;
+
   /* 18 / 24 / 500 — compact interactive row label and its counter. */
   --text-tab: 1.125rem;
   --text-tab--line-height: calc(24 / 18);
@@ -512,26 +528,18 @@
   /*
    * Logo wall.
    *
-   * All six logos are exported from one Figma frame at the same scale, and the
-   * design draws them at two thirds of the exported pixels (measured: the six ink
-   * boxes come out at 0.667 +/- 0.01 of the PNG dimensions). Scaling by a single
-   * factor is what preserves the relative sizing the designer set between one mark
-   * and the next; sizing them one by one would not.
-   *
-   * 0.70 rather than 0.667 because the design's row spans 1270 px inside a 1440
-   * frame and the site grid gives this section 1360. Stretching the marks by the
-   * same 3% the row itself stretches keeps the gaps at the ~105 px the design sets
-   * instead of opening them to 116. A logo exported at another scale needs its own
-   * factor, not this one.
+   * The fifteen SVG exports have unrelated canvas dimensions. Every mark is
+   * therefore contained inside the same 196 x 52 visual ceiling while keeping its
+   * intrinsic ratio; wide wordmarks hit the width first and compact marks hit the
+   * height first.
    */
-  --logo-scale: 0.7;
+  --logo-mark-width: 12.25rem; /* 196 */
+  --logo-mark-height: 3.25rem; /* 52 */
   /*
-   * One loop period is one set plus one gap: 1173 exported px x 0.70 = 821 of
-   * marks, plus 64, = 885. At the previous 1360 px per 32 s the row travelled
-   * 42.5 px/s, and 885 / 42.5 = 20.8 -> 21 s keeps exactly that pace now that the
-   * period is the set's own width instead of the container's.
+   * One normalised fifteen-mark period measures about 3106 px including gaps.
+   * 75 s preserves the accepted marquee pace of roughly 41.4 px/s.
    */
-  --logo-marquee-duration: 21s;
+  --logo-marquee-duration: 75s;
   /*
    * 64, not 72. The gap used to be a floor: each set was stretched to the 1360 px
    * container with `space-between`, which opened the five inner gaps to ~108 px
@@ -688,7 +696,7 @@
   --featured-publications-content-gap: var(--space-6); /* 24 — supplied */
   --featured-publications-border-width: 0.0625rem; /* 1 — supplied */
   --featured-publications-border-color: var(--color-rule-soft);
-  --featured-publications-logo-height: 2.625rem; /* 42 — supplied asset frame */
+  --featured-publications-logo-height: 4rem; /* 64 — see FeaturedPublications.spec.md */
   --featured-publications-meta-gap: var(--space-1); /* 4 */
   --featured-publications-meta-color: rgb(23 46 35 / 0.6);
   --featured-publications-button-hover: var(--color-action-hover);
@@ -1138,10 +1146,10 @@
    * gradient (0.28 / 0.48 / 0.66) the standfirst measures 3.56:1 there against the
    * 4.5 it needs, and the About us headline 2.91:1 against 3.
    *
-   * 0.36 / 0.60 / 0.80 is the shallowest point on a sweep of four candidates that
-   * clears both bars with the same ~13% of headroom: worst headline 3.39:1 and
-   * worst standfirst 5.08:1, over four pages x five viewports. Every extra percent
-   * of alpha is photography thrown away, which is why it is not simply set deeper.
+   * The 2026-09-03 replacement set keeps the 0.60 / 0.80 stops and raises the
+   * shallow stop from 0.36 to 0.37. The brighter Dev-to-Sell mobile crop measured
+   * 2.97:1 at 0.36; one percentage point clears the 3:1 headline threshold without
+   * flattening the photograph.
    * Verified by tests/a11y/page-hero-contrast.spec.ts against the composited
    * pixels under the glyphs — a photograph swapped for a brighter one has to be
    * re-run, not assumed.
@@ -1149,7 +1157,7 @@
   --page-hero-scrim-bottom: linear-gradient(
     to bottom,
     rgb(24 24 24 / 0) 0%,
-    rgb(24 24 24 / 0.36) 26%,
+    rgb(24 24 24 / 0.37) 26%,
     rgb(24 24 24 / 0.6) 60%,
     rgb(24 24 24 / 0.8) 100%
   );
@@ -1338,6 +1346,44 @@
   --market-flex-mobile-divider-gap: var(--space-10); /* 48 */
   --market-flex-reveal-x: -105%;
   --market-flex-reveal-scale: 1.04;
+
+  /*
+   * The energy-mix ladder in the right column. Measured off the 618 px
+   * reference frame (`2008:144`), which is drawn 1 : 1 — every value below is a
+   * frame coordinate, not a conversion.
+   *
+   * The icon column is 80 wide because the text column starts at 90 and the
+   * badge/icon gap is 10; the five glyphs sit at 37–40 in the frame, i.e. on
+   * that column's centre to within 3 px.
+   */
+  --market-flex-mix-measure: 38.625rem; /* 618 — reference frame width */
+  /* 25 rather than the left column's 40: the ladder's first row carries 24 of
+     its own lead, and the reference puts the first label 65 px under the
+     heading's visual centre — which a 32 px leading box reaches at 25 + 24. */
+  --market-flex-mix-heading-gap: 1.5625rem; /* 25 */
+  --market-flex-mix-icon-column: 5rem; /* 80 */
+  --market-flex-mix-icon-gap: 0.625rem; /* 10 → text column at 90 */
+  --market-flex-mix-badge-size: 1.125rem; /* 18 */
+  --market-flex-mix-badge-gap: 0.75rem; /* 12 → label at 120 */
+  --market-flex-mix-badge-offset: 0.1875rem; /* 3 — badge centre on the 24 line */
+  --market-flex-mix-copy-gap: 0.5rem; /* 8 → description 32 below the label top */
+  --market-flex-mix-copy-measure: 29.4375rem; /* 471 — supplied paragraph width */
+  /*
+   * A boundary, split either side of the rule. The reference's four boundaries
+   * measure 44 / 45 / 53 / 49 between identically built rows: 22 + 1 + 22 is the
+   * 45 they settle on, and the 53 is the one that is not slop — it is the flip
+   * from ruled-out to viable, so it keeps its extra air as the conclusion's own
+   * lead rather than as a fourth number.
+   */
+  --market-flex-mix-row-lead: 1.375rem; /* 22 above the label */
+  --market-flex-mix-row-trail: 1.375rem; /* 22 below the description */
+  --market-flex-mix-conclusion-lead: 1.875rem; /* 30 → a 53 boundary */
+  --market-flex-mix-link-gap: 4.1875rem; /* 67 — the break in the rule */
+  --market-flex-mix-chevron-width: 0.75rem; /* 12 */
+  --market-flex-mix-bar-width: 1.1875rem; /* 19 */
+  --market-flex-mix-bar-gap: 0.3125rem; /* 5 between the two bars */
+  /* The glyph arrives from above and settles down onto the rule it points at. */
+  --market-flex-mix-chevron-drop: -0.5rem;
 
   /*
    * Dev-to-Sell development-stage tabs.
@@ -1623,5 +1669,9 @@
     --market-flex-panel-gap: var(--space-10); /* 48 */
     --market-flex-panel-padding: var(--space-5); /* 20 */
     --market-flex-graphic-gap: var(--space-8); /* 36 */
+    /* The glyphs cap themselves to the narrower column and keep their ratio. */
+    --market-flex-mix-icon-column: 3rem; /* 48 */
+    --market-flex-mix-copy-measure: 100%;
+    --market-flex-mix-link-gap: var(--space-9); /* 40 */
   }
 }

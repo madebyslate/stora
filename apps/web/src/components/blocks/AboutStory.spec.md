@@ -47,7 +47,7 @@ jak rytm — dlatego żadna para nie powtarza tematu ani palety.
 
 Drabina wariantów (`ABOUT_STORY_PHOTO_WIDTHS`) jest stała — 144 / 288 / 432 px —
 bo kadr ma stały rozmiar, a nie rozmiar pliku. Zdjęcia są przejęte z innych
-sekcji serwisu i mają od 560 do 1232 px szerokości; drabina liczona ze źródła
+sekcji serwisu i mają od 920 do 3360 px szerokości; drabina liczona ze źródła
 kazałaby enkoderowi robić warianty trzy razy większe od kadru, który je pokazuje.
 
 ## Breakpointy

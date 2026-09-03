@@ -42,20 +42,33 @@ const revealOrder = {
           >
             <article class="publication-card">
               <div class="publication-card__logo" role="img" aria-label={item.publication}>
-                <Picture image={item.logo} widths={[item.logo.width]} sizes={`${item.logo.width}px`} />
+                <Picture
+                  image={item.logo}
+                  widths={[item.logo.width, item.logo.width * 2]}
+                  sizes={`${item.logo.width}px`}
+                  fallbackFormat="png"
+                />
               </div>
 
               <p class="publication-card__description text-tab">{item.description}</p>
 
               <p class="publication-card__meta text-publication-meta">
                 <span class="publication-card__category">{item.category}</span>
-                <span class="publication-card__separator" aria-hidden="true">·</span>
-                <time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                {item.publishedAt && (
+                  <>
+                    <span class="publication-card__separator" aria-hidden="true">·</span>
+                    <time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+                  </>
+                )}
               </p>
 
-              <div class="publication-card__cta">
-                <Button link={item.link} withArrow />
-              </div>
+              {
+                item.link && (
+                  <div class="publication-card__cta">
+                    <Button link={item.link} withArrow />
+                  </div>
+                )
+              }
             </article>
           </li>
         ))
@@ -100,15 +113,25 @@ const revealOrder = {
     --button-fg: var(--color-fg-inverse);
   }
 
+  /*
+    A fixed box rather than a floor. The four wordmarks are a single-line serif
+    logotype and three multi-line event lockups, so nothing normalises them but a
+    shared frame they are each scaled to fit: the descriptions then start on the
+    same line in all four cards regardless of how tall the mark inside is.
+  */
   .publication-card__logo {
     display: flex;
     align-items: flex-start;
-    min-block-size: var(--featured-publications-logo-height);
+    block-size: var(--featured-publications-logo-height);
   }
 
   .publication-card__logo :global(img) {
     inline-size: auto;
     block-size: auto;
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    object-fit: contain;
+    object-position: left top;
   }
 
   .publication-card__description {

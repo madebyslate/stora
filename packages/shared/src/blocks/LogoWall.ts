@@ -19,11 +19,7 @@ export const LogoWallBlock = z.object({
   /** The emphasised half, set in `--color-fg-accent`. Rendered after `heading`. */
   headingAccent: z.string().min(1).optional(),
   subheading: z.string().optional(),
-  /**
-   * Capped at eight: the row is a single line of marks at >= 1280 px, and a ninth
-   * one either shrinks the rest below legibility or wraps into a ragged second
-   * row. A longer wall is a design change, not a content one.
-   */
-  logos: z.array(MediaImage).min(1).max(8),
+  /** The supplied credentials set contains fifteen organisation marks. */
+  logos: z.array(MediaImage).min(1).max(15),
 })
 export type LogoWallBlock = z.infer<typeof LogoWallBlock>

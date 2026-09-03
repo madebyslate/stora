@@ -3,6 +3,7 @@ import { Picture as AstroPicture } from 'astro:assets'
 import type { ImageOutputFormat } from 'astro'
 import type { MediaImage } from '@repo/shared'
 import { resolveImage, isRemote } from '@/lib/media'
+import { DEFAULT_IMAGE_QUALITY } from '@/lib/images'
 
 /**
  * Every content image goes through here, so the format ladder is decided once.
@@ -22,10 +23,13 @@ interface Props {
   /** `true` for the LCP element only. */
   priority?: boolean
   /**
-   * Encoder quality, 0–100. Left unset the shared default applies, which is what
-   * every image should use unless it has a measurement saying otherwise: a number
-   * here is a claim that this particular picture was compared at two settings and
-   * the lower one held up. The place to record that comparison is the block's spec.
+   * Encoder quality, 0–100. Left unset `DEFAULT_IMAGE_QUALITY` applies, which is
+   * what every image should use unless it has a measurement saying otherwise: a
+   * number here is a claim that this particular picture was compared at two
+   * settings and the lower one held up. The place to record that comparison is the
+   * block's spec. The default is passed explicitly rather than left `undefined`,
+   * because `undefined` does not mean "the shared default" — it means sharp's own,
+   * which is 50 for AVIF.
    */
   quality?: number
   /**
@@ -51,7 +55,7 @@ const {
   widths,
   sizes = '100vw',
   priority = false,
-  quality,
+  quality = DEFAULT_IMAGE_QUALITY,
   fallbackFormat = 'jpeg',
   draggable,
   class: className,

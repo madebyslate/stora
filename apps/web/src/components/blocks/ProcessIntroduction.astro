@@ -1,6 +1,7 @@
 ---
 import type { ProcessIntroductionBlock } from '@repo/shared'
 import Picture from '@/components/ui/Picture.astro'
+import { getRetinaWidths } from '@/lib/images'
 
 interface Props {
   block: ProcessIntroductionBlock
@@ -37,7 +38,7 @@ const itemOrder = (index: number) => imageOrder + 1 + index * 4
         >
           <Picture
             image={block.image}
-            widths={[560, 870]}
+            widths={getRetinaWidths([560, 870], block.image.width)}
             sizes="(max-width: 1023px) calc(100vw - 40px), 39vw"
             draggable={false}
           />

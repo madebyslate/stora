@@ -24,13 +24,9 @@ const order = {
   logoStep: 0.5,
 }
 
-/*
- * Three identical groups, not two. The loop's period is one group plus one gap
- * (see the keyframe), and that period — six marks at ~821 px plus 64 — is
- * narrower than the 1360 px inner container. Two groups would leave a hole at the
- * right edge halfway through the cycle; three cover the container at every offset.
- */
-const marqueeGroups = [false, true, true]
+/* Fifteen normalised marks make one period wider than the page, so two identical
+ * groups cover the viewport throughout the loop. */
+const marqueeGroups = [false, true]
 ---
 
 <section class="logo-wall" aria-labelledby={headingId} data-reveal-group>
@@ -79,14 +75,9 @@ const marqueeGroups = [false, true, true]
               {block.logos.map((logo, index) => (
                 <li
                   class="logo-wall__item reveal"
-                  style={`--reveal-index: ${order.logos + index * order.logoStep}; --logo-native-width: ${logo.width}px`}
+                  style={`--reveal-index: ${order.logos + index * order.logoStep}`}
                 >
-                  <Picture
-                    image={logo}
-                    widths={[logo.width]}
-                    sizes={`${Math.round(logo.width)}px`}
-                    fallbackFormat="png"
-                  />
+                  <Picture image={logo} />
                 </li>
               ))}
             </ul>
@@ -166,33 +157,27 @@ const marqueeGroups = [false, true, true]
   }
 
   .logo-wall__item {
+    display: grid;
     flex: none;
-    /*
-     * Every mark is exported from the same frame at the same scale, so one factor
-     * reproduces the relative sizing the designer set between them. `--logo-scale`
-     * carries the reasoning; `--logo-native-width` comes from the fixture, which is
-     * the only place the real pixel dimensions of a given file belong.
-     */
-    inline-size: calc(var(--logo-native-width) * var(--logo-scale));
-    max-inline-size: 100%;
+    place-items: center;
   }
 
   .logo-wall__item :global(img) {
-    inline-size: 100%;
-    /* The intrinsic ratio does the rest — width/height are on the tag, so nothing
-       reflows when the file lands. */
+    max-inline-size: var(--logo-mark-width);
+    max-block-size: var(--logo-mark-height);
+    inline-size: auto;
     block-size: auto;
   }
 
   /*
-   * One period is one group including its trailing gap, i.e. a third of the track.
+   * One period is one group including its trailing gap, i.e. half of the track.
    * The group that lands where the first one started is identical to it, so the
    * loop has no jump — and because the marks no longer stretch to fill the
    * container, every gap in the row is the same one.
    */
   @keyframes logo-wall-marquee {
     to {
-      transform: translateX(calc(-100% / 3));
+      transform: translateX(-50%);
     }
   }
 
@@ -223,6 +208,15 @@ const marqueeGroups = [false, true, true]
       display: none;
     }
 
+    .logo-wall__item {
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+
+    .logo-wall__item :global(img) {
+      max-inline-size: min(100%, var(--logo-mark-width));
+    }
+
     @media (min-width: 768px) {
       .logo-wall__list {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -231,9 +225,8 @@ const marqueeGroups = [false, true, true]
 
     @media (min-width: 1280px) {
       .logo-wall__list {
-        grid-template-columns: repeat(6, auto);
-        justify-content: space-between;
-        gap: 0;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: var(--space-10) var(--space-8);
       }
     }
   }
