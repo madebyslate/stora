@@ -21,7 +21,7 @@ przez cały naturalny przebieg sekcji.
 |---|---|---|---|
 | `blockType` | `'aboutStory'` | tak | dyskryminator unii |
 | `statement` | `string` | tak | zdanie odsłaniane słowo po słowie |
-| `photos` | tuple 6 × `MediaImage` | tak | sześć zdjęć treściowych; drugie użycie każdego jest dekoracyjne i ma pusty `alt` |
+| `photos` | tuple 12 × `MediaImage` | tak | jedno zdjęcie na kadr, wszystkie użyte już gdzie indziej na stronie |
 | `heroImage` | `MediaImage` | tak | to samo źródło co hero; statyczny następca morfowanego kadru |
 
 ## Geometria i rytm
@@ -30,16 +30,25 @@ przez cały naturalny przebieg sekcji.
 |---|---|---|
 | wysokość sekcji | `clamp(72rem, 190svh, 96rem)` | `clamp(70rem, 190svh, 84rem)` |
 | środkowy kadr hero | 112–156 px | 112 px |
-| zdjęcia | 12 rozmieszczeń, cztery tory | te same 12, tory częściowo wychodzą poza krawędzie |
+| zdjęcia | 12 kadrów, cztery tory | te same 12, tory częściowo wychodzą poza krawędzie |
 | tekst | 32 / 40 / 500, miara 720 px; przytrzymany na środku viewportu, bez tła | pełna szerokość siatki; białe tło maskuje kadry przechodzące pod literami |
 | tory (x od krawędzi) | zewnętrzny 24 px, wewnętrzny 112–160 px | zewnętrzny −20 px (kadrowany), wewnętrzny 56 px |
 | rzędy (y w sekcji) | 3 / 20 / 37 / 54 / 71 / 88% | 2 / 18 / 34 / 55 / 72 / 89% |
 | tory zewnętrzne | dodatkowy przebieg 22 rem | dodatkowy przebieg 13 rem |
 | tory wewnętrzne | dodatkowy przebieg 96 px | dodatkowy przebieg 40 px |
 
-Zdjęcia są kwadratowymi kadrami `object-fit: cover`. Sześć pierwszych wystąpień
-zachowuje opisy z fixture. Sześć powtórek służy wyłącznie gęstości kompozycji,
-jest `aria-hidden` i nie rozszerza modelu danych.
+Zdjęcia są kwadratowymi kadrami `object-fit: cover`, każde ze swoim `alt`.
+
+Dwanaście osobnych zdjęć, nie sześć powtórzonych dwa razy. Tory 1–3 i 4–6 są po
+lewej, 7–9 i 10–12 po prawej, a rzędy wiążą je w pary na tej samej wysokości:
+(1, 7), (4, 10), (2, 8), (5, 11), (3, 9), (6, 12). Obie połowy są na ekranie
+jednocześnie, więc to samo zdjęcie po obu stronach czyta się jak pomyłka, a nie
+jak rytm — dlatego żadna para nie powtarza tematu ani palety.
+
+Drabina wariantów (`ABOUT_STORY_PHOTO_WIDTHS`) jest stała — 144 / 288 / 432 px —
+bo kadr ma stały rozmiar, a nie rozmiar pliku. Zdjęcia są przejęte z innych
+sekcji serwisu i mają od 560 do 1232 px szerokości; drabina liczona ze źródła
+kazałaby enkoderowi robić warianty trzy razy większe od kadru, który je pokazuje.
 
 ## Breakpointy
 
@@ -109,14 +118,14 @@ i jadą z naturalnym scrollowaniem strony.
 
 - Sekcja ma niewidoczny wizualnie `<h2>` jako nazwę regionu.
 - Statement jest jednym akapitem z pełnym `aria-label`.
-- Pierwsze użycie każdego zdjęcia zachowuje `alt` z fixture; powtórki i środkowy
-  kadr po hero są dekoracyjne.
+- Każde zdjęcie ma własny `alt`; dekoracyjny jest tylko środkowy kadr po hero.
 - Sekcja nie ma kontrolek ani nawigacji klawiaturą.
 
 ## Odstępstwa
 
 - To świadoma korekta wcześniejszej wersji z Figmy po feedbacku klienta.
-  Zamiast sześciu kadrów w przypiętej scenie jest dwanaście rozmieszczeń
+  Zamiast sześciu kadrów w przypiętej scenie jest dwanaście kadrów
   w naturalnym przepływie, inspirowanych rytmem Waabi.
-- Nie dodano nowych zdjęć źródłowych. Powtórzenia istniejących kadrów utrzymują
-  spójny model treści i nie wymagają tymczasowych assetów.
+- Nie dodano nowych zdjęć źródłowych. Wszystkie dwanaście pochodzi z sekcji, które
+  już są na stronie — pierwotny komplet z Figmy zawierał kadry spoza tematu
+  (ciężarówki na autostradzie), a klient poprosił o materiał z serwisu.

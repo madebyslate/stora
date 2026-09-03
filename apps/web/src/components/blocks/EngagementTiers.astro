@@ -1,0 +1,372 @@
+---
+import type { EngagementTiersBlock } from '@repo/shared'
+import Button from '@/components/ui/Button.astro'
+
+interface Props {
+  block: EngagementTiersBlock
+}
+
+const { block } = Astro.props
+const headingId = `engagement-${block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+
+/**
+ * Card choreography. Every card starts a fifth of a step after the one to its
+ * left, and its own parts follow inside that window: the meter and the title
+ * lead, the feature rows arrive one after another, the fee closes the card.
+ *
+ * The row stagger is deliberately short. Three cards at a full step each would
+ * still be assembling after the CTA below them has entered its own group, and
+ * the section would read as two animations rather than one.
+ */
+const CARD_STAGGER = 0.6
+const cardOrder = (index: number) => {
+  const base = 1 + index * CARD_STAGGER
+  return {
+    surface: base,
+    meter: base + 0.3,
+    title: base + 0.45,
+    description: base + 0.6,
+    features: base + 0.75,
+    fee: base + 0.95,
+  }
+}
+
+/** Feature rows run at a fifth of a step so a six-row card still lands on time. */
+const FEATURE_STEP = 0.2
+---
+
+<section class="tiers" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <h2 id={headingId} class="tiers__heading text-title reveal-mask">
+      <span>{block.heading}</span>
+    </h2>
+
+    <ul class="tiers__row" role="list" style={`--tier-count: ${block.tiers.length}`}>
+      {
+        block.tiers.map((tier, index) => {
+          const order = cardOrder(index)
+          return (
+            <li
+              class:list={['tier', 'reveal-fade', { 'tier--featured': tier.featured }]}
+              style={`--reveal-index: ${order.surface}`}
+            >
+              <div class="tier__header">
+                {/*
+                  The step meter: one segment per tier, filled up to this one. It
+                  says "third of three" at a glance, which is the one thing a
+                  stack of cumulative packages has to say before the copy is read.
+                  Decorative — the same order is already in the document.
+                */}
+                <span class="tier__meter reveal" style={`--reveal-index: ${order.meter}`} aria-hidden="true">
+                  {block.tiers.map((_, segment) => (
+                    <span class:list={['tier__segment', { 'tier__segment--on': segment <= index }]} />
+                  ))}
+                </span>
+
+                <h3 class="tier__name reveal-mask" style={`--reveal-index: ${order.title}`}>
+                  <span>{tier.name}</span>
+                </h3>
+
+                <p class="tier__description reveal" style={`--reveal-index: ${order.description}`}>
+                  {tier.description}
+                </p>
+              </div>
+
+              <div class="tier__body">
+                {tier.inherits ? (
+                  <p class="tier__inherits reveal" style={`--reveal-index: ${order.features}`}>
+                    <svg class="tier__inherits-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 10.8181 20.7672 9.64778 20.3149 8.55585C19.8626 7.46392 19.1997 6.47177 18.364 5.63604C17.5282 4.80031 16.5361 4.13738 15.4442 3.68508C14.3522 3.23279 13.1819 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12C3 14.3869 3.94821 16.6761 5.63604 18.364C7.32387 20.0518 9.61305 21 12 21ZM11.768 15.64L16.768 9.64L15.232 8.36L10.932 13.519L8.707 11.293L7.293 12.707L10.293 15.707L11.067 16.481L11.768 15.64Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    <span>Everything in {tier.inherits}, plus:</span>
+                  </p>
+                ) : (
+                  <p class="tier__eyebrow reveal" style={`--reveal-index: ${order.features}`}>
+                    {block.featuresLabel}
+                  </p>
+                )}
+
+                <ul class="tier__features" role="list">
+                  {tier.features.map((feature, featureIndex) => (
+                    <li
+                      class="tier__feature reveal"
+                      style={`--reveal-index: ${order.features + 0.2 + featureIndex * FEATURE_STEP}`}
+                    >
+                      {/*
+                        Two markers, because the rows mean two different things:
+                        a tier that inherits nothing lists what you get (check),
+                        one that inherits lists what it adds on top (plus). The
+                        reference draws the same distinction.
+                      */}
+                      <svg class="tier__feature-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" />
+                        {tier.inherits ? (
+                          <path
+                            d="M12 8.25V15.75M8.25 12H15.75"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                          />
+                        ) : (
+                          <path
+                            d="M8.25 12.25L11 15L15.75 9.5"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        )}
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div class="tier__fee reveal" style={`--reveal-index: ${order.fee}`}>
+                <p class="tier__eyebrow">{block.feeLabel}</p>
+                <p class="tier__fee-value">{tier.fee}</p>
+              </div>
+            </li>
+          )
+        })
+      }
+    </ul>
+  </div>
+
+  <div class="tiers__cta" data-reveal-group>
+    <div class="container-page tiers__cta-inner">
+      <div class="tiers__cta-copy">
+        <h3 class="tiers__cta-heading reveal-mask">
+          <span>{block.cta.heading}</span>
+        </h3>
+        <p class="tiers__cta-description reveal" style="--reveal-index: 1">{block.cta.description}</p>
+      </div>
+      <div class="tiers__cta-action reveal" style="--reveal-index: 2">
+        <Button link={block.cta.link} withArrow />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tiers {
+    padding-top: var(--engagement-padding-top);
+    background-color: var(--color-bg);
+  }
+
+  .tiers__heading {
+    color: var(--color-fg);
+  }
+
+  .tiers__row {
+    display: grid;
+    grid-template-columns: repeat(var(--tier-count), minmax(0, 1fr));
+    gap: var(--engagement-column-gap);
+    margin-top: var(--engagement-heading-gap);
+  }
+
+  /*
+   * The card is a three-part column — header, features, fee — and the middle
+   * part takes the slack. That is what keeps the three fee blocks on one line
+   * when one tier lists two features and another lists six; in the reference the
+   * short card simply ends in a tall empty run instead.
+   */
+  .tier {
+    display: flex;
+    flex-direction: column;
+    border: var(--engagement-rule-width) solid var(--engagement-card-border);
+    background-color: var(--color-bg);
+  }
+
+  .tier__header {
+    padding: var(--engagement-card-padding);
+    background-color: var(--engagement-header-surface);
+    color: var(--color-fg);
+  }
+
+  .tier--featured {
+    border-color: var(--color-green);
+  }
+
+  .tier--featured .tier__header {
+    background-color: var(--color-green);
+    color: var(--color-fg-inverse);
+  }
+
+  .tier__meter {
+    display: flex;
+    gap: var(--engagement-segment-gap);
+  }
+
+  .tier__segment {
+    width: var(--engagement-segment-width);
+    height: var(--engagement-segment-height);
+    background-color: var(--engagement-segment-off);
+  }
+
+  .tier__segment--on {
+    background-color: var(--color-green);
+  }
+
+  .tier--featured .tier__segment {
+    background-color: var(--engagement-segment-off-featured);
+  }
+
+  .tier--featured .tier__segment--on {
+    background-color: var(--color-fg-inverse);
+  }
+
+  .tier__name {
+    margin-top: var(--engagement-meter-title-gap);
+    font-size: var(--text-card-title);
+    font-weight: var(--text-card-title--font-weight);
+    line-height: var(--text-card-title--line-height);
+    letter-spacing: var(--text-card-title--letter-spacing);
+  }
+
+  .tier__description {
+    margin-top: var(--engagement-title-copy-gap);
+    font-size: var(--text-body);
+    font-weight: var(--text-body--font-weight);
+    line-height: var(--text-body--line-height);
+    color: var(--engagement-header-copy);
+  }
+
+  .tier--featured .tier__description {
+    color: var(--engagement-header-copy-featured);
+  }
+
+  .tier__body {
+    flex: 1;
+    padding: var(--engagement-card-padding);
+  }
+
+  .tier__eyebrow {
+    font-size: var(--text-publication-meta);
+    font-weight: var(--text-publication-meta--font-weight);
+    line-height: var(--text-publication-meta--line-height);
+    letter-spacing: var(--engagement-eyebrow-tracking);
+    text-transform: uppercase;
+    color: var(--color-fg-note);
+  }
+
+  /* The inherit band is the one place a tier says what it does NOT restate. */
+  .tier__inherits {
+    display: flex;
+    align-items: center;
+    gap: var(--engagement-icon-gap);
+    padding: var(--engagement-inherits-padding-block) var(--engagement-inherits-padding-inline);
+    background-color: var(--engagement-inherits-surface);
+    color: var(--color-green);
+    font-size: var(--text-tab);
+    font-weight: var(--text-tab--font-weight);
+    line-height: var(--text-tab--line-height);
+  }
+
+  .tier__inherits-icon {
+    flex: none;
+    width: var(--engagement-check-icon-size);
+    height: var(--engagement-check-icon-size);
+  }
+
+  .tier__features {
+    display: grid;
+    gap: var(--engagement-feature-gap);
+    margin-top: var(--engagement-features-gap);
+  }
+
+  .tier__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--engagement-icon-gap);
+    font-size: var(--text-table-value);
+    font-weight: var(--text-table-value--font-weight);
+    line-height: var(--text-table-value--line-height);
+    color: var(--engagement-tier-copy);
+  }
+
+  .tier__feature-icon {
+    flex: none;
+    width: var(--engagement-feature-icon-size);
+    height: var(--engagement-feature-icon-size);
+    /* Centred on the first line of the row, not on the row: a feature that wraps
+       to two lines must not drag its marker to the middle of the pair. */
+    margin-top: var(--engagement-feature-icon-offset);
+    color: var(--color-green);
+  }
+
+  .tier__fee {
+    padding: var(--engagement-card-padding);
+    border-top: var(--engagement-rule-width) solid var(--engagement-card-border);
+  }
+
+  .tier__fee-value {
+    margin-top: var(--engagement-fee-label-gap);
+    font-size: var(--text-tab);
+    font-weight: var(--text-tab--font-weight);
+    line-height: var(--text-tab--line-height);
+    color: var(--color-fg);
+  }
+
+  .tiers__cta {
+    margin-top: var(--engagement-cta-gap);
+    padding-block: var(--engagement-cta-padding-block);
+    background-color: var(--color-green);
+    color: var(--color-fg-inverse);
+  }
+
+  .tiers__cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--engagement-cta-column-gap);
+  }
+
+  .tiers__cta-heading {
+    font-size: var(--text-comparison-cta);
+    font-weight: var(--text-comparison-cta--font-weight);
+    line-height: var(--text-comparison-cta--line-height);
+    letter-spacing: var(--text-comparison-cta--letter-spacing);
+  }
+
+  .tiers__cta-description {
+    margin-top: var(--engagement-cta-copy-gap);
+    font-size: var(--text-body);
+    font-weight: var(--text-body--font-weight);
+    line-height: var(--text-body--line-height);
+  }
+
+  .tiers__cta-action {
+    --button-surface: var(--color-lime-dark);
+    --button-surface-hover: var(--engagement-button-surface-hover);
+    --button-fg: var(--color-white);
+    flex: none;
+  }
+
+  /* Three cumulative cards need the width to be read side by side. Below the
+     desktop grid they stack rather than pair off, so no tier is orphaned. */
+  @media (max-width: 63.9375rem) {
+    .tiers__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .tier__header,
+    .tier__body,
+    .tier__fee {
+      padding: var(--engagement-card-padding-mobile);
+    }
+
+    .tiers__cta-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

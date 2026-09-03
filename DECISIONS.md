@@ -5,6 +5,103 @@ Dopisujesz każdą decyzję niestandardową (AGENT-RULES §9.7).
 
 ---
 
+## 2026-09-03 — `MarketSlider` znika; `MarketSnapshot` pokazuje obie ilustracje naraz
+
+**Kontekst.** Sekcja „Poland is our core market" była sliderem: dwie ilustracje,
+grupa radio, para strzałek, gest przeciągania i dwie taśmy sterowane `--active`.
+Klient poprosił o uproszczenie sekcji na wzór kadru referencyjnego: jedna kolumna
+tekstu, druga mapa, trzecia wykres. Slajdów było dokładnie dwa i były to dokładnie
+te dwie ilustracje.
+
+**Decyzja.** Blok zostaje wymieniony, nie przerobiony. `MarketSlider` — schemat,
+komponent, spec i tokeny — znika w całości; `MarketSnapshot` to trzy kolumny w
+jednej skrzynce, bez stanu, bez skryptu i bez kontrolki własnej.
+
+**Powód.** Slider z dwoma slajdami prosi o interakcję, żeby pokazać rzecz, na
+którą jest miejsce obok. 470 B gestu, grupa radio z pięcioma statycznymi regułami
+`--active`, dwie taśmy i dwie animacje wjazdu istniały po to, żeby schować jedną
+z dwóch ilustracji. Utrzymanie tego równolegle z układem trzykolumnowym oznaczałoby
+dwa bloki na jedną sekcję i schemat, którego nikt nie używa.
+
+**Skutek.** Blok kosztuje 0 B JS zamiast 470 B gz, ma jeden tab stop zamiast grupy
+radio plus przycisk, i nie ma stanu, który mógłby się rozjechać z treścią.
+`slides[].description` / `slides[].cta` — pole na copy slajdów 2 i 3, otwarte od
+sierpnia — przestaje istnieć razem ze slajdami.
+
+---
+
+## 2026-09-03 — Sekcja rynkowa bez skrzynki, bez kresek i bez własnych wcięć
+
+**Kontekst.** Kadr referencyjny rysuje ramkę 1 px, jedną linię wewnętrzną między
+mapą a wykresem i odsuwa treść od nich o 71–87 px. Pierwsza wersja bloku
+odtwarzała to wiernie. Klient poprosił o zdjęcie kresek i odstępu po bokach —
+„tak jak standardowo, np. sekcje następne".
+
+**Decyzja.** Znikają wszystkie trzy naraz: ramka, linia wewnętrzna i padding cel.
+Blok siada na `container-page` jak każda inna sekcja, kolumny rozdziela
+`--snapshot-column-gap` (72), a pionowo domyka go `--space-14` (120) nad i pod.
+
+**Powód.** Te trzy rzeczy są jedną rzeczą. Wcięcie w kadrze jest wcięciem **od
+ramki** — zdjęcie ramki zostawia liczbę bez punktu odniesienia, a treść odsuniętą
+o 48–88 px od linii, na której stoją nagłówki wszystkich pozostałych sekcji
+strony. Zmierzone: nagłówek stoi teraz na x = 40, dokładnie tam, gdzie „Storing
+energy at scale" pod nim. To, co wcześniej robiła ramka — oddzielało blok od
+sąsiadów — robi teraz rytm sekcji, i robi to tak samo jak wszędzie indziej.
+
+**Skutek.** Kolumny wracają do 340 / 354 / 522 (z 435 / 353 / 570), bo padding
+przestał zjadać po 96 px z każdej celi; rząd jest 364 wysoki zamiast 462. Token
+`--snapshot-rule` i oba tokeny wcięć znikają razem z regułami, które je czytały.
+
+---
+
+## 2026-09-03 — Kolumny 25 / 26 / reszta zamiast zmierzonych 28 / 21 / 51
+
+**Kontekst.** Kadr referencyjny jest rysowany 1:1 — jego skrzynka ma 1363 px
+między liniami przy naszej siatce 1360, więc geometria przechodzi wprost. Nie
+przechodzi typografia: referencja składa nagłówek sekcji w ~38/38, a serwis ma
+jeden stopień na nagłówek sekcji i jest to `--text-title`, 56/64.
+
+**Decyzja.** Geometria idzie z kadru, proporcje kolumn nie. Kolumna tekstu dostaje
+dokładnie tyle, ile potrzebują dwie linie nagłówka w 56 px — 25%, czyli 340 px —
+mapa zostaje przy szerokości, w której jest narysowana (26%), a wykres bierze to,
+co zostaje po dwóch przerwach po 72.
+
+**Powód.** 28% z 1360 to 381 px; po odjęciu wcięć z kadru zostaje 239 px na
+nagłówek składany w 56 px. „Poland" ma w tym stopniu ~190 px — nagłówek rozjeżdża
+się na cztery linie. Bez wcięć te same 340 px dają te same **dwie linie**, które
+ma referencja. Wykres przy 522 px i tak zostaje najszerszym elementem sekcji,
+a jego wpieczona typografia jest w rozmiarze natywnym albo powyżej.
+
+**Alternatywa odrzucona.** Zejść z nagłówkiem do `--text-heading` (32/40) i
+utrzymać 28 / 21 / 51. Odrzucone: nagłówek sekcji jest na tej stronie jednym
+stopniem, powtórzonym siedem razy; wyłamanie jednej sekcji dla wierności kadrowi,
+który i tak jest z innego serwisu, kosztuje więcej niż cztery punkty procentowe.
+
+---
+
+## 2026-09-03 — Ilustracje sekcji rynkowej jako SVG, przepuszczone raz przez `svgo` poza drzewem
+
+**Kontekst.** Mapa i wykres przyszły jako SVG (279 i 75 KB), zamiast wcześniejszych
+JPEG-ów 960 × 960. `Picture.astro` ma gałąź SVG i wypuszcza goły `<img>` — bez
+drabinki formatów, bez `sizes` i bez pytania o 2×.
+
+**Decyzja.** Zostają SVG. Przed commitem przechodzą jednorazowo przez
+`pnpm dlx svgo@3` z precyzją współrzędnych 2 — narzędzie uruchomione na materiale,
+nie zależność projektu, tak jak `scripts/build-fonts.sh`.
+
+**Powód.** Współrzędne miały sześć miejsc po przecinku. Precyzja 2 zbija mapę
+z 45,8 do 17,7 KB gz i wykres z 26,4 do 6,9 — razem 24,8 KB gz zamiast 72,8, przy
+maksymalnej różnicy na kanał 10 i 26 na 255 wobec oryginałów renderowanych w
+150 dpi. Zmierzone, nie założone.
+
+**Skutek.** Typografia wykresu zostaje typografią przy każdej szerokości, nie
+pikselami rastru. Cena: tytuł, oś i legenda są **w pliku**, więc zmiana danych to
+nowy eksport, a nie edycja `content/`. To jest właściwa strona kompromisu —
+wykres składany w połowie w SVG i w połowie w HTML ma dwa komplety typografii,
+dwa komplety kolorów i dwa miejsca do zmiany.
+
+---
+
 ## 2026-08-31 — Pas logotypów ma jeden stały odstęp 64 px zamiast rozstawu z ramki
 
 **Kontekst.** Ramka rozstawia sześć znaków ręcznie: pięć przerw mierzy 98,1 /
@@ -1251,3 +1348,45 @@ kwadrat 560 jest wyższy od kadru 394, który wyznacza tę samą pustkę w
 `HowWeDevelop` — do decyzji grafika; (3) Dev-to-Hold łączy zakładkę „Ancillary
 services" z plikiem `wholesale-arbitrage.svg`, którego grafika nosi tytuł
 WHOLESALE ARBITRAGE — treści nie ruszaliśmy.
+
+## 2026-09-03 — Tabela Retained / Ad-Hoc ustępuje trzem kumulatywnym pakietom
+
+**Kontekst.** Klient odrzucił sekcję „Choose how we work together" w formie
+porównania dwóch modeli współpracy i przysłał dwie referencje: własny ciemny
+render trzech pakietów (Introduction Only → Buy-Side Mandate → Full Support,
+z nazwą Stora w wierszach due diligence) oraz jasną tabelę cenową jako przykład
+układu. Prośba brzmiała: taki układ, „tylko ładnie graficznie".
+
+Po drodze zbudowaliśmy wariant pośredni — te same karty, ale z dotychczasową
+treścią Retained / Ad-Hoc — na wypadek gdyby render był tylko wzorem układu.
+Klient potwierdził, że treść z renderu jest właściwa, i ten wariant odpadł.
+**Reguła, która z tego zostaje: obrazek referencyjny to układ, nie treść —
+treść na stronie zmieniamy dopiero po potwierdzeniu.**
+
+**Decyzja.** `EngagementComparison` znika, wchodzi `EngagementTiers` — trzy karty
+z miernikiem kroków, pasmem „Everything in …, plus:" i przypiętą do stopy linią
+opłaty. Treść pakietów bierzemy z referencji klienta dosłownie. Zielone CTA pod
+sekcją zostaje bez zmian, razem ze swoimi tokenami.
+
+Blok, schemat, komponent i tokeny zmieniają nazwę zamiast żyć obok starych:
+w treści jest jedno wystąpienie tej sekcji, a martwy wariant w `packages/shared`
+byłby ofertą, której nikt nie wybiera. Prefiks tokenów zostaje `--engagement-*`,
+bo to nadal to samo miejsce na stronie i te same tokeny CTA.
+
+**Dwa markery, nie jeden.** Pakiet bazowy wylicza to, co dostajesz — ptaszek.
+Pakiety, które dokładają do poprzedniego, wyliczają to, co dochodzi — plus.
+Referencja robi to samo rozróżnienie i jest ono treściowe, nie dekoracyjne.
+
+**Powód odchylenia od referencji.** Referencja jest ciemna, a na stronie nie ma
+ani jednej ciemnej sekcji tego typu. Kopiujemy układ, nie paletę: nagłówek karty
+siada na `--color-bg-subtle`, wyróżniony na Green, korpus jest biały na kresce
+`#E0E0E0`, rogi zostają proste. Geometria referencji (render 1990 px na rząd
+1928 px) jest przeskalowana 1360/1928 = 0,7054 i sprowadzona na skalę 4 px —
+wyliczenie per element leży w `EngagementTiers.spec.md`.
+
+**Konsekwencja.** Dwie wartości kontrastu do domknięcia w odłożonym audycie,
+obie wynikające z palety klienta użytej tak, jak używa jej referencja: biała
+etykieta 12 px na Green (3,09 : 1) i zielony tekst 18/500 na 10 % Green
+(3,6 : 1). Wpis z 2026-08-21 dotyczy bloku, którego już nie ma; jego trzecia
+wartość — biały opis 16/400 na Green w CTA — obowiązuje dalej, bo CTA przeszło
+bez zmian.

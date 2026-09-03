@@ -28,40 +28,76 @@
       },
       "photos": [
         {
-          "src": "content/media/pages/about-photos/1.jpg",
-          "alt": "Technical plan of a grid-scale battery storage facility",
-          "width": 291,
-          "height": 285
+          "src": "content/media/services/develop-to-sell.jpg",
+          "alt": "Aerial survey of a development site rendered as a technical plan",
+          "width": 612,
+          "height": 600
         },
         {
-          "src": "content/media/pages/about-photos/2.jpg",
-          "alt": "Agricultural fields seen from above",
-          "width": 159,
-          "height": 156
+          "src": "content/media/audience/have-land.jpg",
+          "alt": "A farm track running through open Polish farmland at sunrise",
+          "width": 1232,
+          "height": 928
         },
         {
-          "src": "content/media/pages/about-photos/4.jpg",
-          "alt": "Electric freight trucks travelling beside an energy facility",
-          "width": 240,
-          "height": 234
+          "src": "content/media/process/dso-dno-relationship.jpg",
+          "alt": "A substation and transmission towers standing in a field at dusk",
+          "width": 920,
+          "height": 1080
         },
         {
-          "src": "content/media/pages/about-photos/5.jpg",
+          "src": "content/media/services/develop-to-hold.jpg",
           "alt": "A grid-scale battery storage site surrounded by green fields",
-          "width": 384,
-          "height": 384
+          "width": 612,
+          "height": 600
         },
         {
-          "src": "content/media/pages/about-photos/6.jpg",
-          "alt": "Outdoor battery storage enclosures",
-          "width": 291,
-          "height": 285
+          "src": "content/media/pages/technical-depth/off-market-opportunities.jpg",
+          "alt": "An engineer inspecting the racks inside an open battery enclosure",
+          "width": 560,
+          "height": 560
         },
         {
-          "src": "content/media/pages/about-photos/7.jpg",
-          "alt": "A Polish town surrounded by agricultural land at dusk",
-          "width": 276,
-          "height": 270
+          "src": "content/media/process/data-heavy-screening.jpg",
+          "alt": "Patchwork farmland seen straight down from the air",
+          "width": 920,
+          "height": 1080
+        },
+        {
+          "src": "content/media/pages/boxes/grid-progress.jpg",
+          "alt": "A substation and transmission pylons among ripening fields",
+          "width": 1086,
+          "height": 698
+        },
+        {
+          "src": "content/media/pages/proof-points/built-with-partners.jpg",
+          "alt": "A battery storage site beside a substation, with the grid connection drawn over it",
+          "width": 1088,
+          "height": 1024
+        },
+        {
+          "src": "content/media/audience/buy-or-sell-a-project.jpg",
+          "alt": "A row of battery containers on a prepared site at dusk",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "src": "content/media/process/proprietary-knowledge.jpg",
+          "alt": "A crane lowering a battery container into place during construction",
+          "width": 920,
+          "height": 1080
+        },
+        {
+          "src": "content/media/pages/how-we-develop/notice-to-proceed-commercial-operation.jpg",
+          "alt": "An operating solar farm outlined against the surrounding fields",
+          "width": 974,
+          "height": 564
+        },
+        {
+          "src": "content/media/audience/interested-in-investing.jpg",
+          "alt": "A completed battery storage site in open country at sunrise",
+          "width": 1232,
+          "height": 928
         }
       ]
     },

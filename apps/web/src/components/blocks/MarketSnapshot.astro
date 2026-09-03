@@ -1,0 +1,196 @@
+---
+import type { MarketSnapshotBlock } from '@repo/shared'
+import Button from '@/components/ui/Button.astro'
+import Picture from '@/components/ui/Picture.astro'
+
+interface Props {
+  block: MarketSnapshotBlock
+}
+
+const { block } = Astro.props
+
+const headingId = 'market-snapshot-heading'
+
+/**
+ * The block is three columns in one bordered box and nothing else — no state, no
+ * script, no interaction. The two illustrations are SVG, so `Picture.astro` takes
+ * its SVG branch and emits a plain `<img>`: no encoder ladder, no `sizes`, and
+ * the artwork stays sharp at whatever width the column resolves to.
+ *
+ * The chart's title, legend and axis are inside the file. That is deliberate and
+ * it is the reason the block declares no chart chrome of its own: a chart drawn
+ * half in SVG and half in HTML has two sets of type, two sets of colour, and two
+ * places to change when the data is refreshed.
+ */
+---
+
+<section class="snapshot" aria-labelledby={headingId} data-reveal-group>
+  <div class="container-page">
+    <div class="snapshot__inner">
+      <div class="snapshot__copy">
+        <h2 class="snapshot__heading text-title reveal-mask" id={headingId}>
+          <span>{block.heading}</span>
+        </h2>
+
+        <p class="snapshot__note text-claim reveal" style="--reveal-index: 1">
+          {block.description}
+        </p>
+
+        <div class="snapshot__cta reveal" style="--reveal-index: 2">
+          <Button link={block.cta} withArrow />
+        </div>
+      </div>
+
+      {
+        /*
+          Both illustrations are unmasked from the left: the pane starts one full
+          width to the side of its own clip and the artwork inside counter-travels
+          the same distance, so the picture stands still while the opening crosses
+          it. The clip is on the PANE, not on the figure — with it one level up the
+          artwork sits in its final place from the first frame and an empty box
+          slides past it, which is the trap ServiceCards and TeamGrid both record.
+        */
+      }
+      <figure class="snapshot__map">
+        <span
+          class="snapshot__pane reveal-curtain"
+          style="--reveal-index: 1; --reveal-curtain-x: -100%; --reveal-curtain-y: 0%"
+        >
+          <span
+            class="snapshot__hold reveal-curtain-hold"
+            style="--reveal-index: 1; --reveal-curtain-x: -100%; --reveal-curtain-y: 0%"
+          >
+            <Picture image={block.map} />
+          </span>
+        </span>
+      </figure>
+
+      <figure class="snapshot__chart">
+        <span
+          class="snapshot__pane reveal-curtain"
+          style="--reveal-index: 2; --reveal-curtain-x: -100%; --reveal-curtain-y: 0%"
+        >
+          <span
+            class="snapshot__hold reveal-curtain-hold"
+            style="--reveal-index: 2; --reveal-curtain-x: -100%; --reveal-curtain-y: 0%"
+          >
+            <Picture image={block.chart} />
+          </span>
+        </span>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .snapshot {
+    /* The section's own rhythm, the same `--space-14` every other section on the
+       page stands on. It replaces the box: with no border to close the block,
+       what separates it from its neighbours is the air above and below it. */
+    padding-block: var(--space-14);
+    background-color: var(--color-fg);
+    color: var(--color-on-media);
+    /* Everything here sits on Lime-Dark; the ring has to be the thing that is
+       visible against it, not the thing that vanishes into it. */
+    --color-focus: var(--color-on-media);
+  }
+
+  /*
+   * The layout, and nothing else: three columns on the page grid, separated by a
+   * gap rather than by a rule and inset by nothing of their own.
+   *
+   * The reference draws a bordered box with an internal rule and pads everything
+   * away from it; both were dropped on request, and dropping them takes the
+   * per-cell padding with them — with no border for an inset to be measured from,
+   * padding would only push the heading out of line with every other section's.
+   * `container-page` is the one and only inset in the block.
+   */
+  .snapshot__inner {
+    display: grid;
+    grid-template-columns: var(--snapshot-copy-column) var(--snapshot-map-column) minmax(0, 1fr);
+    gap: var(--snapshot-column-gap);
+  }
+
+  /* ── Copy ─────────────────────────────────────────────────────────────────
+   * Heading and paragraph at the top, button at the foot. `1fr` on the middle
+   * row is what pushes the button down without a `justify-content` that would
+   * also spread the heading away from its own paragraph.
+   */
+  .snapshot__copy {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .snapshot__heading {
+    margin: 0;
+    color: var(--color-on-media);
+  }
+
+  .snapshot__note {
+    max-inline-size: var(--snapshot-copy-measure);
+    margin: 0;
+    padding-block-start: var(--snapshot-copy-gap);
+    color: var(--color-on-media);
+  }
+
+  .snapshot__cta {
+    align-self: end;
+    padding-block-start: var(--snapshot-cta-gap);
+  }
+
+  /* ── Illustrations ────────────────────────────────────────────────────────
+   * Both are centred in their cell and sized by its WIDTH. The copy column is the
+   * tallest of the three at every width the design covers, so the row's height is
+   * the copy's and the drawings sit in the middle of it with air above and below —
+   * which is the arrangement, not a gap to be closed: scaling either file to the
+   * row's height instead would blow it past its own column.
+   */
+  .snapshot__map,
+  .snapshot__chart {
+    display: grid;
+    /*
+     * `align-content`, not `place-items: center`. Centring the ITEMS makes the
+     * pane shrink-to-fit, and a pane whose only child is `inline-size: 100%`
+     * shrinks to nothing — measured: both drawings came out 0 x 0. The row is
+     * centred in the cell; the pane still stretches across it.
+     */
+    align-content: center;
+    margin: 0;
+    min-inline-size: 0;
+  }
+
+  .snapshot__pane {
+    display: block;
+    /* The aperture. It is on the pane, not on the figure — see the markup. */
+    overflow: clip;
+    min-inline-size: 0;
+  }
+
+  .snapshot__hold {
+    display: block;
+  }
+
+  .snapshot__map :global(img),
+  .snapshot__chart :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* ── Fold ─────────────────────────────────────────────────────────────────
+   * The design covers one width. Below the point where a 25% column stops holding
+   * the copy's 296 px measure — 25% of 1184 — the three columns become one and
+   * the column gap becomes the row gap.
+   *
+   * There the chart gets the full column, and it needs it: its title, its axis and
+   * its legend are inside the file at a size chosen for ~500 px, so at 390 they
+   * are already down to ~12 px. See the open question in the spec.
+   */
+  @media (max-width: 1183px) {
+    .snapshot__inner {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+
+  }
+</style>

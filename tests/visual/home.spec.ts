@@ -32,12 +32,23 @@ test.describe('Home page', () => {
     await expect(page.locator('h1')).toHaveCount(1)
   })
 
-  test('shows exactly two slides in the Poland market section', async ({ page }) => {
+  /*
+   * The Poland section used to be a slider and is now three columns side by side.
+   * What this guards is the reason for the change: both drawings are on the page
+   * at once, at a real size, and nothing in the block asks to be operated.
+   */
+  test('shows both market drawings at once, with no control to operate', async ({ page }) => {
     await page.goto('/')
-    const market = page.locator('section[aria-labelledby="market-slider-heading"]')
+    const market = page.locator('section[aria-labelledby="market-snapshot-heading"]')
 
-    await expect(market.locator('.market__slide')).toHaveCount(2)
-    await expect(market.locator('input[type="radio"]')).toHaveCount(2)
+    await expect(market.locator('img')).toHaveCount(2)
+    await expect(market.locator('input, button, [role="button"]')).toHaveCount(0)
+
+    for (const drawing of ['.snapshot__map img', '.snapshot__chart img']) {
+      const box = await market.locator(drawing).boundingBox()
+      expect(box!.width).toBeGreaterThan(200)
+      expect(box!.height).toBeGreaterThan(150)
+    }
   })
 
   test('exposes no private addresses in the HTML', async ({ page }) => {

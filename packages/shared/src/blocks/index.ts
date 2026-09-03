@@ -1,15 +1,15 @@
 import { z } from 'zod'
 import { AudienceTabsBlock } from './AudienceTabs'
 import { AboutStoryBlock } from './AboutStory'
-import { EngagementComparisonBlock } from './EngagementComparison'
+import { EngagementTiersBlock } from './EngagementTiers'
 import { FeaturePairBlock } from './FeaturePair'
 import { FeaturedPublicationsBlock } from './FeaturedPublications'
 import { HeroBlock } from './Hero'
 import { GrowthTimelineBlock } from './GrowthTimeline'
 import { HowWeDevelopBlock } from './HowWeDevelop'
 import { LogoWallBlock } from './LogoWall'
-import { MarketSliderBlock } from './MarketSlider'
 import { MarketFlexibilityBlock } from './MarketFlexibility'
+import { MarketSnapshotBlock } from './MarketSnapshot'
 import { MetricStatementBlock } from './MetricStatement'
 import { OurProcessBlock } from './OurProcess'
 import { PageHeroBlock } from './PageHero'
@@ -23,15 +23,15 @@ import { WiderTeamBlock } from './WiderTeam'
 
 export * from './AudienceTabs'
 export * from './AboutStory'
-export * from './EngagementComparison'
+export * from './EngagementTiers'
 export * from './FeaturePair'
 export * from './FeaturedPublications'
 export * from './Hero'
 export * from './GrowthTimeline'
 export * from './HowWeDevelop'
 export * from './LogoWall'
-export * from './MarketSlider'
 export * from './MarketFlexibility'
+export * from './MarketSnapshot'
 export * from './MetricStatement'
 export * from './OurProcess'
 export * from './PageHero'
@@ -56,7 +56,7 @@ export const Block = z.discriminatedUnion('blockType', [
   ServiceCardsBlock,
   OurProcessBlock,
   TeamGridBlock,
-  MarketSliderBlock,
+  MarketSnapshotBlock,
   AudienceTabsBlock,
   PageHeroBlock,
   AboutStoryBlock,
@@ -69,7 +69,7 @@ export const Block = z.discriminatedUnion('blockType', [
   TechnicalDepthTabsBlock,
   MarketFlexibilityBlock,
   ProcessIntroductionBlock,
-  EngagementComparisonBlock,
+  EngagementTiersBlock,
   ProofPointsBlock,
   WiderTeamBlock,
   // ↓ further blocks go here, in the order they appear on the page

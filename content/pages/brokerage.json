@@ -114,96 +114,45 @@
       ]
     },
     {
-      "blockType": "engagementComparison",
+      "blockType": "engagementTiers",
       "heading": "Choose how we work together",
-      "plans": [
+      "featuresLabel": "What you get",
+      "feeLabel": "Fee",
+      "tiers": [
         {
-          "name": "Retained",
-          "icon": "retained"
+          "name": "Introduction Only",
+          "description": "Access to our deal flow.",
+          "features": [
+            "Access to our project database",
+            "New project leads based on your criteria"
+          ],
+          "fee": "Success fee"
         },
         {
-          "name": "Ad-Hoc",
-          "icon": "adHoc"
-        }
-      ],
-      "rows": [
-        {
-          "heading": "Commitment",
-          "values": [
-            {
-              "text": "Long-term partnership",
-              "status": "included"
-            },
-            {
-              "text": "No long-term commitment",
-              "status": "excluded"
-            }
-          ]
+          "name": "Buy-Side Mandate",
+          "description": "Dedicated sourcing and priority access to the pipeline.",
+          "inherits": "Introduction Only",
+          "features": [
+            "Active sourcing tailored to your mandate",
+            "Preliminary technical screening",
+            "Negotiation and contract preparation",
+            "Deal closing support",
+            "Priority / first look at new projects",
+            "Dedicated team and weekly calls"
+          ],
+          "fee": "Retainer + success fee"
         },
         {
-          "heading": "Support across deal lifecycle",
-          "values": [
-            {
-              "text": "Dedicated, continuous",
-              "status": "included"
-            },
-            {
-              "text": "At selected stages only",
-              "status": "excluded"
-            }
-          ]
-        },
-        {
-          "heading": "Access to team & network",
-          "values": [
-            {
-              "text": "Priority access",
-              "status": "included"
-            },
-            {
-              "text": "Access on demand",
-              "status": "included"
-            }
-          ]
-        },
-        {
-          "heading": "Sourcing to closing",
-          "values": [
-            {
-              "text": "Fully covered end-to-end",
-              "status": "included"
-            },
-            {
-              "text": "Covered per selected service",
-              "status": "included"
-            }
-          ]
-        },
-        {
-          "heading": "Pricing structure",
-          "values": [
-            {
-              "text": "Retainer, continuous availability",
-              "status": "plain"
-            },
-            {
-              "text": "Pay only for the services you use",
-              "status": "plain"
-            }
-          ]
-        },
-        {
-          "heading": "Best for",
-          "values": [
-            {
-              "text": "Continuous support for buyers & sellers",
-              "status": "plain"
-            },
-            {
-              "text": "Teams with an internal process",
-              "status": "plain"
-            }
-          ]
+          "name": "Full Support",
+          "description": "Dedicated sourcing with additional transaction support.",
+          "inherits": "Buy-Side Mandate",
+          "features": [
+            "End-to-end transaction support",
+            "Full technical due diligence, coordinated by Stora",
+            "Full legal due diligence, coordinated by Stora"
+          ],
+          "fee": "Retainer + success fee + DD fees",
+          "featured": true
         }
       ],
       "cta": {

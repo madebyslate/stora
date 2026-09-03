@@ -847,75 +847,39 @@
   --process-section-height: 300vh;
 
   /*
-   * Market slider.
+   * Market snapshot.
    *
-   * The block is a bordered box inside the page grid: a band with the heading in
-   * it, a rule, and under it a body as tall as the illustration. Everything
-   * positional here is that geometry.
+   * The block is three columns on the page grid — the claim, the map, and the
+   * chart — with no box around them, no rule between them and no inset of their
+   * own. Every number here is that geometry.
+   */
+  /*
+   * The three columns, as fractions of the box.
    *
-   * The rule and the step buttons are the same value — white at 8% — and it is
-   * given, not derived. It is NOT `--color-on-media-rule` (0.3): that one is
-   * tuned for a hairline over photography and would read as a hard frame here.
+   * Read off the reference at 1:1 — its box measures 1363 px between the outer
+   * rules with the internal rule at 663, so the split is 48.6% / 51.4% either
+   * side of it, and inside the left half the map's own artwork starts 383 px in.
+   * 25 / 26 / the rest is those positions with the rules taken out: the copy gets
+   * exactly the 339 px its two lines of 56 px heading need, the map keeps the
+   * width it was drawn at, and the chart takes whatever the two gaps leave.
    */
-  --market-rule: rgb(255 255 255 / 0.08);
-  /* 640 — the illustrations' native size, and what the frame draws them at. */
-  --market-figure-size: 40rem;
+  --snapshot-copy-column: 25%;
+  --snapshot-map-column: 26%;
   /*
-   * The inset of everything inside the box: the heading from the left border, the
-   * copy from it, the button from the box's foot.
-   *
-   * Given as 20. The frame measures 28.3 to the left edge of the button and 30 to
-   * the foot (both at the 0.6 scale the reference is drawn to, so ±1.7 px of
-   * reading error each) — the stated value is what ships, and the measurement is
-   * recorded in MarketSlider.spec.md as an open question.
+   * What stands between the columns now that the rule does not. 72 is the gap the
+   * reference leaves between its internal rule and the chart's artwork, and it is
+   * what the copy and the map already had between them once both insets were
+   * counted.
    */
-  --market-pad: 1.25rem; /* 20 */
+  --snapshot-column-gap: var(--space-12); /* 72 */
+  /* Heading to paragraph, and the floor under the paragraph before the button. */
+  --snapshot-copy-gap: var(--space-8); /* 36 */
+  --snapshot-cta-gap: var(--space-10); /* 48 */
   /*
-   * The heading band. Neither number is given: the rule sits 208 px below the top
-   * of the reference crop and the heading's own line box occupies 64 of that, so
-   * the two paddings have to sum to ~144. Split 96 / 36 — the pair on the 4 px
-   * scale closest to the measured split (107 / 37), and the 96 carries the whole
-   * error because the crop's top edge is not proof of the section's.
+   * The copy's measure. Carried over from the slider this block replaces — the
+   * paragraph was written against it and still breaks where it was written to.
    */
-  --market-head-pad-block: var(--space-13); /* 96 */
-  --market-head-gap: var(--space-8); /* 36 */
-  /*
-   * The copy's measure, and it is narrower than the column it sits in. Bracketed
-   * rather than given: the frame breaks the second line after "permits" while the
-   * line plus " for" would still fit the 340 px column, so the measure is between
-   * the line as drawn (278) and the line plus the next word (~310). Middle.
-   */
-  --market-copy-measure: 18.5rem; /* 296 */
-  /* Copy to button: 25 screenshot px at 0.6 = 41.6, i.e. the 40 step. */
-  --market-copy-gap: var(--space-9); /* 40 */
-  /*
-   * The step buttons. 40 x 40 with a 1 px gap between them, both given, and the
-   * pair sits directly against the illustration's right edge with no gap at all —
-   * measured, not assumed: the first button's left edge is the picture's right
-   * edge to the pixel.
-   */
-  --market-step-size: var(--space-9); /* 40 */
-  --market-step-gap: 1px;
-  --market-step-surface: var(--market-rule);
-  /*
-   * No hover state in the frame. Doubling the alpha is the same move the button
-   * makes with its 8% tint — the smallest change that still registers on a
-   * surface this quiet.
-   */
-  --market-step-surface-hover: rgb(255 255 255 / 0.16);
-  /*
-   * One step of the copy's entrance, per WORD.
-   *
-   * Shorter than the global `--reveal-step` (90 ms) by a lot, and it has to be:
-   * this is not four headings arriving one after another, it is fourteen words of
-   * one sentence. At 90 the last word would land 1.3 s after the first and the
-   * sentence would read as a list. At 26 the whole line is away in 360 ms and the
-   * eye reads a wave crossing it, which is the effect the design asks for.
-   */
-  --market-word-step: 26ms;
-  /* How far a word travels out of its own line box. Just past its own height, so
-     it starts fully hidden behind the clip and never shows a sliver. */
-  --market-word-travel: 105%;
+  --snapshot-copy-measure: 18.5rem; /* 296 */
 
 
   /*
@@ -1468,23 +1432,46 @@
   --process-intro-copy-color: rgb(23 46 35 / 0.6);
   --process-intro-mobile-gap: var(--space-10); /* 48 */
 
-  /* Brokerage Retained / Ad-Hoc comparison and its attached green CTA. */
-  --engagement-padding-top: var(--space-11); /* 64 — measured from reference */
+  /*
+   * Brokerage engagement tiers and the green CTA attached under them.
+   *
+   * Geometry is the client reference (1990 px render of a 1928 px row) scaled by
+   * 1360 / 1928 = 0.7054 onto this site's container, then landed on the 4 px
+   * step scale. `EngagementTiers.spec.md` carries the arithmetic per element.
+   */
+  --engagement-padding-top: var(--space-11); /* 64 — measured from the reference */
   --engagement-heading-gap: var(--space-10); /* 48 */
-  --engagement-label-column: 42%;
-  --engagement-column-gap: 0.625rem; /* 10 — measured */
-  --engagement-cell-padding-block: var(--space-5); /* 20 — 64 px row with 24 px line */
-  --engagement-cell-padding-inline: var(--space-6); /* 24 */
-  --engagement-mobile-cell-padding-inline: var(--space-3); /* 12 */
+  --engagement-column-gap: var(--space-6); /* 24 — 33 px in the reference × 0.7054 */
+  --engagement-card-padding: var(--space-7); /* 28 — 43 px inset × 0.7054 = 30.3 */
+  --engagement-card-padding-mobile: var(--space-5); /* 20 */
   --engagement-rule-width: 0.0625rem; /* 1 */
-  --engagement-plan-icon-size: 1.375rem; /* 22 — supplied */
+  --engagement-card-border: var(--color-rule-soft);
+  /* The resting header sits on the established tinted surface; the emphasised
+     one goes to Green, which is where the reference puts it. */
+  --engagement-header-surface: var(--color-bg-subtle);
+  --engagement-header-copy: rgb(23 46 35 / 0.7);
+  --engagement-header-copy-featured: rgb(255 255 255 / 0.8);
+  --engagement-segment-width: 1.25rem; /* 20 — 28 px bar × 0.7054 */
+  --engagement-segment-height: 0.25rem; /* 4 */
+  --engagement-segment-gap: 0.375rem; /* 6 — 8 px × 0.7054 */
+  --engagement-segment-off: color-mix(in srgb, var(--color-lime-dark) 15%, transparent);
+  --engagement-segment-off-featured: rgb(255 255 255 / 0.35);
+  --engagement-meter-title-gap: var(--space-5); /* 20 */
+  --engagement-title-copy-gap: var(--space-3); /* 12 */
+  --engagement-eyebrow-tracking: 0.08em; /* measured off the reference eyebrow */
+  --engagement-inherits-surface: color-mix(in srgb, var(--color-green) 10%, var(--color-white));
+  --engagement-inherits-padding-block: var(--space-4); /* 16 — 62 px band around a 24 px line */
+  --engagement-inherits-padding-inline: var(--space-4); /* 16 */
+  --engagement-features-gap: var(--space-6); /* 24 */
+  --engagement-feature-gap: var(--space-4); /* 16 */
+  --engagement-feature-icon-size: 1.25rem; /* 20 — 28 px × 0.7054 */
+  /* (24 px line − 20 px glyph) / 2, so the marker centres on the first line of a
+     wrapping row rather than on the row as a whole. */
+  --engagement-feature-icon-offset: 0.125rem; /* 2 */
   --engagement-check-icon-size: 1.5rem; /* 24 — supplied SVG */
-  --engagement-cross-icon-size: 1.25rem; /* 20 — supplied SVG */
   --engagement-icon-gap: var(--space-3); /* 12 */
-  --engagement-status-gap: var(--space-2); /* 8 */
-  --engagement-retained-surface: color-mix(in srgb, var(--color-green) 10%, var(--color-white));
-  --engagement-adhoc-surface: color-mix(in srgb, var(--color-lime-dark) 5%, var(--color-white));
-  --engagement-value-color: rgb(23 46 35 / 0.6);
+  --engagement-fee-label-gap: var(--space-2); /* 8 */
+  --engagement-tier-copy: rgb(23 46 35 / 0.7);
   --engagement-cta-gap: var(--space-14); /* 120 — measured */
   --engagement-cta-padding-block: var(--space-10); /* 48 */
   --engagement-cta-column-gap: var(--space-10); /* 48 */

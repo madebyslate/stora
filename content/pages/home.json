@@ -180,7 +180,7 @@
       ]
     },
     {
-      "blockType": "marketSlider",
+      "blockType": "marketSnapshot",
       "heading": "Poland is our core market",
       "description": "Stora Energy secures land, grid connection and permits for grid-scale battery energy storage in Poland",
       "cta": {
@@ -188,24 +188,18 @@
         "href": "/contact/",
         "disabled": true
       },
-      "slides": [
-        {
-          "image": {
-            "src": "content/media/market/renewable-energy-vs-battery-storage.jpg",
-            "alt": "",
-            "width": 960,
-            "height": 960
-          }
-        },
-        {
-          "image": {
-            "src": "content/media/market/poland-s4.jpg",
-            "alt": "",
-            "width": 960,
-            "height": 960
-          }
-        }
-      ]
+      "map": {
+        "src": "content/media/market/poland-map.svg",
+        "alt": "",
+        "width": 480,
+        "height": 455
+      },
+      "chart": {
+        "src": "content/media/market/renewable-vs-battery.svg",
+        "alt": "Renewable energy against battery storage in Poland, 2018 to 2024: both grow, renewable energy faster.",
+        "width": 580,
+        "height": 376
+      }
     },
     {
       "blockRef": "largeScaleContacts"

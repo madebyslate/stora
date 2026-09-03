@@ -48,3 +48,12 @@ export const ABOUT_STORY_HERO_WIDTHS = [156, 312, 624]
 
 /** The widest photograph is 18% of the desktop frame and roughly a third on mobile. */
 export const ABOUT_STORY_SIZES = '(max-width: 767px) 34vw, 18vw'
+
+/**
+ * The scroll-field frames are a fixed size — 144 px at the widest lane, 104 px on
+ * mobile — so the ladder is the frame, not the file. The photographs are reused
+ * from elsewhere on the site and arrive at anything from 560 to 1232 px wide;
+ * deriving the widths from the source would ask the encoder for candidates three
+ * times larger than any frame that displays them.
+ */
+export const ABOUT_STORY_PHOTO_WIDTHS = [144, 288, 432]

@@ -10,7 +10,7 @@ One question per kind of visitor, and one photograph and one call per answer: a
 heading top left, and under it a 500 px band split into two halves — the questions
 on a tinted ground, the photograph the active question selects. The whole
 photograph is a link; the button in its corner is the affordance, not the target.
-On `home`, as the section under `MarketSlider`.
+On `home`, as the section under `MarketSnapshot`.
 
 - Figma: no node link supplied. The reference is a crop, 645 × 379, drawn at
   0.4479 of the real scale. The scale is established two independent ways and they
