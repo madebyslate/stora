@@ -74,8 +74,15 @@ const stepRange = (index: number) => ({
 /**
  * `sizes` describes the photograph's real drawn width, which is a token rather
  * than a breakpoint ladder: 44vw capped at 460 above the fold, 72vw capped at 460
- * below it. The widths stop at 920 because that is the masters' native size — and
- * it is exactly 2 × 460, so the picture is sharp at 2 dpr and nothing upscales.
+ * below it. The widths stop at 920 because that is the masters' native size.
+ *
+ * 920 is 2 × 460, so the *width* is sharp at 2 dpr. The height is not, and that is
+ * what a visitor sees. The drawn box measures 460 × 759, not 460 × 460: the frame
+ * is taller than the masters' 920 × 1080 aspect, so `object-fit: cover` crops the
+ * sides and the height becomes the binding dimension. 1080 px of master over a
+ * 759 px box tops out at 1.42 dpr — every retina visitor gets a ~1.4× upscale,
+ * which is the softness in this section. No `widths` rung can fix it; the masters
+ * need to be at least 920 × 1520. Flagged to the designer 2026-09-03.
  */
 const PHOTO_SIZES = '(min-width: 768px) min(460px, 44vw), min(460px, 72vw)'
 const PHOTO_WIDTHS = [320, 460, 690, 920]

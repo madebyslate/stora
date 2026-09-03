@@ -95,8 +95,8 @@
       "image": {
         "src": "content/media/pages/introduction-process/more-than-an-introduction.jpg",
         "alt": "",
-        "width": 870,
-        "height": 515
+        "width": 1456,
+        "height": 816
       },
       "items": [
         {
@@ -245,10 +245,10 @@
         "role": "Chief Development Officer (CDO)",
         "email": "michal.o@storaenergy.pl",
         "portrait": {
-          "src": "content/media/team/michal-oginski.jpg",
+          "src": "content/media/team/michal-oginski-mini.jpg",
           "alt": "",
-          "width": 486,
-          "height": 585
+          "width": 200,
+          "height": 200
         }
       }
     }

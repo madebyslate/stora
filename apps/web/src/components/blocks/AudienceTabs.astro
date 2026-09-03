@@ -53,12 +53,16 @@ const TAB_STAGGER = 0.4
  * up, and just under half the viewport between the fold and there. Below the fold
  * it is the full width of the page.
  *
- * The ladder stops at 675 because that is where the layout stops growing — and
- * because the masters stop there too. They are 500 px tall against a 500 px band,
- * so there is no 2× file to ask for; see AudienceTabs.spec.md.
+ * The layout stops growing at 675, but the *device* does not: a 675 px box on a
+ * 2 dpr screen wants a 1350 px file. The old ladder stopped at 675 because the
+ * masters did, so every retina visitor got a 1× file stretched over 2× pixels —
+ * measured, not assumed; see AudienceTabs.spec.md. The masters are now 1024–1232
+ * px wide, so the ladder is built per image and capped at what that file can
+ * actually deliver. Astro never upscales, so a rung above the master would be a
+ * duplicate of the master; asking for one is how the ladder silently lies.
  */
-const PHOTO_WIDTHS = [390, 675]
 const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
+const photoWidths = (width: number) => [...new Set([390, 675, 1024, 1350].filter((w) => w <= width).concat(width))]
 ---
 
 <section class="audience" aria-labelledby={headingId} data-reveal-group>
@@ -159,7 +163,7 @@ const PHOTO_SIZES = '(min-width: 1440px) 675px, (min-width: 1024px) 47vw, 100vw'
                   rel={!option.cta.disabled && option.cta.external ? 'noopener noreferrer' : undefined}
                   target={!option.cta.disabled && option.cta.external ? '_blank' : undefined}
                 >
-                  <Picture image={option.image} widths={PHOTO_WIDTHS} sizes={PHOTO_SIZES} />
+                  <Picture image={option.image} widths={photoWidths(option.image.width)} sizes={PHOTO_SIZES} />
 
                   <span class="audience__cta">
                     <Button link={option.cta} withArrow as="span" />

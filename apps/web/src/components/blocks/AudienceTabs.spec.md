@@ -130,7 +130,7 @@ the built page, not by reading it (measured 0.94 and still climbing).
 |---|---|---|
 | JavaScript | 0 KB | **0 B** — radio group, `:has()`, one rule per photograph |
 | Requests | — | 3, one photograph each, none of them at load: measured 0 requests until the section is scrolled to, then three AVIFs. `visibility: hidden` hides a panel but does not stop its image being fetched, so all three arrive together — the price of a switch that changes with no network round trip |
-| Largest asset | — | `interested-in-investing`, 18.3 KB AVIF at 675 px (the other two: 14.7 and 17.7 KB) |
+| Largest asset | — | `interested-in-investing`, 18.3 KB AVIF at the 675 px rung. The masters were replaced 2026-09-03 and the ladder now runs to the file's native width, so a 2 dpr screen takes the 1024–1232 px rung instead |
 
 ## A11y
 
@@ -166,11 +166,16 @@ the built page, not by reading it (measured 0.94 and still climbing).
       pattern — "Call with Land Lead", "Call with Investment Lead" — and all three
       point at `/contact/`, which does not exist yet. Real labels and real
       destinations, please.
-- [ ] **Masters.** All three are 500 px tall against a 500 px band, so the
-      photograph is 1× and goes soft on a 2× screen. Worse,
-      `interested-in-investing` is 400 px wide against a 675 px half — it is being
-      upscaled 1.7× before it is even cropped, and it shows. Files at ≥ 1350 × 1000
-      fix both without a line of code.
+- [x] **Masters.** *Resolved 2026-09-03.* The old three were 500 px tall against a
+      500 px band and `interested-in-investing` was 400 px wide against a 675 px
+      half — a 1.7× upscale before the crop. New masters landed at 1232 × 928,
+      1024 × 1024 and 1232 × 928, and the `widths` ladder — which stopped at 675
+      because the masters did — is now built per image up to the file's native
+      width. Measured at 1440 × 900: the drawn box is 675 × 500 and a 2 dpr client
+      now fetches the 1232 px rung (it fetched 675 px before). `buy-or-sell-a-project`
+      is 1024 px wide against the 1350 px a full 2× would want, so it is served at
+      1.52× rather than 2×; the other two reach 1.82×. A ≥ 1350 px wide file for
+      that one closes the last gap.
 - [ ] **The heading's line break.** "Store energy at / large scale" is set from the
       copy (`\n`), as in `Hero`. Confirm it is the designed break and not the
       frame's width.

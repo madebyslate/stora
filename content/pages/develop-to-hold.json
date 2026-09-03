@@ -133,10 +133,10 @@
         "role": "Chief Development Officer (CDO)",
         "email": "michal.o@storaenergy.pl",
         "portrait": {
-          "src": "content/media/team/michal-oginski.jpg",
+          "src": "content/media/team/michal-oginski-mini.jpg",
           "alt": "",
-          "width": 486,
-          "height": 585
+          "width": 200,
+          "height": 200
         }
       }
     }

@@ -1222,3 +1222,32 @@ na trzy kolumny nie mieści miary 208, przy której najdłuższa linia adresu
 **Konsekwencja.** Zmierzone: 1440 — 584 → 504, 390 — 1666 → 1282. Odchylenie jest
 opisane jako punkt 6 w `Footer.spec.md` i wymaga potwierdzenia u grafika, tak samo
 jak stojące tam wcześniej pytanie o dolny padding, którego crop nie obejmuje.
+
+## 2026-09-03 — `TechnicalDepthTabs` przejmuje wygląd `HowWeDevelop`
+
+**Kontekst.** Prośba klienta: sekcje „BESS revenue streams in Poland"
+(Dev-to-Hold) i „Technical depth. Market access. Transaction experience."
+(Brokerage) mają wyglądać tak samo jak „How We Develop" na About Us. Oba bloki
+i tak dzieliły już strzałkę i przesunięcie etykiety o 38 px, ale różniły się
+wszystkim innym: 18/500 na `opacity: 0.5` kontra 30/500 w pełnej sile, licznik
+`01/03` kontra jego brak, opis dosunięty do stopy lewej kolumny kontra opis nad
+medium w prawej.
+
+**Decyzja.** `TechnicalDepthTabs` bierze z `HowWeDevelop` typografię wiersza,
+kreskę `#E0E0E0`, zieloną etykietę aktywną, choreografię wejścia i stos
+opis-nad-medium. Nie bierze ramki medium: zostaje 560 kwadrat w siatce
+680/120/560. Liczniki `01/03` znikają.
+
+**Powód.** Materiały są kwadratowe — trzy zdjęcia 560 × 560 i dwa wykresy SVG
+590 × 590. Kadr 974:564 wymagałby nowych zdjęć poziomych i przerysowania obu
+wykresów; przycięcie wykresu jest destrukcyjne, a nie kosmetyczne. Klient
+wybrał wariant bez nowych materiałów.
+
+**Konsekwencja.** Trzy rzeczy do domknięcia, wszystkie w
+`TechnicalDepthTabs.spec.md`: (1) składanie do jednej kolumny przesunęło się
+z 1024 na 1200 px, bo 30 px etykiety potrzebują ~360 px kolumny, a siatka daje
+tyle dopiero od 1200; (2) lewa kolumna kończy się ~300 px nad stopą sekcji, bo
+kwadrat 560 jest wyższy od kadru 394, który wyznacza tę samą pustkę w
+`HowWeDevelop` — do decyzji grafika; (3) Dev-to-Hold łączy zakładkę „Ancillary
+services" z plikiem `wholesale-arbitrage.svg`, którego grafika nosi tytuł
+WHOLESALE ARBITRAGE — treści nie ruszaliśmy.

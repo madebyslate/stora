@@ -1177,7 +1177,10 @@ Mylące jest to, że tokeny z `packages/tokens/tokens.css` **aktualizują się**
 normalnie, bo to zwykły globalny arkusz: część efektu zmiany widać (bo przeszła
 przez token), a część nie, więc wygląda to jak błąd w CSS-ie komponentu.
 
-**Fix.** Restart dev servera. Zanim zaczniesz debugować własny selektor:
+**Fix.** Restart dev servera — ale `kill PID` nie wystarcza: Astro 7 trzyma dev
+server jako demona, który wstaje z powrotem z tym samym cache'em, a `pnpm dev`
+melduje wtedy „Another astro dev server is already running". Zatrzymujesz go
+`pnpm exec astro dev stop`. Zanim zaczniesz debugować własny selektor:
 `curl -s "http://localhost:PORT/src/components/…/X.astro?astro&type=style&index=0&lang.css" | grep NOWA_KLASA`
 — pusto znaczy, że problem jest w serwerze, nie w kodzie.
 
@@ -1187,3 +1190,26 @@ pokazuje prawdę. Reguła: **geometrię mierzysz na zbudowanej stronie, nie na d
 serverze.**
 
 **Do startera.** Skrypt pomiarowy celujący w `dist/`, nie w `:4321`.
+
+### P-055 — Turbo nie widzi `content/`, więc `pnpm verify` po podmianie zdjęć zwraca stary build
+**Objaw.** Podmieniasz pliki w `content/media/`, uruchamiasz `pnpm verify`,
+dostajesz `FULL TURBO` i zielone testy w kilkanaście milisekund. `dist/` nadal
+zawiera poprzednie obrazy — więc weryfikujesz build, którego nie ma na dysku
+w wersji, którą właśnie zrobiłeś. Wdrożenie z czystym cache'em pokazuje co innego
+niż lokalny „zielony".
+
+**Przyczyna.** Domyślne `inputs` taska Turbo to pliki **wewnątrz katalogu
+pakietu**. `content/` leży w korzeniu monorepo, poza `apps/web`, więc jego hash
+nie wchodzi do klucza cache'a. Im lepiej rozdzielisz treść od aplikacji, tym
+pewniej wpadniesz w tę pułapkę — to koszt architektury, nie przeoczenie.
+
+**Fix.** `"globalDependencies": ["content/**"]` w `turbo.json`. Każde źródło
+prawdy leżące poza pakietami musi być tam wymienione — dotyczy tak samo
+`packages/tokens` konsumowanego po ścieżce czy `_inbox` po podmianie materiałów.
+
+**Wyłapuje.** Kontrola, nie test: zmieniasz bajt w pliku z `content/`, uruchamiasz
+`pnpm verify` i patrzysz na `Cached:`. `0 cached` = mechanizm działa,
+`FULL TURBO` = nie działa. `touch` nie wystarczy — Turbo hashuje treść, nie mtime.
+
+**Do startera.** `globalDependencies` w `turbo.json` od pierwszego commita,
+z komentarzem, że lista jest sprzężona z każdym katalogiem treści poza pakietami.

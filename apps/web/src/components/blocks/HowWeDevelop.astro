@@ -40,12 +40,14 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
                 checked={index === 0}
               />
               <label class="how-develop__tab" for={optionId(index)}>
-                <span class="how-develop__tab-main">
-                  <span class="how-develop__arrow">
-                    <LongArrowRight />
-                  </span>
-                  <span class="how-develop__tab-label reveal-mask" style={`--reveal-index: ${1 + index * 0.45}`}>
-                    <span>{item.label}</span>
+                <span class="how-develop__tab-main reveal-mask" style={`--reveal-index: ${1 + index * 0.45}`}>
+                  <span class="how-develop__tab-line">
+                    <span class="how-develop__arrow">
+                      <LongArrowRight />
+                    </span>
+                    <span class="how-develop__tab-label">
+                      <span>{item.label}</span>
+                    </span>
                   </span>
                 </span>
               </label>
@@ -159,13 +161,24 @@ const hasAnyCopy = block.items.some((item) => item.title || item.description)
     transition: opacity var(--duration-base) var(--ease-standard);
   }
 
+  /* The mask sits on the whole row, not on the label alone: the arrow is part of
+     the stage's title, so it has to ride the same slide-up instead of being
+     painted in place before the words arrive. Horizontal insets are widened
+     because the active label steps aside by the arrow's width and would other-
+     wise be cut on its longest line; only the vertical edge does the masking. */
   .how-develop__tab-main {
-    position: relative;
     display: block;
     min-width: 0;
+    clip-path: inset(0 calc(-1 * var(--how-develop-tab-mask-bleed)) -0.16em);
+  }
+
+  .how-develop__tab-line {
+    position: relative;
+    display: block;
   }
 
   .how-develop__tab-label {
+    display: block;
     width: fit-content;
     transform: none;
     transition: transform var(--duration-base) var(--ease-out-expo);

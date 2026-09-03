@@ -12,7 +12,6 @@ const key = block.heading.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-
 const group = `technical-depth-tabs-${key}`
 const headingId = `${group}-heading`
 const optionId = (index: number) => `${group}-${index + 1}`
-const count = block.items.length.toString().padStart(2, '0')
 const headingLines = block.heading.split('\n')
 ---
 
@@ -43,22 +42,18 @@ const headingLines = block.heading.split('\n')
                 checked={index === 0}
               />
               <label class="technical__tab" for={optionId(index)}>
-                <span class="technical__tab-main">
-                  <span class="technical__arrow">
-                    <LongArrowRight />
-                  </span>
-                  <span
-                    class="technical__tab-label reveal-mask"
-                    style={`--reveal-index: ${headingLines.length + 1 + index * 0.45}`}
-                  >
-                    <span>{item.label}</span>
-                  </span>
-                </span>
                 <span
-                  class="technical__counter reveal-mask"
-                  style={`--reveal-index: ${headingLines.length + 1.2 + index * 0.45}`}
+                  class="technical__tab-main reveal-mask"
+                  style={`--reveal-index: ${headingLines.length + index * 0.45}`}
                 >
-                  <span>{String(index + 1).padStart(2, '0')}/{count}</span>
+                  <span class="technical__tab-line">
+                    <span class="technical__arrow">
+                      <LongArrowRight />
+                    </span>
+                    <span class="technical__tab-label">
+                      <span>{item.label}</span>
+                    </span>
+                  </span>
                 </span>
               </label>
             </div>
@@ -70,7 +65,7 @@ const headingLines = block.heading.split('\n')
         {
           block.items.map((item) => (
             <div class="technical__copy-panel">
-              <h3 class="technical__copy-title text-heading">{item.title}</h3>
+              <h3 class="technical__copy-title text-panel-title">{item.title}</h3>
               <p class="technical__copy-description text-body">{item.description}</p>
             </div>
           ))
@@ -86,7 +81,7 @@ const headingLines = block.heading.split('\n')
                   <Picture
                     image={item.image}
                     widths={[360, 480, 560]}
-                    sizes="(max-width: 1023px) min(100vw, 560px), 560px"
+                    sizes="(max-width: 1199px) min(100vw, 560px), 560px"
                     draggable={false}
                   />
                 </span>
@@ -100,6 +95,11 @@ const headingLines = block.heading.split('\n')
 </section>
 
 <style>
+  /* Geometry and choreography are shared with `HowWeDevelop`: the client asked
+     for one switcher pattern across About Us, Dev-to-Sell, Brokerage and
+     Dev-to-Hold. Only the media frame differs — the supplied photographs and
+     BESS diagrams are square, so this block keeps its 560 square stage instead
+     of the 974:564 landscape crop. */
   .technical {
     padding-block: var(--technical-padding-top) var(--technical-padding-bottom);
     background-color: var(--color-bg);
@@ -117,15 +117,15 @@ const headingLines = block.heading.split('\n')
   .technical__body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, var(--technical-media-size));
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto;
     column-gap: var(--technical-column-gap);
-    min-height: var(--technical-media-size);
+    row-gap: var(--technical-copy-media-gap);
     margin-top: var(--technical-heading-gap);
   }
 
   .technical__switches {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / 3;
     min-width: 0;
     margin: 0;
     padding: 0;
@@ -134,6 +134,7 @@ const headingLines = block.heading.split('\n')
 
   .technical__switch {
     position: relative;
+    border-bottom: var(--technical-rule-width) solid var(--technical-rule-color);
   }
 
   .technical__pick {
@@ -146,28 +147,35 @@ const headingLines = block.heading.split('\n')
   }
 
   .technical__tab {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: block;
     padding-block: var(--technical-tab-padding-block);
-    border-bottom: 1px solid currentColor;
     color: var(--color-fg);
-    font-size: var(--text-tab);
-    font-weight: var(--text-tab--font-weight);
-    line-height: var(--text-tab--line-height);
-    letter-spacing: var(--text-tab--letter-spacing);
-    opacity: var(--technical-tab-rest-opacity);
+    font-size: var(--text-stage);
+    font-weight: var(--text-stage--font-weight);
+    line-height: var(--text-stage--line-height);
+    letter-spacing: var(--text-stage--letter-spacing);
     cursor: pointer;
     transition: opacity var(--duration-base) var(--ease-standard);
   }
 
+  /* The mask sits on the whole row, not on the label alone, so the arrow rides
+     the same slide-up instead of being painted in place before the words
+     arrive. Horizontal insets are widened because the active label steps aside
+     by the arrow's width; only the vertical edge does the masking. */
   .technical__tab-main {
-    position: relative;
+    display: block;
     min-width: 0;
+    clip-path: inset(0 calc(-1 * var(--technical-tab-mask-bleed)) -0.16em);
+  }
+
+  .technical__tab-line {
+    position: relative;
+    display: block;
   }
 
   .technical__tab-label {
-    display: inline-block;
+    display: block;
+    width: fit-content;
     transform: none;
     transition: transform var(--duration-base) var(--ease-out-expo);
   }
@@ -192,33 +200,22 @@ const headingLines = block.heading.split('\n')
     height: 100%;
   }
 
-  .technical__counter {
-    flex: none;
-    margin-left: var(--space-4);
-    opacity: 0;
-    transition: opacity var(--duration-base) var(--ease-standard);
-  }
-
   .technical__pick:checked + .technical__tab {
-    opacity: 1;
+    color: var(--technical-active-color);
   }
 
   .technical__pick:checked + .technical__tab .technical__tab-label {
     transform: translate3d(var(--technical-label-active-shift), 0, 0);
   }
 
-  .technical__pick:checked + .technical__tab .technical__arrow,
-  .technical__pick:checked + .technical__tab .technical__counter {
-    opacity: 1;
-  }
-
   .technical__pick:checked + .technical__tab .technical__arrow {
+    opacity: 1;
     transform: translate3d(0, -50%, 0);
   }
 
   .technical__pick:focus-visible + .technical__tab {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 3px;
+    outline: var(--technical-rule-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
   }
 
   @media (hover: hover) and (pointer: fine) {
@@ -228,43 +225,43 @@ const headingLines = block.heading.split('\n')
   }
 
   .technical__copy-stack {
-    position: relative;
-    grid-column: 1;
-    grid-row: 2;
-    align-self: end;
-    min-height: var(--technical-copy-window);
-    max-width: var(--technical-copy-measure);
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .technical__copy-panel {
-    position: absolute;
-    inset: auto 0 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translate3d(0, var(--technical-copy-shift), 0);
-    transition:
-      opacity var(--duration-base) var(--ease-standard),
-      transform var(--duration-slow) var(--ease-out-expo),
-      visibility 0s linear var(--duration-base);
+    display: none;
   }
 
   .technical__copy-title {
     color: var(--color-fg);
+    opacity: 0;
+    transform: translate3d(0, var(--technical-copy-title-shift), 0);
+    animation-name: var(--technical-copy-title-animation, none);
+    animation-duration: var(--duration-slow);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
   }
 
   .technical__copy-description {
     max-width: var(--technical-copy-measure);
     margin-top: var(--technical-copy-gap);
     color: var(--technical-copy-color);
+    opacity: 0;
+    transform: translate3d(0, var(--technical-copy-description-shift), 0);
+    animation-name: var(--technical-copy-description-animation, none);
+    animation-duration: var(--duration-slow);
+    animation-delay: var(--technical-copy-description-delay);
+    animation-timing-function: var(--ease-out-expo);
+    animation-fill-mode: both;
   }
 
   .technical__stage {
     position: relative;
     grid-column: 2;
-    grid-row: 1 / 3;
-    width: min(100%, var(--technical-media-size));
+    grid-row: 2;
+    width: 100%;
     aspect-ratio: 1;
-    justify-self: end;
     overflow: clip;
   }
 
@@ -332,13 +329,34 @@ const headingLines = block.heading.split('\n')
     }
   }
 
+  @keyframes technical-copy-title-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--technical-copy-title-shift), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes technical-copy-description-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--technical-copy-description-shift), 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .technical__body:has(.technical__pick[data-panel='1']:checked) .technical__copy-panel:nth-child(1),
   .technical__body:has(.technical__pick[data-panel='2']:checked) .technical__copy-panel:nth-child(2),
   .technical__body:has(.technical__pick[data-panel='3']:checked) .technical__copy-panel:nth-child(3) {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition-delay: 0s;
+    --technical-copy-title-animation: technical-copy-title-in;
+    --technical-copy-description-animation: technical-copy-description-in;
+    display: block;
   }
 
   .technical__body:has(.technical__pick[data-panel='1']:checked) .technical__panel:nth-child(1),
@@ -353,15 +371,20 @@ const headingLines = block.heading.split('\n')
   }
 
   :global(html.js) .technical:not([data-inview]) .technical__pane,
-  :global(html.js) .technical:not([data-inview]) .technical__hold {
+  :global(html.js) .technical:not([data-inview]) .technical__hold,
+  :global(html.js) .technical:not([data-inview]) .technical__copy-title,
+  :global(html.js) .technical:not([data-inview]) .technical__copy-description {
     animation-play-state: paused;
   }
 
-  @media (max-width: 1023px) {
+  /* The 30 px labels need roughly 360 px of column before they wrap, which the
+     680 / 120 / 560 grid only delivers from 1200 px up — the previous 18 px
+     labels survived down to 1024. */
+  @media (max-width: 1199px) {
     .technical__body {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto auto auto;
-      min-height: 0;
+      row-gap: 0;
     }
 
     .technical__switches,
@@ -374,16 +397,29 @@ const headingLines = block.heading.split('\n')
       grid-row: 1;
     }
 
-    .technical__stage {
+    .technical__copy-stack {
       grid-row: 2;
-      justify-self: center;
-      margin-top: var(--technical-mobile-stage-gap);
+      margin-top: var(--technical-mobile-copy-gap);
     }
 
-    .technical__copy-stack {
+    .technical__stage {
       grid-row: 3;
-      width: 100%;
-      margin-top: var(--technical-mobile-copy-gap);
+      width: min(100%, var(--technical-media-size));
+      justify-self: center;
+      margin-top: var(--technical-copy-media-gap);
+    }
+  }
+
+  /* One column below 768 cannot spare the arrow's gutter; the rows are tapped
+     rather than hovered here, so the arrow goes and the label keeps its full
+     measure. Same call as `HowWeDevelop`. */
+  @media (max-width: 767px) {
+    .technical__arrow {
+      display: none;
+    }
+
+    .technical__pick:checked + .technical__tab .technical__tab-label {
+      transform: none;
     }
   }
 </style>

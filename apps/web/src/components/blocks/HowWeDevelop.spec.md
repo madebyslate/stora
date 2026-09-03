@@ -82,6 +82,12 @@ supplied landscape photograph.
 - Arrow: hidden and offset 8 px left at rest; on the selected row it fades in and
   settles at the label's left edge, while the label steps 38 px right. Below
   768 px there is no arrow and no shift.
+- The entry mask wraps the whole row — arrow and label together — not the label
+  alone. With the mask on the label only, the first row's arrow was painted in
+  place while its words were still under the clip edge, so the row entered in
+  two pieces. The mask's horizontal insets are widened to 48 px (the token
+  `--how-develop-tab-mask-bleed`, > the 38 px label shift) because the clip box
+  is now the full 608 px row and would otherwise cut the stepped-aside label.
 - Focus: native radio focus is drawn on its visible label.
 - First stage is selected on initial load.
 
@@ -89,7 +95,7 @@ supplied landscape photograph.
 
 | What | When | Duration | Easing | `prefers-reduced-motion: reduce` |
 |---|---|---|---|---|
-| Heading and tabs | section enters viewport | reveal | out-expo | lands immediately |
+| Heading and tab rows | section enters viewport | reveal | out-expo | lands immediately |
 | Active label | selection changes | base | out-expo | duration collapses globally |
 | Bullet markers | selection changes, one by one | base, 70 ms stagger | out-expo | lands immediately |
 | Bullet text | 55 ms after its marker, one by one | slow, 70 ms stagger | out-expo | lands immediately |

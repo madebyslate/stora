@@ -227,8 +227,8 @@
         "image": {
           "src": "content/media/audience/have-land.jpg",
           "alt": "An empty field at dusk, treeline on the horizon, of the kind a storage project is sited on",
-          "width": 870,
-          "height": 500
+          "width": 1232,
+          "height": 928
         },
         "cta": {
           "label": "Call with Land Lead",
@@ -241,8 +241,8 @@
         "image": {
           "src": "content/media/audience/buy-or-sell-a-project.jpg",
           "alt": "A lit battery storage site at blue hour, rows of containers behind a perimeter fence",
-          "width": 659,
-          "height": 500
+          "width": 1024,
+          "height": 1024
         },
         "cta": {
           "label": "Call with M&A Lead",
@@ -255,8 +255,8 @@
         "image": {
           "src": "content/media/audience/interested-in-investing.jpg",
           "alt": "An aerial view of an operating battery storage site laid out in rows beside farmland",
-          "width": 400,
-          "height": 500
+          "width": 1232,
+          "height": 928
         },
         "cta": {
           "label": "Call with Investment Lead",

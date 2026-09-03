@@ -13,8 +13,8 @@
       "image": {
         "src": "content/media/pages/develop-to-sell-hero.jpg",
         "alt": "A battery storage site under construction, rows of containers laid out beside a substation",
-        "width": 1440,
-        "height": 900
+        "width": 1680,
+        "height": 720
       }
     },
     {
@@ -44,8 +44,8 @@
           "image": {
             "src": "content/media/pages/boxes/rtb-acquisition.jpg",
             "alt": "",
-            "width": 1086,
-            "height": 698
+            "width": 1441,
+            "height": 812
           }
         }
       ]
@@ -85,8 +85,8 @@
           "image": {
             "src": "content/media/pages/behind-the-asset/local-market-expertise.jpg",
             "alt": "",
-            "width": 620,
-            "height": 489
+            "width": 1232,
+            "height": 928
           }
         }
       ]
@@ -136,20 +136,20 @@
         }
       ],
       "image": {
-        "src": "content/media/pages/proof-points/built-with-partners.png",
+        "src": "content/media/pages/proof-points/built-with-partners.jpg",
         "alt": "",
-        "width": 573,
-        "height": 548
+        "width": 1088,
+        "height": 1024
       },
       "contact": {
         "name": "Michał Ogiński",
         "role": "Chief Development Officer (CDO)",
         "email": "michal.o@storaenergy.pl",
         "portrait": {
-          "src": "content/media/team/michal-oginski.jpg",
+          "src": "content/media/team/michal-oginski-mini.jpg",
           "alt": "",
-          "width": 486,
-          "height": 585
+          "width": 200,
+          "height": 200
         }
       }
     }

@@ -1323,28 +1323,37 @@
   --feature-word-travel: 105%;
 
   /*
-   * Brokerage technical-depth switcher.
-   * The 560 square, 18/500 row and 120 top padding are supplied directly.
+   * Brokerage and Dev-to-Hold technical-depth switcher.
+   * The row now carries the same 30/500 label, 20 px padding, soft rule and
+   * copy-above-media stack as `HowWeDevelop` — one switcher pattern across the
+   * four pages, on the client's request. The 560 square, the 680 / 120 / 560
+   * grid and the 120 top padding stay as supplied: these media are square
+   * photographs and vector diagrams, not the 974:564 landscape crop.
    */
   --technical-padding-top: var(--space-14); /* 120 */
   --technical-padding-bottom: var(--space-14); /* 120 */
   --technical-heading-gap: var(--space-10); /* 48 */
   --technical-media-size: 35rem; /* 560 */
   --technical-column-gap: var(--space-14); /* 120 */
-  --technical-tab-padding-block: 0.875rem; /* 14 — supplied */
-  --technical-tab-rest-opacity: 0.5;
+  --technical-tab-padding-block: var(--space-5); /* 20 — as HowWeDevelop */
   --technical-tab-hover-opacity: 0.72;
   --technical-arrow-width: 1.875rem; /* 30 */
   --technical-arrow-height: 0.8125rem; /* 13 */
   --technical-arrow-start: -0.5rem; /* -8 */
   --technical-label-active-shift: 2.375rem; /* 30 + 8 */
-  --technical-copy-window: 7.75rem; /* 124 — title + gap + up to 3 body lines */
-  --technical-copy-measure: 32rem; /* 512 */
-  --technical-copy-gap: var(--space-6); /* 24 */
-  --technical-copy-shift: var(--space-4); /* 16 */
+  /* Horizontal bleed of the tab-row mask: at least the active label's shift. */
+  --technical-tab-mask-bleed: 3rem; /* 48 > 38 shift */
+  --technical-rule-width: 0.0625rem; /* 1 */
+  --technical-rule-color: var(--color-rule-soft);
+  --technical-active-color: var(--color-fg-accent);
+  --technical-copy-measure: 35rem; /* 560 — the copy column is the media column */
+  --technical-copy-gap: var(--space-3); /* 12 */
+  --technical-copy-media-gap: var(--space-6); /* 24 */
+  --technical-copy-title-shift: var(--space-3); /* 12 */
+  --technical-copy-description-shift: var(--space-2); /* 8 */
+  --technical-copy-description-delay: 90ms;
   --technical-copy-color: rgb(23 46 35 / 0.6);
   --technical-image-reveal-scale: 1.04;
-  --technical-mobile-stage-gap: var(--space-10); /* 48 */
   --technical-mobile-copy-gap: var(--space-10); /* 48 */
 
   /* Dev-to-Hold market case: supplied 55 px panel inset and native-size SVGs. */
@@ -1390,6 +1399,9 @@
   --how-develop-arrow-width: 1.875rem; /* 30 */
   --how-develop-arrow-height: 0.8125rem; /* 13 */
   --how-develop-arrow-start: -0.5rem; /* -8 */
+  /* Horizontal bleed of the tab-row mask: at least the active label's shift, so
+     the stepped-aside line is never cut. */
+  --how-develop-tab-mask-bleed: 3rem; /* 48 > 38 shift */
   --how-develop-rule-width: 0.0625rem; /* 1 */
   --how-develop-bullet-marker: 0.375rem; /* 6 */
   --how-develop-bullet-marker-start-scale: 0.15;

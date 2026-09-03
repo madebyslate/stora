@@ -13,8 +13,8 @@
       "image": {
         "src": "content/media/pages/about-us-hero.jpg",
         "alt": "A wooded valley seen from the air, with a river running through it",
-        "width": 1440,
-        "height": 900
+        "width": 1376,
+        "height": 864
       }
     },
     {
@@ -23,8 +23,8 @@
       "heroImage": {
         "src": "content/media/pages/about-us-hero.jpg",
         "alt": "",
-        "width": 1440,
-        "height": 900
+        "width": 1376,
+        "height": 864
       },
       "photos": [
         {
@@ -117,7 +117,7 @@
       "members": [
         {
           "name": "Krzysztof Maj",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Head of Development",
           "portrait": {
             "src": "content/media/team/wider/krzysztof-maj.jpg",
             "alt": "",
@@ -127,7 +127,7 @@
         },
         {
           "name": "Miłosz Mikołajczyk",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Director of M&A",
           "portrait": {
             "src": "content/media/team/wider/milosz-mikolajczyk.jpg",
             "alt": "",
@@ -137,7 +137,7 @@
         },
         {
           "name": "Sonia Krenczyk",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Head of People",
           "portrait": {
             "src": "content/media/team/wider/sonia-krenczyk.jpg",
             "alt": "",
@@ -147,7 +147,7 @@
         },
         {
           "name": "Tobias Martin",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "BESS Technical Advisor",
           "portrait": {
             "src": "content/media/team/wider/tobias-martin.jpg",
             "alt": "",
@@ -157,7 +157,7 @@
         },
         {
           "name": "Anna Pawlak",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Development Eng.",
           "portrait": {
             "src": "content/media/team/wider/anna-pawlak.jpg",
             "alt": "",
@@ -167,7 +167,7 @@
         },
         {
           "name": "Brunon Magolewski",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Biz Dev & JV Manager",
           "portrait": {
             "src": "content/media/team/wider/brunon-magolewski.jpg",
             "alt": "",
@@ -177,7 +177,7 @@
         },
         {
           "name": "Aleksandra Krajewska",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "M&A Manager",
           "portrait": {
             "src": "content/media/team/wider/aleksandra-krajewska.jpg",
             "alt": "",
@@ -187,7 +187,7 @@
         },
         {
           "name": "Żaneta Kopeć",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Geospatial Specialist",
           "portrait": {
             "src": "content/media/team/wider/zaneta-kopec.jpg",
             "alt": "",
@@ -197,7 +197,7 @@
         },
         {
           "name": "Anna Walencka-K.",
-          "role": "Chief Technology Officer & Co-founder",
+          "role": "Legal Counsel",
           "portrait": {
             "src": "content/media/team/wider/anna-walencka-k.jpg",
             "alt": "",
